@@ -1,8 +1,8 @@
+import { InventoryService } from './../../../../services/inventory.service';
 import { ArticleInventoryPost, ArticlePost } from '../../../../models/article.model';
 import { Component, EventEmitter, inject, OnInit, Output, TemplateRef, ViewChild } from '@angular/core';
 import { FormBuilder, FormGroup, FormsModule, ReactiveFormsModule, Validators } from '@angular/forms';
 import { CommonModule } from '@angular/common';
-import { InventoryService } from '../../../../services/inventory.service';
 import { Article, ArticleCategory, ArticleType, ArticleCondition, MeasurementUnit,Status } from '../../../../models/article.model';
 import { MapperService } from '../../../../services/MapperCamelToSnake/mapper.service';
 import { ActivatedRoute, Router, RouterModule } from '@angular/router';
@@ -43,11 +43,11 @@ export class ArticleFormComponent implements OnInit {
   ArticleCategory = ArticleCategory; // Asignamos el enum ArticleCategory a una propiedad del componente
   MeasurementUnit = MeasurementUnit; // Asignamos el enum MeasurementUnit a una propiedad del componente
 
-  
+
 
   constructor(private fb: FormBuilder, private inventoryService: InventoryService, private toast : ToastService) {
     this.articleForm = this.fb.group({
-      identifier: [{value:'', disabled: true}],
+      identifier: [{ value: '', disabled: true }, Validators.required],
       name: ['', Validators.required],
       description: [''],
       articleType: [ArticleType.NON_REGISTRABLE, Validators.required],
@@ -71,6 +71,29 @@ export class ArticleFormComponent implements OnInit {
     });
     this.articleForm.get('articleType')?.valueChanges.subscribe(this.handleArticleTypeChange.bind(this));
   }
+
+
+  checkIdentifier() {
+    const identifier = this.articleForm.get('identifier')?.value;
+    if (identifier) {
+      this.inventoryService.articleExist(identifier).subscribe(
+        (exists) => {
+          if (exists) {
+            // Si el identificador existe, establecer el error en el control
+            this.articleForm.get('identifier')?.setErrors({ unique: true });
+          } else {
+            // Si no existe, limpiar los errores
+            this.articleForm.get('identifier')?.setErrors(null);
+          }
+        },
+        (error) => {
+          console.error('Error al verificar el identificador:', error);
+          // Manejar el error aquí si es necesario
+        }
+      );
+    }
+  }
+
 
   showInfo(): void {
     this.modalService.open(this.infoModal, { centered: true });
@@ -149,7 +172,7 @@ export class ArticleFormComponent implements OnInit {
           this.resetForm(); // Limpia el formulario después de crear exitosamente
           this.router.navigate(['/inventories']);
           this.toast.sendSuccess('Articulo creado exitosamente');
-        }) 
+        })
       }
       else {
         this.toast.sendError('Articulo no creado');
@@ -187,5 +210,5 @@ export class ArticleFormComponent implements OnInit {
     this.isModalOpen = false
   }
 
- 
+
 }

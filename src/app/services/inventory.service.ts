@@ -8,6 +8,7 @@ import { Inventory, Transaction, TransactionPost } from '../models/inventory.mod
   providedIn: 'root'
 })
 export class InventoryService {
+
    private apiArticlesUrl = 'http://localhost:8080/articles'; // URL de la API para los ítems DEL BACK
    private apiInventoriesUrl = 'http://localhost:8080/inventories'; // URL de la API para los inventarios
    private apiTransactionsUrl = 'http://localhost:8080/transactions'; // URL de la API para las transacciones
@@ -20,6 +21,10 @@ export class InventoryService {
 
 
   // CRUD para Ítems
+  articleExist(identifier: string) {
+    return this.http.post<Boolean>(this.apiArticlesUrl + '/articleVerify', { identifier });
+  }
+
   getArticles(): Observable<Article[]> {
     return this.http.get<Article[]>(this.apiArticlesUrl);
   }
@@ -47,10 +52,10 @@ export class InventoryService {
     location?: string;
     articleName?: string;
     stock?: number;
-  } 
+  }
   ): Observable<Inventory[]> {
     let params = new HttpParams();
-    
+
     if (filters) {
       Object.keys(filters).forEach(key => {
         const value = filters[key as keyof typeof filters];
@@ -59,14 +64,14 @@ export class InventoryService {
         }
       });
     }
-    
+
     return this.http.get<Inventory[]>(this.apiInventoriesUrl, { params });
   }
 
   getInventoriesUnit(measure: string): Observable<Inventory[]> {
     return this.http.get<Inventory[]>(`${this.apiInventoriesUrl}/article/${measure}`);
   }
-  
+
   addInventory(inventory: Inventory): Observable<Inventory> {
     return this.http.post<Inventory>(this.apiInventoriesUrl, inventory);
   }
