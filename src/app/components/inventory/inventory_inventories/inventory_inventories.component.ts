@@ -40,9 +40,10 @@ import { ToastService } from 'ngx-dabd-grupo01';
 export class InventoryTableComponent implements OnInit {
 
   private mapperService = inject(MapperService);
-  Status = Status;
-  searchInput = new FormControl('');
+  private inventoryService = inject(InventoryService)
+  private toastService = inject(ToastService);
 
+  searchInput = new FormControl('');
 
   // Modals
   showRegisterForm: boolean = false;
@@ -61,12 +62,12 @@ export class InventoryTableComponent implements OnInit {
   selectedInventoryId: string | null = null;
 
 
-  //   //sorts
+  //sorts
   sortedList: Inventory[] = [];
   sortColumn: string = '';
   sortDirection: 'asc' | 'desc' = 'asc';
 
-  constructor(private fb: FormBuilder, private inventoryService: InventoryService, private toastService: ToastService) {
+  constructor(private fb: FormBuilder, ) {
     this.inventoryForm = this.fb.group({
       article_id: ['', Validators.required],
       stock: [1, Validators.required], // Stock inicial es 1
@@ -106,9 +107,8 @@ getInventories(): void {
         article: this.mapperService.toCamelCase(inventory.article) // Convertir el artículo a camelCase
       }));
   });
-
-    console.log(this.inventories); // Para verificar que la conversión se realizó correctamente
   })};
+
  // Método para convertir la unidad de medida a una representación amigable
 getDisplayUnit(unit: MeasurementUnit): string {
   switch (unit) {
@@ -139,38 +139,6 @@ getDisplayCategory(articleCategory: ArticleCategory): string {
 }
 
 
-
-  buildArticleMap(): void {
-    this.articles.forEach(article => {
-      // Verificar que el ID y el nombre no sean undefined o nulos
-      if (article && article.id !== undefined && article.id !== null && article.name) {
-        this.articleMap[article.id] = article.name;
-      } else {
-        console.warn('Article inválido encontrado:', article);
-      }
-    });
-  }
-
-  // Método para obtener los ítems y filtrar solo los activos
-
-  getArticles(): void {
-    this.inventoryService.getArticles().subscribe((articles: Article[]) => {
-      this.articles = articles;
-      this.activeArticles = this.articles;//.filter(article => article.article_status === Status.ACTIVE); // Usar ArticleStatus.FUNCTIONAL
-      this.buildArticleMap();
-    });
-  }
-
-  addInventory(): void {
-    if (this.inventoryForm.valid) {
-      const newInventory = this.inventoryForm.value;
-      this.inventoryService.addInventory(newInventory).subscribe(() => {
-        this.getInventories();
-        this.inventoryForm.reset({ stock: 1, min_stock: 1, inventory_status: Status.ACTIVE });
-      });
-    }
-  }
-
   deleteInventory(id: number): void {
     Swal.fire({
       title: '¿Estas Seguro?',
@@ -197,25 +165,6 @@ getDisplayCategory(articleCategory: ArticleCategory): string {
     this.inventoryForm.reset({ stock: 1, min_stock: 1, inventory_status: 'Active' });
   }
 
-  saveInventory(): void {
-    if (this.inventoryForm.valid) {
-      const inventoryData = this.inventoryForm.value;
-
-      if (this.isEditing && this.editingInventoryId) {
-        // Editar inventario existente
-        const updatedInventory: Inventory = {
-          ...inventoryData,
-          id: this.editingInventoryId
-        };
-      } else {
-        // Agregar nuevo inventario
-        this.inventoryService.addInventory(inventoryData).subscribe(() => {
-          this.getInventories(); // Recargar la lista después de agregar
-          this.resetForm(); // Resetear el formulario después de agregar
-        });
-      }
-    }
-  }
   onNewTransaction(id:any){
     this.selectedInventoryId = id;
     this.showRegisterTransactionForm = !this.showRegisterTransactionForm;
