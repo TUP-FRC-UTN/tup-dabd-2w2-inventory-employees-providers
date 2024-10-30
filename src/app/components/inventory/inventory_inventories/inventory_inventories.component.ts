@@ -1,3 +1,4 @@
+import { ArticleCategory } from './../../../models/article.model';
 import { CommonModule } from '@angular/common';
 import { Component, inject, OnInit, TemplateRef, ViewChild } from '@angular/core';
 import { FormBuilder, FormControl, FormGroup, FormsModule, ReactiveFormsModule, Validators } from '@angular/forms';
@@ -96,13 +97,9 @@ getInventories(): void {
     this.inventories = inventories.map( inventory => ({
       ...this.mapperService.toCamelCase(inventory),
     }));
-    this.inventories.forEach(inventory => {
-      inventories.map(inventory.article = this.mapperService.toCamelCase(inventory.article));
-    });
     this.inventories = inventories;
     this.filteredInventories = inventories;
     this.isLoading = false;
-    console.log('CHANCHA', this.inventories);
     this.inventoryService.getInventories().subscribe((inventories: any[]) => {
       this.inventories = inventories.map(inventory => ({
         ...this.mapperService.toCamelCase(inventory), // Convertir todo el inventario a camelCase
@@ -123,6 +120,21 @@ getDisplayUnit(unit: MeasurementUnit): string {
           return 'Ud.';
       default:
           return unit; // Retorna el valor original si no coincide
+  }
+}
+
+getDisplayCategory(articleCategory: ArticleCategory): string {
+  switch (articleCategory) {
+      case ArticleCategory.CONSUMABLES:
+          return 'Consumible';
+      case ArticleCategory.DURABLES:
+          return 'Durable';
+      case ArticleCategory.MATERIALS_CONSTRUCTION:
+          return 'Mat. Construcción';
+      case ArticleCategory.OTHERS:
+      return 'Otros';
+      default:
+          return "Otros"; // Retorna el valor original si no coincide
   }
 }
 
