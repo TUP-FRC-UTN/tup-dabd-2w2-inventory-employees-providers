@@ -10,32 +10,33 @@
                         </a>
                         <ul class="nav nav-pills flex-column mt-4">
                             <!-- Empleados con submenú -->
-                            <li class="nav-item" ngbDropdown>
-                                <a class="nav-link" id="navbarDropdown" role="button" ngbDropdownToggle>Empleados</a>
-                                <div ngbDropdownMenu aria-labelledby="navbarDropdown">
-                                <a ngbDropdownItem routerLink="/employees/list">Listado</a>
-                                <a ngbDropdownItem routerLink="/employees/form">Registrar Empleado</a>
+                            <li class="nav-item">
+                                <a class="nav-link text-white" id="navbarDropdown1" role="button">Empleados</a>
+                                <div class="submenu">
+                                    <a class="text-white" routerLink="/employees/list">Listado</a>
+                                    <a class="text-white" routerLink="/employees/form">Registrar Empleado</a>
                                 </div>
                             </li>
-                    
-                            <li class="nav-item" ngbDropdown>
-                                <a class="nav-link" id="navbarDropdown" role="button" ngbDropdownToggle>Proveedores</a>
-                                <div ngbDropdownMenu aria-labelledby="navbarDropdown">
-                                <a ngbDropdownItem routerLink="/providers/list">Listado</a>
-                                <a ngbDropdownItem routerLink="/providers/form">Registrar Proveedor</a>
+
+                            <li class="nav-item">
+                                <a class="nav-link text-white" id="navbarDropdown2" role="button">Proveedores</a>
+                                <div class="submenu">
+                                    <a class="text-white" routerLink="/providers/list">Listado</a>
+                                    <a class="text-white" routerLink="/providers/form">Registrar Proveedor</a>
                                 </div>
                             </li>
-                            <li class="nav-item" ngbDropdown>
-                                <a class="nav-link" id="navbarDropdown" role="button" ngbDropdownToggle>Inventario</a>
-                                <div ngbDropdownMenu aria-labelledby="navbarDropdown">
-                                <a ngbDropdownItem routerLink="/inventories">Listado</a>
-                                <a ngbDropdownItem routerLink="/articles/article">Registrar Artículo</a>
+
+                            <li class="nav-item">
+                                <a class="nav-link text-white" id="navbarDropdown3" role="button">Inventario</a>
+                                <div class="submenu">
+                                    <a class="text-white" routerLink="/inventories">Listado</a>
+                                    <a class="text-white" routerLink="/articles/article">Registrar Artículo</a>
                                 </div>
                             </li>
                         </ul>
                     </div>
                 </div>
             </div>
-         </div>
+        </div>
     </div>
 </div>

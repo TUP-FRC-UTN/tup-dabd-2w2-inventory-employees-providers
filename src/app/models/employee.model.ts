@@ -41,6 +41,7 @@ export interface Employee {
   hiringDate: string; // Fecha de contratación del empleado.
   salary: number; // Salario del empleado.
   state: StatusType; // Estado del empleado (Activo o Inactivo).
+  //enabled: boolean; // Estado del empleado (Activo o Inactivo).
 }
 
 export interface EmployeePayment {
