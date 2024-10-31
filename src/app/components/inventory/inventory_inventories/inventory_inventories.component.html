@@ -23,13 +23,13 @@
     <div class="col-lg-2"></div> <!-- Espacio más largo en el medio -->
 
     <div class="col-lg-2 d-flex justify-content-end">
-      <button
-      class="btn btn-outline-primary mx-1"
-      [routerLink]="['/articles/article']"
-      data-bs-toggle="tooltip"
-      data-bs-placement="top"
-      title="Agregar artículo">
-      <i class="bi bi-plus-lg"></i>
+     <button
+        class="btn btn-outline-primary mx-1"
+        [routerLink]="['/articles/article']"
+        data-bs-toggle="tooltip"
+        data-bs-placement="top"
+        title="Agregar artículo">
+        <i class="bi bi-plus-lg"></i>
     </button>
     <button class="btn btn-success mx-1" (click)="exportToExcel()">
         <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-file-earmark-excel" viewBox="0 0 16 16" style="width: 20px; height: 20px;">
@@ -296,6 +296,9 @@
                 <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-chevron-right" viewBox="0 0 16 16">
                   <path fill-rule="evenodd" d="M4.646 1.646a.5.5 0 0 1 .708 0l6 6a.5.5 0 0 1 0 .708l-6 6a.5.5 0 0 1-.708-.708L10.293 8 4.646 2.354a.5.5 0 0 1 0-.708z"/>
                 </svg>
+              </button>
+              <button class="btn btn-secondary ms-3 mb-3 custom-button" (click)="showInfo()">
+                <i class="bi bi-info-circle"></i>
               </button>
             </div>
           </div>

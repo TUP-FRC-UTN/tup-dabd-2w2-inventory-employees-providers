@@ -19,6 +19,7 @@ import 'jspdf-autotable';
 import * as XLSX from 'xlsx';
 import autoTable from 'jspdf-autotable';
 import { ToastService } from 'ngx-dabd-grupo01';
+import { NgbModal } from '@ng-bootstrap/ng-bootstrap';
 
 
 @Component({
@@ -42,9 +43,15 @@ export class InventoryTableComponent implements OnInit {
   private mapperService = inject(MapperService);
   private inventoryService = inject(InventoryService)
   private toastService = inject(ToastService);
+  private modalService = inject(NgbModal);
 
   searchInput = new FormControl('');
 
+  @ViewChild('infoModal') infoModal!: TemplateRef<any>;
+
+  showInfo(): void {
+    this.modalService.open(this.infoModal, { centered: true });
+  }
   // Modals
   showRegisterForm: boolean = false;
   showRegisterTransactionForm: boolean = false;
