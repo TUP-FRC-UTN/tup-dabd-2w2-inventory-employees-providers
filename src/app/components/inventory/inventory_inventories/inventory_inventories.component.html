@@ -23,8 +23,13 @@
     <div class="col-lg-2"></div> <!-- Espacio más largo en el medio -->
 
     <div class="col-lg-2 d-flex justify-content-end">
-      <button class="btn btn-outline-primary  mx-1" [routerLink]="['/articles/article']">
-        Nuevo
+      <button
+      class="btn btn-outline-primary mx-1"
+      [routerLink]="['/articles/article']"
+      data-bs-toggle="tooltip"
+      data-bs-placement="top"
+      title="Agregar artículo">
+      <i class="bi bi-plus-lg"></i>
     </button>
     <button class="btn btn-success mx-1" (click)="exportToExcel()">
         <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-file-earmark-excel" viewBox="0 0 16 16" style="width: 20px; height: 20px;">
