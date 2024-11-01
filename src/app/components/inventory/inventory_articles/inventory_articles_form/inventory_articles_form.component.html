@@ -28,7 +28,10 @@
       <div class="col-md-6 mb-3">
         <div style="display: flex; align-items: center;">
           <label style="display: inline-flex; align-items: center; margin-right: 8px;" for="identifier">Identificador</label>
-          <input id="identifier" formControlName="identifier" class="form-control disabled" />
+          <input id="identifier" (blur)="checkIdentifier()" formControlName="identifier" class="form-control disabled"  />
+          <div *ngIf="articleForm.get('identifier')?.hasError('unique')" class="text-danger">
+            El identificador ya está en uso.
+          </div>
         </div>
       </div>
     </div>
@@ -177,7 +180,7 @@
           <h5 class="alert-heading">¿Qué es esta pantalla?</h5>
           <p class="mb-0 small">Esta pantalla te permite registrar un nuevo artículo.</p>
         </div>
-    
+
         <!-- Campos Principales -->
         <div class="card mb-2">
           <div class="card-header py-1">
@@ -194,7 +197,7 @@
             </ul>
           </div>
         </div>
-    
+
         <!-- Acciones -->
         <div class="card mb-2">
           <div class="card-header py-1">
@@ -211,7 +214,7 @@
             </ul>
           </div>
         </div>
-    
+
         <!-- Nota (OPCIONAL) -->
         <div class="alert alert-warning py-2 mb-0">
           <h5 class="alert-heading">Nota:</h5>
@@ -222,5 +225,5 @@
     <div class="modal-footer py-2">
       <button type="button" class="btn btn-primary" (click)="modal.close()">Entendido</button>
     </div>
-    
+
 </ng-template>
