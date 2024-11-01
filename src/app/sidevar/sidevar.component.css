@@ -1,0 +1,40 @@
+  /* Texto blanco en el navbar */
+  .nav-link {
+    color: white !important;
+}
+
+/* Estilos y animación de los submenús */
+.submenu {
+    display: none;
+    flex-direction: column;
+    margin-left: 20px;
+    animation: slideUp 0.3s ease-out;
+}
+
+/* Efecto de slide hacia arriba */
+@keyframes slideUp {
+    from {
+        opacity: 0;
+        transform: translateY(20px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+/* Mostrar el submenú al pasar el cursor */
+.nav-item:hover .submenu {
+    display: flex;
+}
+
+/* Enlaces blancos en el submenú */
+.submenu a {
+    color: white;
+    padding: 5px 0;
+}
+
+/* Cambiar color de enlace al hacer hover */
+.submenu a:hover {
+    color: #ccc;
+}

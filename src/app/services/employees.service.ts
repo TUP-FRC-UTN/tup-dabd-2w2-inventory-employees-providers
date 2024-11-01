@@ -10,7 +10,7 @@ import { MapperService } from './MapperCamelToSnake/mapper.service';
 })
 export class EmployeesService {
 
-   private apiUrl = 'http://localhost:8063/employees'; // URL de la API para empleados
+   private apiUrl = 'http://localhost:8007/employees'; // URL de la API para empleados
   //private apiUrl = 'http://localhost:3000/employees'; // URL de la API para empleados
 
   private http = inject(HttpClient);

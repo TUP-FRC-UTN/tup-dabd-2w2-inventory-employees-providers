@@ -23,13 +23,8 @@
       <div class="col-lg-2"></div> <!-- Espacio más largo en el medio -->
 
       <div class="col-lg-2 d-flex justify-content-end">
-      <button
-        class="btn btn-outline-primary mx-1"
-        [routerLink]="['/employees/form']"
-        data-bs-toggle="tooltip"
-        data-bs-placement="top"
-        title="Agregar artículo">
-        <i class="bi bi-plus-lg"></i>
+        <button class="btn mx-1 btn-custom-unique" [routerLink]="['/employees/form']">
+          Nuevo
       </button>
       <button class="btn btn-success mx-1" (click)="exportToExcel()">
           <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-file-earmark-excel" viewBox="0 0 16 16" style="width: 20px; height: 20px;">
@@ -173,20 +168,24 @@
           <table class="table table-striped table-hover border rounded-lg-overflow-hidden">
             <thead class="bg-light">
               <tr>
-                <th class="px-4 py-3" (click)="sort('firstName')">
-                  Empleado <span [ngClass]="{'asc': sortColumn === 'firstName' && sortDirection === 'asc', 'desc': sortColumn === 'firstName' && sortDirection === 'desc'}">⇅</span>
+                <th class="px-4 py-3"> <!--(click)="sort('state')"> -->
+                  Empleado 
+                  <!-- <span [ngClass]="{'asc': sortColumn === 'firstName' && sortDirection === 'asc', 'desc': sortColumn === 'firstName' && sortDirection === 'desc'}">⇅</span> -->
                 </th>
-                <th class="px-4 py-3" (click)="sort('employeeType')">
-                  Tipo <span [ngClass]="{'asc': sortColumn === 'employeeType' && sortDirection === 'asc', 'desc': sortColumn === 'employeeType' && sortDirection === 'desc'}">⇅</span>
+                <th class="px-4 py-3"> <!--(click)="sort('state')"> -->
+                  Tipo
+                   <!-- <span [ngClass]="{'asc': sortColumn === 'employeeType' && sortDirection === 'asc', 'desc': sortColumn === 'employeeType' && sortDirection === 'desc'}">⇅</span> -->
                 </th>
-                <th class="px-4 py-3" (click)="sort('documentType')">
-                  Documento <span [ngClass]="{'asc': sortColumn === 'documentType' && sortDirection === 'asc', 'desc': sortColumn === 'documentType' && sortDirection === 'desc'}">⇅</span>
+                <th class="px-4 py-3"> <!--(click)="sort('state')"> -->
+                  Documento 
+                  <!-- <span [ngClass]="{'asc': sortColumn === 'documentType' && sortDirection === 'asc', 'desc': sortColumn === 'documentType' && sortDirection === 'desc'}">⇅</span> -->
                 </th>
-                <th class="px-4 py-3" (click)="sort('hiringDate')">
-                  Fecha Contratación <span [ngClass]="{'asc': sortColumn === 'hiringDate' && sortDirection === 'asc', 'desc': sortColumn === 'hiringDate' && sortDirection === 'desc'}">⇅</span>
+                <th class="px-4 py-3"> <!--(click)="sort('state')"> -->
+                  Fecha Contratación 
+                  <!-- <span [ngClass]="{'asc': sortColumn === 'hiringDate' && sortDirection === 'asc', 'desc': sortColumn === 'hiringDate' && sortDirection === 'desc'}">⇅</span> -->
                  </th>
                 <th class="px-4 py-3" (click)="sort('state')">
-
+                  
                   Estado <span [ngClass]="{'asc': sortColumn === 'state' && sortDirection === 'asc', 'desc': sortColumn === 'state' && sortDirection === 'desc'}">⇅</span>
                 </th>
                 <th class="px-4 py-3 text-center">Acciones</th>
@@ -266,7 +265,7 @@
         <!-- Right side - Items per page dropdown -->
         <div class="d-flex align-items-center">
           <span class="me-2">Elementos por página:</span>
-          <select class="form-select form-select-sm" style="width: auto;" [(ngModel)]="itemsPerPage">
+        <select class="form-select form-select-sm" style="width: auto;" [(ngModel)]="itemsPerPage">
             <option value="5">5</option>
             <option value="10">10</option>
             <option value="20">20</option>

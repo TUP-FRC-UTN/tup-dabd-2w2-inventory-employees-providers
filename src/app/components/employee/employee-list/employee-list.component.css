@@ -7,5 +7,17 @@
 }
 
 .custom-button i {
-    vertical-align: middle;    
-}
+    vertical-align: middle; 
+}   
+    .btn-custom-unique {
+        background-color: white;
+        color: rgb(0, 110, 255);
+        border: 2px solid  rgb(0, 110, 255);
+    }
+    
+    /* Cambia el color del texto y el borde al pasar el cursor */
+    .btn-custom-unique:hover {
+        background-color: lightblue;
+        color: white;
+        border-color: blue;
+    }
