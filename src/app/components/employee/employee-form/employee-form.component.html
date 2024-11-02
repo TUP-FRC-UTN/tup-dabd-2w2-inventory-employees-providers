@@ -112,7 +112,7 @@
         </div>
     </div>
     <div class="row mb-4 ">
-        <div class="col-md-6 mt-1">
+        <div class="col-md-12 mt-1">
             <label for="salary" class="form-label">Salario<span class="text-danger">*</span></label>
             <div class="input-group position-relative ms-2">
                 <span class="input-group-text">$</span>
@@ -128,7 +128,7 @@
                 </div>
             </div>
         </div>
-        <div class="col-md-6">
+        <!-- <div class="col-md-6">
             <label for="email" class="form-label">Email<span class="text-danger">*</span></label>
             <div class="position-relative">
                 <input type="email" formControlName="email" class="form-control" 
@@ -142,9 +142,9 @@
                     <i class="bi bi-x-circle-fill text-danger"></i> Email es requerido
                 </div>
             </div>
-        </div>
+        </div> -->
     </div>
-    <div class="row mb-4">
+    <!-- <div class="row mb-4">
         <div class="col-md-12">
             <label for="phone" class="form-label">Teléfono<span class="text-danger">*</span></label>
             <div class="position-relative">
@@ -160,7 +160,7 @@
                 </div>
             </div>
         </div>
-    </div>
+    </div> -->
     <button type="submit" class="btn btn-primary" [disabled]="employeeForm.invalid">{{ !isEdit ? 'Registrar' : 'Modificar' }}</button>
 </form>
 </div>
@@ -224,3 +224,8 @@
       </div>
       
   </ng-template>
+
+  <app-employee-access></app-employee-access>
+  <app-employee-contact></app-employee-contact>
+  <!-- <app-access-schedule></app-access-schedule>
+<app-contact></app-contact> -->

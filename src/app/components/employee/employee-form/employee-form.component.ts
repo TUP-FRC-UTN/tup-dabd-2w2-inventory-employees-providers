@@ -11,11 +11,13 @@ import { MapperService } from '../../../services/MapperCamelToSnake/mapper.servi
 import { ToastService } from 'ngx-dabd-grupo01';
 import { NgbModal } from '@ng-bootstrap/ng-bootstrap';
 import { CommonModule } from '@angular/common';
+import { EmployeeAccessComponent } from "../employee-access/employee-access.component";
+import { EmployeeContactComponent } from "../employee-contact/employee-contact.component";
 
 @Component({
   selector: 'app-employee-form',
   standalone: true,
-  imports: [ReactiveFormsModule, CommonModule],
+  imports: [ReactiveFormsModule, CommonModule, EmployeeAccessComponent, EmployeeContactComponent],
   templateUrl: './employee-form.component.html',
   styleUrls: ['./employee-form.component.scss'],
 })
