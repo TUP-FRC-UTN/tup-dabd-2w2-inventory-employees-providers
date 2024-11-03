@@ -180,6 +180,7 @@ export class ArticleFormComponent implements OnInit {
 
       const articleInventoryFormatted = this.mapperService.toSnakeCase(articleInventory);
       if(!this.isEditing){
+        console.log(articleInventoryFormatted);
         this.inventoryService.addInventoryArticle(articleInventoryFormatted).subscribe((data) => {
           console.log(data);
           this.resetForm(); // Limpia el formulario después de crear exitosamente
