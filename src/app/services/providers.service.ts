@@ -70,7 +70,8 @@ export class ProvidersService {
   updateProvider(provider: Supplier): Observable<Supplier> {
     return this.http.put<Supplier>(this.apiUrl, provider);
   }
-
+  
+  
   deleteProvider(id: number): Observable<void> {
     return this.http.delete<void>(`${this.apiUrl}/${id}`);
   }
