@@ -1,96 +1,175 @@
-<!-- employee-access.component.html -->
-<div class="card mt-4">
-  <div class="card-body">
-    <h3 class="mb-4">Horarios de Acceso</h3>
-    <form [formGroup]="accessForm" (ngSubmit)="saveSchedule()" class="mt-3">
-      <div class="row mb-3">
-        <div class="col-md-6">
-          <label for="dateFrom" class="form-label">Fecha Desde<span class="text-danger">*</span></label>
-          <div class="position-relative">
-            <input type="date" formControlName="dateFrom" class="form-control" 
-                   [ngClass]="{'is-valid': accessForm.get('dateFrom')?.valid && accessForm.get('dateFrom')?.touched,
-                              'is-invalid': accessForm.get('dateFrom')?.invalid && accessForm.get('dateFrom')?.touched}" 
-                   id="dateFrom">
-            <div *ngIf="accessForm.get('dateFrom')?.invalid && accessForm.get('dateFrom')?.touched" 
-                 class="invalid-feedback">
+<div class="container-fluid my-4">
+  <form [formGroup]="accessForm" (ngSubmit)="saveSchedule()">
+    <!-- Header -->
+    <div class="d-flex align-items-center mb-4">
+      <h3>Horarios de Acceso</h3>
+    </div>
+
+    <!-- Date Range -->
+    <div class="row mb-4">
+      <div class="col-md-6">
+        <div class="form-group">
+          <label class="form-label">
+            Fecha Desde <span class="text-danger">*</span>
+          </label>
+          <input 
+            type="date" 
+            formControlName="dateFrom"
+            class="form-control"
+            [class.is-invalid]="accessForm.get('dateFrom')?.invalid && 
+                              accessForm.get('dateFrom')?.touched"
+          >
+          @if (accessForm.get('dateFrom')?.invalid && accessForm.get('dateFrom')?.touched) {
+            <div class="invalid-feedback">
               Fecha desde es requerida
             </div>
-          </div>
+          }
         </div>
-        <div class="col-md-6">
-          <label for="dateTo" class="form-label">Fecha Hasta<span class="text-danger">*</span></label>
-          <div class="position-relative">
-            <input type="date" formControlName="dateTo" class="form-control" 
-                   [ngClass]="{'is-valid': accessForm.get('dateTo')?.valid && accessForm.get('dateTo')?.touched,
-                              'is-invalid': accessForm.get('dateTo')?.invalid && accessForm.get('dateTo')?.touched}" 
-                   id="dateTo">
-            <div *ngIf="accessForm.get('dateTo')?.invalid && accessForm.get('dateTo')?.touched" 
-                 class="invalid-feedback">
+      </div>
+
+      <div class="col-md-6">
+        <div class="form-group">
+          <label class="form-label">
+            Fecha Hasta <span class="text-danger">*</span>
+          </label>
+          <input 
+            type="date" 
+            formControlName="dateTo"
+            class="form-control"
+            [class.is-invalid]="accessForm.get('dateTo')?.invalid && 
+                              accessForm.get('dateTo')?.touched"
+          >
+          @if (accessForm.get('dateTo')?.invalid && accessForm.get('dateTo')?.touched) {
+            <div class="invalid-feedback">
               Fecha hasta es requerida
             </div>
-          </div>
+          }
         </div>
       </div>
+    </div>
 
-      <div class="row mb-3">
-        <div class="col-md-12">
-          <label for="shiftType" class="form-label">Tipo de Turno<span class="text-danger">*</span></label>
-          <div class="position-relative">
-            <select formControlName="shiftType" class="form-select" id="shiftType"
-                    [ngClass]="{'is-valid': accessForm.get('shiftType')?.valid && accessForm.get('shiftType')?.touched,
-                               'is-invalid': accessForm.get('shiftType')?.invalid && accessForm.get('shiftType')?.touched}">
-              <option value="" disabled>Seleccione un turno</option>
-              <option *ngFor="let shift of shiftTypes" [value]="shift">
-                {{shift}}
-              </option>
-            </select>
-            <div *ngIf="accessForm.get('shiftType')?.invalid && accessForm.get('shiftType')?.touched" 
-                 class="invalid-feedback">
-              Tipo de turno es requerido
+    <!-- Shift Type -->
+    <div class="mb-4">
+      <div class="form-group">
+        <label class="form-label">
+          Tipo de Turno <span class="text-danger">*</span>
+        </label>
+        <select 
+          formControlName="shiftType"
+          class="form-select"
+          [class.is-invalid]="accessForm.get('shiftType')?.invalid && 
+                            accessForm.get('shiftType')?.touched"
+        >
+          <option value="" disabled>Seleccione un turno</option>
+          @for (shift of shiftTypes; track shift) {
+            <option [value]="shift">{{ shiftTypeLabels[shift] }}</option>
+          }
+        </select>
+        @if (accessForm.get('shiftType')?.invalid && accessForm.get('shiftType')?.touched) {
+          <div class="invalid-feedback">
+            Tipo de turno es requerido
+          </div>
+        }
+      </div>
+    </div>
+
+    <!-- Time Selection -->
+    <div class="row mb-4">
+      <div class="col-md-6">
+        <div class="form-group">
+          <label class="form-label">
+            Hora Entrada <span class="text-danger">*</span>
+          </label>
+          <input 
+            type="time" 
+            formControlName="entryTime"
+            class="form-control"
+            [class.is-invalid]="accessForm.get('entryTime')?.invalid && 
+                              accessForm.get('entryTime')?.touched"
+          >
+          @if (accessForm.get('entryTime')?.invalid && accessForm.get('entryTime')?.touched) {
+            <div class="invalid-feedback">
+              Hora de entrada es requerida
             </div>
-          </div>
+          }
         </div>
       </div>
 
-      <div formArrayName="schedules" class="row mb-3">
-        <div class="col-12">
-          <label class="form-label">Horarios por día<span class="text-danger">*</span></label>
-          <div class="table-responsive">
-            <table class="table">
-              <thead>
-                <tr>
-                  <th>Día</th>
-                  <th>Activo</th>
-                  <th>Hora Entrada</th>
-                  <th>Hora Salida</th>
-                </tr>
-              </thead>
-              <tbody>
-                <tr *ngFor="let schedule of schedules.controls; let i = index" [formGroupName]="i">
-                  <td>{{daysOfWeek[i].label}}</td>
-                  <td>
-                    <div class="form-check">
-                      <input type="checkbox" class="form-check-input" [formControlName]="'selected'" (change)="toggleDay(i)">
-                    </div>
-                  </td>
-                  <td>
-                    <input type="time" class="form-control" formControlName="entry_time" 
-                           [attr.disabled]="!isDaySelected(i)">
-                  </td>
-                  <td>
-                    <input type="time" class="form-control" formControlName="exit_time"
-                           [attr.disabled]="!isDaySelected(i)">
-                  </td>
-                </tr>
-              </tbody>
-            </table>
+      <div class="col-md-6">
+        <div class="form-group">
+          <label class="form-label">
+            Hora Salida <span class="text-danger">*</span>
+          </label>
+          <input 
+            type="time" 
+            formControlName="exitTime"
+            class="form-control"
+            [class.is-invalid]="accessForm.get('exitTime')?.invalid && 
+                              accessForm.get('exitTime')?.touched"
+          >
+          @if (accessForm.get('exitTime')?.invalid && accessForm.get('exitTime')?.touched) {
+            <div class="invalid-feedback">
+              Hora de salida es requerida
+            </div>
+          }
+        </div>
+      </div>
+    </div>
+
+    <!-- Days Selection -->
+    <div class="mb-4">
+      <label class="form-label">
+        Días Laborales <span class="text-danger">*</span>
+      </label>
+      <div class="d-flex flex-wrap gap-2">
+        @for (day of daysOfWeek; track day.id) {
+          <button
+          type="button"
+          (click)="toggleDay(day.id)"
+          class="btn btn-sm flex-grow-1 {{selectedDays.includes(day.id) ? 
+            'btn-primary' : 'btn-outline-primary'}}"
+          >
+          {{day.label}}
+          </button>
+        }
+      </div>
+      @if (showDaysError) {
+        <div class="text-danger small mt-2">
+          Debe seleccionar al menos un día
+        </div>
+      }
+    </div>
+    
+    <!-- Selected Schedule Preview -->
+    @if (selectedDays.length > 0) {
+      <div class="card mb-4 bg-light">
+        <div class="card-body">
+          <h5 class="card-title">Horario Seleccionado:</h5>
+          <div class="row g-2">
+            @for (day of getSelectedDaysLabels(); track day) {
+              <div class="col-12 col-md-4">
+                <div class="p-2 bg-white rounded shadow-sm">
+                  <span class="badge bg-primary me-2">{{day}}</span>
+                  <span class="text-muted">
+                    {{accessForm.get('entryTime')?.value}} - {{accessForm.get('exitTime')?.value}}
+                  </span>
+                </div>
+              </div>
+            }
           </div>
         </div>
       </div>
+    }
 
-      <button type="submit" class="btn btn-primary" [disabled]="accessForm.invalid">
+    <!-- Submit Button -->
+    <div class="d-flex justify-content-end">
+      <button
+        type="submit"
+        class="btn btn-primary"
+        [disabled]="!isFormValid()"
+      >
         Guardar Horarios
       </button>
-    </form>
-  </div>
+    </div>
+  </form>
 </div>

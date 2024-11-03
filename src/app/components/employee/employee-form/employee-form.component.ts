@@ -30,7 +30,7 @@ export class EmployeeFormComponent implements OnInit {
     salary: new FormControl(0, [Validators.required, Validators.min(0)]),
     state: new FormControl(StatusType.ACTIVE),
   });
- currentEmployeeId: number|undefined;
+ currentEmployeeId!: number;
 
   constructor(private toastService: ToastService) {}
 
@@ -135,6 +135,7 @@ export class EmployeeFormComponent implements OnInit {
         this.toastService.sendSuccess("El Empleado ha sido creado con éxito.");
         if( response.id){
           this.currentEmployeeId = response.id;
+          console.log('id enviado', this.currentEmployeeId);
         }
         this.resetForm(); // Limpia el formulario
       },

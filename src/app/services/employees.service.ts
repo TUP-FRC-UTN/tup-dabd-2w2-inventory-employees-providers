@@ -20,7 +20,7 @@ export class EmployeesService {
   private apiUrlSHIFT = 'http://localhost:8007/shift'; // URL de la API para empleados
 
   createSchedule(schedule: EmployeeSchedule): Observable<EmployeeSchedule> {
-    return this.http.post<EmployeeSchedule>(this.apiUrl, schedule);
+    return this.http.post<EmployeeSchedule>(this.apiUrlSHIFT, schedule);
   }
 
   getEmployeeSchedules(employeeId: number): Observable<EmployeeSchedule[]> {
