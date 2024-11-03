@@ -111,11 +111,25 @@ export class EmployeeAccessComponent implements OnInit{
       next: (response) => {
         console.log('Horario guardado exitosamente', response);
         this.toast.sendSuccess('Horario guardado exitosamente');
+        this.resetForm();
       },
       error: (error) => {
         console.error('Error al guardar el horario', error);
         this.toast.sendError('Error al guardar el horario');
       }
     });
+  }
+
+  resetForm(): void{
+    this.accessForm.reset({
+      dateFrom: '',
+      dateTo: '',
+      shiftType: ShiftType.MORNING,
+      entryTime: '',
+      exitTime: ''
+    });
+    this.selectedDays = [];
+    this.selectedShift = ShiftType.MORNING;
+    this.showDaysError = false;
   }
 }
