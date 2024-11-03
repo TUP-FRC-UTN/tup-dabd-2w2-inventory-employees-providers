@@ -62,3 +62,54 @@ export interface EmployeeFilter {
   state?: StatusType;
   enabled?: boolean;
 }
+
+//Access interface
+
+// Enum para los tipos de contacto
+export enum ContactType {
+  EMAIL = 'EMAIL',
+  PHONE = 'PHONE',
+  // Añade otros tipos según necesites
+}
+
+// Interface para el contacto
+export interface Contact {
+  contact_value: string;
+  contact_type: ContactType;
+}
+
+// Interface para los días de la semana
+export enum DayOfWeek {
+  MONDAY = 'MONDAY',
+  TUESDAY = 'TUESDAY',
+  WEDNESDAY = 'WEDNESDAY',
+  THURSDAY = 'THURSDAY',
+  FRIDAY = 'FRIDAY',
+  SATURDAY = 'SATURDAY',
+  SUNDAY = 'SUNDAY'
+}
+
+// Interface para el rango de autorización
+export interface AuthRange {
+  date_from: string;  // formato: "DD-MM-YYYY"
+  date_to: string;    // formato: "DD-MM-YYYY"
+  hour_from: string;  // formato: "HH:mm:ss"
+  hour_to: string;    // formato: "HH:mm:ss"
+  days_of_week: DayOfWeek[];
+  comment: string;
+}
+
+// Interface para la solicitud de rango de autorización
+export interface AuthRangeRequest {
+  auth_range_request: AuthRange[];
+}
+
+// Interface para el formulario (opcional, pero útil para tipado fuerte en el componente)
+export interface AccessFormData {
+  dateFrom: string;
+  dateTo: string;
+  hourFrom: string;
+  hourTo: string;
+  daysOfWeek: DayOfWeek[];
+  comment?: string;
+}
