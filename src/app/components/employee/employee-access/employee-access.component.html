@@ -155,7 +155,10 @@
     @if (selectedDays.length > 0) {
       <div class="card mb-4 bg-light">
         <div class="card-body">
-          <h5 class="card-title">Horario Seleccionado:</h5>
+          <div class="d-flex justify-content-between align-items-center">
+            <h5 class="card-title">Horario Seleccionado: </h5>
+            <h6 class="text-muted">{{accessForm.get('dateFrom')?.value}} - {{accessForm.get('dateTo')?.value}}</h6>
+          </div>
           <div class="row g-2">
             @for (day of getSelectedDaysLabels(); track day) {
               <div class="col-12 col-md-4">
