@@ -31,27 +31,6 @@
                   <td>{{ transaction.quantity }}</td>
                   <td>{{ transaction.price || "-" }}</td>
                   <td>{{ transaction.transactionDate ? (transaction.transactionDate | date: 'dd/MM/yyyy') : '-' }}</td>
-  
-                  <!-- <td>
-                    <button
-                      (click)="editTransaction(transaction.id!)"
-                      class="btn btn-success btn-sm"
-                      title="Editar"
-                      data-toggle="tooltip"
-                      data-placement="top"
-                    >
-                      <i class="bi bi-pencil"></i>
-                    </button>
-                    <button
-                      (click)="deleteTransaction(transaction.id!)"
-                      class="btn btn-danger btn-sm"
-                      title="Eliminar"
-                      data-toggle="tooltip"
-                      data-placement="top"
-                    >
-                      <i class="bi bi-trash"></i>
-                    </button>
-                  </td> -->
                 </tr>
               </tbody>
             </table>
@@ -61,4 +40,3 @@
     </div>
   </div>
 }
- 
