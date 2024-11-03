@@ -1,5 +1,5 @@
 import { Component, inject, OnInit, Output, TemplateRef, ViewChild } from '@angular/core';
-import { AbstractControl, FormControl, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
+import { AbstractControl, FormArray, FormControl, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
 import { EmployeeType, Employee, DocumentType, StatusType } from '../../../models/employee.model';
 import { ActivatedRoute, Router } from '@angular/router';
 import { EmployeesService } from '../../../services/employees.service';
@@ -29,7 +29,27 @@ export class EmployeeFormComponent implements OnInit {
     docNumber: new FormControl('', [Validators.required, Validators.pattern(/^[0-9.-]*$/)]),
     salary: new FormControl(0, [Validators.required, Validators.min(0)]),
     state: new FormControl(StatusType.ACTIVE),
+    contacts: new FormArray([]),
   });
+
+  contactTypes = ['PHONE', 'EMAIL'];
+  
+  get contacts() {
+    return this.employeeForm.get('contacts') as FormArray;
+  }
+
+  addContact() {
+    const contactForm = new FormGroup({
+      contact_type: new FormControl('', Validators.required),
+      contact_value: new FormControl('', [Validators.required])
+    });
+    this.contacts.push(contactForm);
+  }
+
+  removeContact(index: number) {
+    this.contacts.removeAt(index);
+  }
+  
  currentEmployeeId!: number;
 
   constructor(private toastService: ToastService) {}
@@ -46,6 +66,8 @@ export class EmployeeFormComponent implements OnInit {
   private currentId = 0;
   isEdit:boolean=false;
 
+  showEmployeeForm = true;
+  employeeRegistered = false;
 
   ngOnInit(): void {
     this.activatedRoute.params.subscribe((params) => {
@@ -55,6 +77,7 @@ export class EmployeeFormComponent implements OnInit {
         this.getById(id);
       }
     });
+    this.addContact();
   }
 
   getById(id: number) {
@@ -91,26 +114,30 @@ export class EmployeeFormComponent implements OnInit {
       }
     }
   }
-    resetForm() : void {
-      this.employeeForm.reset({
-        id:0,
-        firstName: '',
-        lastName: '',
-        employeeType: EmployeeType.ADMIN,
-        hiringDate: new Date().toISOString().split('T')[0],
-        documentType: DocumentType.DNI,
-        docNumber: '',
-        state: StatusType.ACTIVE,
-        salary: 0
-      })
-    }
-
+  resetForm(): void {
+    this.showEmployeeForm = true;
+    this.employeeRegistered = false;
+    this.employeeForm.reset({
+      id: 0,
+      firstName: '',
+      lastName: '',
+      employeeType: EmployeeType.ADMIN,
+      hiringDate: new Date().toISOString().split('T')[0],
+      documentType: DocumentType.DNI,
+      docNumber: '',
+      state: StatusType.ACTIVE,
+      salary: 0
+    });
+    this.contacts.clear();
+    this.addContact();
+  }
+/*
   prepareEmployeeData(): Employee {
     const { id, firstName, lastName, employeeType, hiringDate, documentType, docNumber, salary, state } = this.employeeForm.value;    
     let parsedHiringDate: Date | null = new Date();
     /*if (hiringDate) {
       parsedHiringDate = new Date(hiringDate);
-    }*/
+    }
 
     return {
       id,
@@ -123,7 +150,26 @@ export class EmployeeFormComponent implements OnInit {
       salary,
       state,
     } as Employee;
-  }
+  } */
+    prepareEmployeeData(): any {
+      const formValue = this.employeeForm.value;
+      
+      // Crear el objeto base del empleado
+      const employeeData = {
+        id: formValue.id,
+        first_name: formValue.firstName,
+        last_name: formValue.lastName,
+        employee_type: formValue.employeeType,
+        document_type: formValue.documentType,
+        doc_number: formValue.docNumber,
+        hiring_date: formValue.hiringDate,
+        salary: formValue.salary,
+        state: formValue.state,
+        contact: this.contacts.length > 0 ? this.contacts.at(0).value : null
+      };
+  
+      return employeeData;
+    }
 
   showInfo(): void {
     this.modalService.open(this.infoModal, { centered: true });
@@ -135,14 +181,30 @@ export class EmployeeFormComponent implements OnInit {
         this.toastService.sendSuccess("El Empleado ha sido creado con éxito.");
         if( response.id){
           this.currentEmployeeId = response.id;
+          this.employeeRegistered = true;
+          this.disableForm();
           console.log('id enviado', this.currentEmployeeId);
         }
+        this.toastService.sendSuccess("Cargue los dato de acceso.");
         this.resetForm(); // Limpia el formulario
       },
       error: (error) => {
         this.toastService.sendError("Hubo un error en la creación del empleado.");
       } 
     });
+  }
+
+  disableForm(): void {
+    Object.keys(this.employeeForm.controls).forEach(key => {
+      this.employeeForm.get(key)?.disable();
+      this.contacts.get('contact_type')?.disable();
+    });
+  }
+
+  startNewEmployee(): void {
+    this.resetForm();
+    this.employeeForm.enable();
+    this.currentEmployeeId = 0;
   }
 
   updateEmployee(employee: Employee) {
@@ -169,5 +231,10 @@ export class EmployeeFormComponent implements OnInit {
       ),
       map((exists: boolean) => (exists ? { documentExists: true } : null))
     );
+}
+
+onCancel(){
+  this.resetForm();
+  this.router.navigate(['/employees/list']);
 }
 }

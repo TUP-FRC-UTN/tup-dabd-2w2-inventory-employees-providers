@@ -1,5 +1,5 @@
 import { CommonModule } from '@angular/common';
-import { Component, inject, Input, OnInit } from '@angular/core';
+import { Component, EventEmitter, inject, Input, OnInit, Output } from '@angular/core';
 import { FormArray, FormControl, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
 import { DaySchedule, EmployeeSchedule, ShiftType } from '../../../models/employee.model';
 import { EmployeesService } from '../../../services/employees.service';
@@ -19,6 +19,7 @@ interface DayOfWeek {
 })
 export class EmployeeAccessComponent implements OnInit{
   @Input() employeeId?: number;
+  @Output() schedulesSaved = new EventEmitter<void>();
 
   private scheduleService = inject(EmployeesService);
   private toast = inject(ToastService);
@@ -131,5 +132,10 @@ export class EmployeeAccessComponent implements OnInit{
     this.selectedDays = [];
     this.selectedShift = ShiftType.MORNING;
     this.showDaysError = false;
+  }
+
+  newEmployee(){
+    this.employeeId = undefined;
+    this.schedulesSaved.emit();
   }
 }
