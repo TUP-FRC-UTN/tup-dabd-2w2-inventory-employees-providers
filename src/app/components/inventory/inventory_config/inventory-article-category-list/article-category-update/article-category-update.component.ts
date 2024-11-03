@@ -5,6 +5,7 @@ import { Router } from '@angular/router';
 import { FormBuilder, FormGroup, FormsModule, ReactiveFormsModule, Validators } from '@angular/forms';
 import { InventoryService } from '../../../../../services/inventory.service';
 import { CommonModule } from '@angular/common';
+import { ToastService } from 'ngx-dabd-grupo01';
 
 @Component({
   selector: 'app-article-category-update',
@@ -15,8 +16,8 @@ import { CommonModule } from '@angular/common';
 })
 export class ArticleCategoryUpdateComponent {
   private mapperService = inject(MapperService);
-  private router = inject(Router);
-  private inventoryService = inject(InventoryService)
+  private inventoryService = inject(InventoryService);
+  private toastService = inject(ToastService);
 
   @Input() category: ArticleCateg | null = null;
   @Output() closeModal = new EventEmitter<void>();
@@ -55,32 +56,30 @@ export class ArticleCategoryUpdateComponent {
         // Actualización de la categoría
         this.inventoryService.updateCategory(this.category.id, categoryUpdateFormatted).subscribe(
           (data) => {
-            console.log('Categoría actualizada:', data);
+            this.toastService.sendSuccess('La categoría ha sido actualizada con éxito.');
             this.onClose(); // Cierra el modal después de guardar
           },
           (error) => {
-            console.error("Error al actualizar la categoría", error);
-            alert("No se pudo actualizar la categoría. " + error.message);
+            this.toastService.sendError('No se pudo modificar la categoría. ' + error.message);
           }
         );
       } else {
         // Creación de una nueva categoría
         const newCategory: ArticleCategPost = {
-          denomination: categoryUpdateFormatted.denomination 
+          denomination: categoryUpdateFormatted.denomination
         };
         this.inventoryService.createCategory(categoryUpdateFormatted).subscribe(
           (data) => {
-            console.log('Categoría creada:', data);
+            this.toastService.sendSuccess('La categoría ha sido creada con éxito.');
             this.onClose(); // Cierra el modal después de guardar
           },
           (error) => {
-            console.error("Error al crear la categoría", error);
-            alert("No se pudo crear la categoría. " + error.message);
+            this.toastService.sendError('No se pudo crear la categoría. ' + error.message);
           }
         );
       }
     } else {
-      alert("El formulario no es válido. Por favor, completa todos los campos requeridos.");
+      this.toastService.sendError('El formulario no es válido. Por favor, completa todos los campos requeridos.');
     }
   }
 
