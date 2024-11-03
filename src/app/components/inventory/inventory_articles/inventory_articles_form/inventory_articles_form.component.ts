@@ -1,5 +1,5 @@
 import { InventoryService } from './../../../../services/inventory.service';
-import { ArticleInventoryPost, ArticlePost } from '../../../../models/article.model';
+import { ArticleCateg, ArticleInventoryPost, ArticlePost } from '../../../../models/article.model';
 import { Component, EventEmitter, inject, OnInit, Output, TemplateRef, ViewChild } from '@angular/core';
 import { FormBuilder, FormGroup, FormsModule, ReactiveFormsModule, Validators } from '@angular/forms';
 import { CommonModule } from '@angular/common';
@@ -40,7 +40,7 @@ export class ArticleFormComponent implements OnInit {
   // Propiedades para los enumerados
   ArticleType = ArticleType; // Asignamos el enum ArticleType a una propiedad del componente
   ArticleStatus = ArticleCondition; // Asignamos el enum ArticleStatus a una propiedad del componente
-  ArticleCategory = ArticleCategory; // Asignamos el enum ArticleCategory a una propiedad del componente
+  ArticleCategory: ArticleCateg[] = []; // Asignamos el enum ArticleCategory a una propiedad del componente
   MeasurementUnit = MeasurementUnit; // Asignamos el enum MeasurementUnit a una propiedad del componente
 
 
@@ -52,13 +52,12 @@ export class ArticleFormComponent implements OnInit {
       description: [''],
       articleType: [ArticleType.NON_REGISTRABLE, Validators.required],
       articleCondition: [ArticleCondition.FUNCTIONAL, Validators.required],
-      articleCategory: [ArticleCategory.DURABLES, Validators.required],
+      articleCategory: [Validators.required],
       measurementUnit: [MeasurementUnit.UNITS, Validators.required],
       location: ['', Validators.required], // Campo ubicación del inventario
       stock: [{value: '', disabled: false}, Validators.required],    // Campo stock del inventario
       stockMin: [''], // Campo stock mínimo del inventario
-      price: ['']     // Campo precio para la transacción inicial
-
+      price: ['']    // Campo precio para la transacción inicial
     });
   }
 
@@ -70,6 +69,21 @@ export class ArticleFormComponent implements OnInit {
       }
     });
     this.articleForm.get('articleType')?.valueChanges.subscribe(this.handleArticleTypeChange.bind(this));
+    this.loadCategories();
+  }
+
+  loadCategories(): void {
+    this.inventoryService.getArticleCategories().subscribe(
+      (data) => {
+        this.ArticleCategory = data;
+        if (this.ArticleCategory.length > 0) {
+          this.articleForm.get('articleCategory')?.setValue(this.ArticleCategory[0].id);
+        }
+      },
+      (error) => {
+        console.error('Error al cargar las categorías', error);
+      }
+    );
   }
 
 
@@ -152,11 +166,10 @@ export class ArticleFormComponent implements OnInit {
         name: this.articleForm.get('name')?.value,
         description: this.articleForm.get('description')?.value ?? null,
         articleCondition: this.articleForm.get('articleCondition')?.value,
-        articleCategory: this.articleForm.get('articleCategory')?.value,
+        articleCategoryId: this.articleForm.get('articleCategory')?.value,
         articleType: this.articleForm.get('articleType')?.value,
         measurementUnit: this.articleForm.get('measurementUnit')?.value
       };
-
       const articleInventory: ArticleInventoryPost = {
         article,
         stock: this.articleForm.get('stock')?.value,

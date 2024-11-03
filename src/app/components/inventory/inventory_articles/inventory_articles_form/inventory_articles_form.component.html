@@ -72,10 +72,10 @@
               Categoría <span style="color: red; margin-left: 2px;">*</span>
             </label>
             <select id="articleCategory" formControlName="articleCategory" class="form-select">
-              <option [value]="ArticleCategory.DURABLES">Durables</option>
-              <option [value]="ArticleCategory.CONSUMABLES">Consumibles</option>
-              <option [value]="ArticleCategory.MATERIALS_CONSTRUCTION">Materiales de Construcción</option>
-              <option [value]="ArticleCategory.OTHERS">Otros</option>
+              @for( categoria of ArticleCategory; track $index)
+              {
+                <option [value]="categoria.id">{{categoria.denomination}}</option>
+              }
             </select>
           </div>
           <div *ngIf="articleForm.get('articleCategory')?.hasError('required') && articleForm.get('articleCategory')?.touched"
