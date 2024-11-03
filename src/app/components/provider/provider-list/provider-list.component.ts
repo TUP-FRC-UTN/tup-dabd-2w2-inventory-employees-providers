@@ -10,6 +10,9 @@ import { debounceTime, distinctUntilChanged } from 'rxjs';
 import * as XLSX from 'xlsx';
 import jsPDF from 'jspdf';
 import autoTable from 'jspdf-autotable';
+import { Chart, ChartType, registerables } from 'chart.js';
+
+Chart.register(...registerables);
 
 
 @Component({
@@ -29,6 +32,7 @@ import autoTable from 'jspdf-autotable';
 
 })
 export class ProviderListComponent implements OnInit {
+  @ViewChild('pieChart') pieChartRef!: ElementRef;
   @ViewChild('providersTable') providersTable!: ElementRef;
   @ViewChild('infoModal') infoModal!: TemplateRef<any>;
 
@@ -51,6 +55,12 @@ export class ProviderListComponent implements OnInit {
   pageSize: number = 10;
   sizeOptions: number[] = [5,10, 20, 50, 100];
 
+
+  activeCount: number = 0;
+  inactiveCount: number = 0;
+  pieChart!: Chart;
+  barChart: any;
+  serviceCountMap: { [key: string]: number } = {};
 
   private providerService = inject(ProvidersService);
   private router = inject(Router);
@@ -80,6 +90,79 @@ export class ProviderListComponent implements OnInit {
   ngOnInit(): void {
     this.getProviders();
     this.setupFilterSubscriptions();
+  }
+  //METRICAS
+    
+  createPieChart(): void {
+    if (this.pieChart) {
+      this.pieChart.destroy();
+    }
+    this.pieChart = new Chart(this.pieChartRef.nativeElement, {
+      type: 'pie' as ChartType,
+      data: {
+        labels: ['Activos', 'Inactivos'],
+        datasets: [
+          {
+            data: [this.activeCount, this.inactiveCount],
+            backgroundColor: ['#28a745', '#dc3545'],
+          }
+        ]
+      },
+      options: {
+        responsive: true,
+        plugins: {
+          legend: {
+            position: 'top'
+          }
+        }
+      }
+    });
+  }
+  calculateMetrics(): void {
+    // Contadores de activos e inactivos
+    this.activeCount = this.providerList.filter(provider => provider.enabled === true).length;
+    this.inactiveCount = this.providerList.filter(provider => provider.enabled === false).length;
+
+    // Calcula la cantidad de proveedores por tipo de servicio
+    this.serviceCountMap = this.providerList.reduce((acc, provider) => {
+      const service = provider.service;
+      if (service) {
+        acc[service] = (acc[service] || 0) + 1;
+      }
+      return acc;
+    }, {} as { [key: string]: number });
+  }
+
+  createBarChart(): void {
+    if (this.barChart) {
+      this.barChart.destroy();
+    }
+
+    const ctx = document.getElementById('barChart') as HTMLCanvasElement;
+    const serviceTypes = Object.keys(this.serviceCountMap);
+    const serviceCounts = Object.values(this.serviceCountMap);
+
+    this.barChart = new Chart(ctx, {
+      type: 'bar',
+      data: {
+        labels: serviceTypes,
+        datasets: [{
+          label: 'Cantidad de Proveedores',
+          data: serviceCounts,
+          backgroundColor: '#007bff'
+        }]
+      },
+      options: {
+        responsive: true,
+        plugins: {
+          legend: { display: false }
+        },
+        scales: {
+          x: { title: { display: true, text: 'Tipo de Servicio' } },
+          y: { title: { display: true, text: 'Cantidad' }, beginAtZero: true }
+        }
+      }
+    });
   }
 
   filterProviders(searchTerm: string): void {
@@ -121,19 +204,53 @@ export class ProviderListComponent implements OnInit {
     return item.id; // Suponiendo que `id` es un identificador único de cada proveedor
   }  
 
+  // getProviders(page: number = 0, size: number = this.pageSize): void {
+  //   this.isLoading = true;
+  //   const filters = this.getFilters(); // Obtiene los filtros actuales si es necesario
+  
+  //   this.providerService.getProviders({ ...filters, page, size }).subscribe({
+  //     next: (response) => {
+  //       this.originalProviders = response.content;
+  //       this.providerList = [...this.originalProviders];
+  //       this.filteredProviders = [...this.originalProviders];
+  //       this.totalItems = response.totalElements; // Ajusta `totalItems` según la respuesta de la API
+  //       this.isLoading = false;
+  
+  //       // Calcula las métricas y actualiza el gráfico
+  //       this.calculateMetrics();
+  //       this.createPieChart();
+  //     },
+  //     error: (error) => {
+  //       console.error('Error al obtener los proveedores:', error);
+  //       this.toastService.sendError('Error al cargar proveedores.');
+  //       this.isLoading = false;
+  //     }
+  //   });
+  // }
   getProviders(page: number = 0, size: number = this.pageSize): void {
     this.isLoading = true;
-    const filters = this.getFilters(); // Obtén los filtros actuales si es necesario
-  
-    this.providerService.getProviders({ ...filters, page, size }).subscribe(response => {
-      this.originalProviders = response.content;
-      this.providerList = [...this.originalProviders];
-      this.filteredProviders = [...this.originalProviders];
-      this.totalItems = response.totalElements; // Ajusta `totalItems` según la respuesta de la API
-      this.isLoading = false;
+    const filters = this.getFilters();
+
+    this.providerService.getProviders({ ...filters, page, size }).subscribe({
+      next: (response) => {
+        this.originalProviders = response.content;
+        this.providerList = [...this.originalProviders];
+        this.filteredProviders = [...this.originalProviders];
+        this.totalItems = response.totalElements;
+        this.isLoading = false;
+
+        // Calcula métricas y crea gráficos
+        this.calculateMetrics();
+        this.createPieChart();
+        this.createBarChart();
+      },
+      error: (error) => {
+        console.error('Error al obtener los proveedores:', error);
+        this.toastService.sendError('Error al cargar proveedores.');
+        this.isLoading = false;
+      }
     });
   }
-  
 
   onItemsPerPageChange(): void {
     this.currentPage = 1; // Reinicia a la primera página
@@ -268,7 +385,7 @@ clearFilters(): void {
     return table;
   }
 
-  editProvider(id: number): void {
+    editProvider(id: number) {
     this.router.navigate(['/providers/form', id]);
   }
 
