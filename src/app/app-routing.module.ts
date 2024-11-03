@@ -7,6 +7,7 @@ import { ArticleFormComponent } from './components/inventory/inventory_articles/
 import { TransactionComponentForm } from './components/inventory/inventory_transaction/inventory_transaction_form/inventory_transaction_form.component';
 import { InventoryTransactionTableComponent } from './components/inventory/inventory_transaction/inventory_transaction_table/inventory_transaction_table.component';
 import { InventoryTableComponent } from './components/inventory/inventory_inventories/inventory_inventories.component';
+import { InventoryArticleCategoryListComponent } from './components/inventory/inventory_config/inventory-article-category-list/inventory-article-category-list.component';
 
 
 
@@ -22,6 +23,7 @@ export const routes: Routes = [
   { path: 'inventories', component: InventoryTableComponent },
   { path: 'transactions/:id', component: TransactionComponentForm },
   { path: 'inventories/transactions/:inventoryId', component: InventoryTransactionTableComponent },
+  { path: 'inventories/config', component: InventoryArticleCategoryListComponent},
   { path: '', redirectTo: '/employees', pathMatch: 'full' }
 ];
 
