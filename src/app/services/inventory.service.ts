@@ -75,6 +75,7 @@ export class InventoryService {
   }
 
   addInventory(inventory: Inventory): Observable<Inventory> {
+    console.log('servicio', inventory);
     return this.http.post<Inventory>(this.apiInventoriesUrl, inventory);
   }
 
@@ -124,9 +125,11 @@ export class InventoryService {
   }
 
   // CRUD para ArticleCategories
+  
   getArticleCategories(): Observable<ArticleCateg[]> {
-    return this.http.get<ArticleCateg[]>(this.apiArticleCategoriesUrl);
+    return this.http.get<ArticleCateg[]>(`${this.apiArticleCategoriesUrl}`);
   }
+
   deleteCategories(categoryId: number): Observable<void> {
     return this.http.delete<void>(`${this.apiArticleCategoriesUrl}/${categoryId}`);
   }

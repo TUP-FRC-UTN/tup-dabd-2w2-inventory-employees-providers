@@ -1,17 +1,16 @@
-import { CommonModule } from '@angular/common';
-import { FormControl, FormGroup, FormsModule, ReactiveFormsModule } from '@angular/forms';
-import { NgbModal, NgbPagination } from '@ng-bootstrap/ng-bootstrap';
-import { MainContainerComponent, TableComponent, ToastService } from 'ngx-dabd-grupo01';
-import { Observable } from 'rxjs';
-import { MapperService } from '../../../../services/MapperCamelToSnake/mapper.service';
+import { Component, OnInit, ViewChild, TemplateRef, CUSTOM_ELEMENTS_SCHEMA } from '@angular/core';
+import { FormBuilder, FormGroup, FormControl, FormsModule, ReactiveFormsModule } from '@angular/forms';
+import { NgbModal } from '@ng-bootstrap/ng-bootstrap';
+import { MainContainerComponent, ConfirmAlertComponent, ToastService } from 'ngx-dabd-grupo01';
+import { ArticleCateg } from '../../../../models/article.model';
 import { InventoryService } from '../../../../services/inventory.service';
-import { Component, inject, OnInit } from '@angular/core';
-import { ArticleCateg, ArticleCategory } from '../../../../models/article.model';
-import Swal from 'sweetalert2';
 import { ArticleCategoryUpdateComponent } from './article-category-update/article-category-update.component';
 import { RouterModule } from '@angular/router';
-import { StatusType } from '../../../../models/inventory.model';
-
+import * as XLSX from 'xlsx';
+import jsPDF from 'jspdf';
+import autoTable from 'jspdf-autotable';
+import { CommonModule } from '@angular/common';
+import Swal from 'sweetalert2';
 
 @Component({
   selector: 'app-inventory-article-category-list',
@@ -19,41 +18,116 @@ import { StatusType } from '../../../../models/inventory.model';
   imports: [
     CommonModule,
     ReactiveFormsModule,
-    RouterModule,
     FormsModule,
-    ArticleCategoryUpdateComponent
+    RouterModule,
+    MainContainerComponent,
+    ArticleCategoryUpdateComponent,
+    ConfirmAlertComponent
   ],
   templateUrl: './inventory-article-category-list.component.html',
-  styleUrl: './inventory-article-category-list.component.css'
+  styleUrls: ['./inventory-article-category-list.component.css'],
+  schemas: [CUSTOM_ELEMENTS_SCHEMA] 
 })
 export class InventoryArticleCategoryListComponent implements OnInit {
+  @ViewChild('infoModal') infoModal!: TemplateRef<any>;
 
-  private mapperService = inject(MapperService);
-  private inventoryService = inject(InventoryService)
-  private toastService = inject(ToastService);
-  private modalService = inject(NgbModal);
+  showModalFilter: boolean = false;
+  searchFilter: FormControl = new FormControl('');
   categories: ArticleCateg[] = [];
+  filteredCategories: ArticleCateg[] = [];
+  originalCategories: ArticleCateg[] = [];
   isLoading = false;
   selectedCategory: ArticleCateg | null = null;
   showCategoryUpdate: boolean = false;
+
+  // Formulario de filtros
+  filterForm: FormGroup;
+  selectedStatusFilter: string = ''; // Filtro de estado
+
+  constructor(
+    private inventoryService: InventoryService,
+    private toastService: ToastService,
+    private modalService: NgbModal,
+    private fb: FormBuilder
+  ) {
+    this.filterForm = this.fb.group({
+      denomination: [''],
+      status: ['']
+    });
+  }
 
   ngOnInit(): void {
     this.getCategories();
   }
 
   getCategories(): void {
+    this.isLoading = true;
     this.inventoryService.getArticleCategories().subscribe(
-      (data: ArticleCateg[]) => {
-        this.categories = data;
-        this.isLoading = true;
-        console.log(this.categories);
+      (response: ArticleCateg[]) => {
+        this.originalCategories = response;
+        this.categories = [...this.originalCategories];
+        this.filteredCategories = [...this.originalCategories];
+        this.isLoading = false;
+        this.applyFilters(); // Aplicar filtro inicial si ya hay algún valor
       },
       (error) => {
         console.error('Error al obtener las categorías:', error);
+        this.toastService.sendError('Error al cargar las categorías.');
+        this.isLoading = false;
       }
     );
   }
 
+  applyFilters(): void {
+    const searchText = this.searchFilter.value ? this.searchFilter.value.toLowerCase() : '';
+    this.filteredCategories = this.originalCategories.filter(category => {
+      const matchesDenomination = category.denomination.toLowerCase().includes(searchText);
+      const matchesStatus = this.selectedStatusFilter ? category.status === this.selectedStatusFilter : true;
+      return matchesDenomination && matchesStatus;
+    });
+    this.categories = [...this.filteredCategories];
+  }
+
+  filterByStatus(status: string): void {
+    this.selectedStatusFilter = status;
+    this.applyFilters();
+  }
+
+
+  clearFilters(): void {
+    this.filterForm.reset();
+    this.applyFilters();
+  }
+
+  openModalFilter(): void {
+    this.modalService.open(this.infoModal, { centered: true });
+  }
+
+  closeModalFilter(): void {
+    this.modalService.dismissAll();
+  }
+
+  exportToPDF(): void {
+    const doc = new jsPDF();
+    autoTable(doc, {
+      head: [['Denominación', 'Estado']],
+      body: this.categories.map(category => [
+        category.denomination,
+        category.status.toString() === 'ACTIVE' ? 'Activo' : 'Inactivo'
+      ])
+    });
+    doc.save('categorias-de-articulos.pdf');
+  }
+
+  exportToExcel(): void {
+    const worksheet = XLSX.utils.json_to_sheet(this.categories.map(category => ({
+      Denominación: category.denomination,
+      Estado: category.status.toString() === 'ACTIVE' ? 'Activo' : 'Inactivo'
+    })));
+    const workbook = XLSX.utils.book_new();
+    XLSX.utils.book_append_sheet(workbook, worksheet, 'Categorías');
+    XLSX.writeFile(workbook, 'categorias-de-articulos.xlsx');
+  }
 
   deleteCategory(id: number): void {
     console.log(id);
@@ -74,30 +148,16 @@ export class InventoryArticleCategoryListComponent implements OnInit {
         });
       }
     });
+  };
+  
+  onCategoryUpdate(category?: ArticleCateg): void {
+    this.selectedCategory = category || null;
+    this.showCategoryUpdate = true;
   }
 
-  // activateCategory(id: number): void{
-  //   const categoryUpdate = {
-  //   status: StatusType.INACTIVE
-  //   };
-  //   this.inventoryService.updateCategory(id, categoryUpdate).subscribe(() => {
-  //     this.getCategories();
-  //     this.toastService.sendSuccess('La categoría ha sido eliminada con éxito.');
-  //   });
-  // }
-
-
-  onCategoryUpdate(category?: ArticleCateg){
-    if(category) {
-      this.selectedCategory = category;
-    }
-    this.showCategoryUpdate = !this.showCategoryUpdate;
-  }
-
-  onCategoryUpdateClose() {
+  onCategoryUpdateClose(): void {
     this.showCategoryUpdate = false;
     this.selectedCategory = null;
     this.getCategories();
   }
-
 }

@@ -1,0 +1,75 @@
+<div class="container mt-5">
+<h3 class="h3">Lista de categorías de artículos</h3>
+<!-- Mensaje de no hay resultados -->
+<div *ngIf="!isLoading && categories.length === 0" class="alert alert-info">
+  No se encontraron inventarios con los filtros seleccionados.
+</div>
+<button
+        class="btn btn-outline-primary mx-1"
+        (click)="onCategoryUpdate()"
+        data-bs-toggle="tooltip"
+        data-bs-placement="top"
+        title="Agregar artículo">
+        <i class="bi bi-plus-lg"></i>
+    </button>
+
+     <!-- FormGroup filters -->
+
+  <form class="row g-3 mt-3">
+    <div class="container">
+      <table class="table table-striped border rounded-lg-overflow-hidden">
+        <thead class="bg-dark text-white">
+          <tr>
+            <th>
+              Denominanción
+            </th>
+            <th>
+              Estado
+            </th>
+            <th>Acciones</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr *ngFor="let category of categories">
+            <td>{{ category.denomination }}</td>
+            <td>
+              @if (category.status.toString() == "ACTIVE") {
+                <p class="mb-0">
+                  <i class="bi bi-check2-circle text-success" style="font-size: 1.5rem;"></i>
+                </p>
+              } @else {
+                <p class="mb-0">
+                  <i class="bi bi-x-circle text-danger" style="font-size: 1.5rem;"></i>
+                </p>
+              }
+            </td>
+            <td>
+              @if(category.status.toString() == "ACTIVE") {
+                <!-- Botón para editar con ícono -->
+                <button class="btn btn-sm btn-primary me-1" (click)="onCategoryUpdate(category)" title="Editar">
+                  <i class="bi bi-pencil"></i>
+                </button>
+
+                <!-- Botón para eliminar con ícono -->
+                <button class="btn btn-sm btn-danger me-1" (click)="deleteCategory(category.id!)" title="Eliminar">
+                  <i class="bi bi-trash"></i>
+                </button>
+              }
+              <!-- @if (category.status.toString() == "INACTIVE") {
+              <button class="btn btn-sm btn-success me-2" (click)="activateCategory(category.id)" title="Activar">
+                <i class="bi bi-check-circle"></i>
+              </button>
+              } -->
+            </td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </form>
+</div>
+
+    <app-article-category-update
+    *ngIf="showCategoryUpdate"
+    [category]="selectedCategory"
+    (closeModal)="onCategoryUpdateClose()"
+  ></app-article-category-update>

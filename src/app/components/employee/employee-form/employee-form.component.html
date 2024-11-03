@@ -1,155 +1,341 @@
 <div class="card">
-    <div class="card-body">
-<div class="m-4">
-  @if(!isEdit){
+  <div class="card-body">
+    <div class="m-4">
+      @if(!isEdit){
       <h2 class="mb-4">Registrar Empleado:</h2>
-  }
-  @else {
+      } @else {
       <h2 class="mb-4">Modificar Empleado:</h2>
-  }
-  <form [formGroup]="employeeForm" (ngSubmit)="saveEmployee()" class="mt-3">
-    <div class="row mb-3">
-        <div class="col-md-6 d-flex align-items-center">
-            <label for="firstName" class="form-label me-2">Nombre<span class="text-danger">*</span></label>
-            <div class="position-relative flex-grow-1">
-                <input type="text" formControlName="firstName" class="form-control" 
-                       [ngClass]="{'is-valid': employeeForm.get('firstName')?.valid, 
-                                   'is-invalid': employeeForm.get('firstName')?.invalid && employeeForm.get('firstName')?.touched}" 
-                       id="firstName" placeholder="Ingrese el nombre">
-                <div *ngIf="employeeForm.get('firstName')?.valid" class="valid-feedback position-absolute top-10 end-0 mt-1 me-2"></div>
-                <div *ngIf="employeeForm.get('firstName')?.invalid && employeeForm.get('firstName')?.touched" class="invalid-feedback position-absolute top-10 end-0 mt-1 me-2">
-                    Nombre es requerido
+      }
+      <form [formGroup]="employeeForm" (ngSubmit)="saveEmployee()" class="mt-3">
+        <div class="row mb-3">
+          <div class="col-md-6">
+            <label for="firstName" class="form-label"
+              >Nombre<span class="text-danger">*</span></label
+            >
+            <div class="position-relative">
+              <input
+                type="text"
+                formControlName="firstName"
+                class="form-control"
+                [ngClass]="{
+                  'is-valid': employeeForm.get('firstName')?.valid,
+                  'is-invalid':
+                    employeeForm.get('firstName')?.invalid &&
+                    employeeForm.get('firstName')?.touched
+                }"
+                id="firstName"
+                placeholder="Ingrese el nombre"
+              />
+              <div
+                *ngIf="employeeForm.get('firstName')?.valid"
+                class="valid-feedback position-absolute top-10 end-0 mt-1 me-2"
+              >
+                <i class="bi bi-check-circle-fill text-success"></i>
+              </div>
+              <div
+                *ngIf="
+                  employeeForm.get('firstName')?.invalid &&
+                  employeeForm.get('firstName')?.touched
+                "
+                class="invalid-feedback position-absolute top-10 end-10 mt-10 me-10"
+              >
+                <i class="bi bi-x-circle-fill text-danger"></i> Nombre es
+                requerido
+              </div>
+            </div>
+          </div>
+          <div class="col-md-6">
+            <label for="lastName" class="form-label"
+              >Apellido<span class="text-danger">*</span></label
+            >
+            <div class="position-relative">
+              <input
+                type="text"
+                formControlName="lastName"
+                class="form-control"
+                [ngClass]="{
+                  'is-valid': employeeForm.get('lastName')?.valid,
+                  'is-invalid':
+                    employeeForm.get('lastName')?.invalid &&
+                    employeeForm.get('lastName')?.touched
+                }"
+                id="lastName"
+                placeholder="Ingrese el apellido"
+              />
+              <div
+                *ngIf="employeeForm.get('lastName')?.valid"
+                class="valid-feedback position-absolute top-10 end-0 mt-1 me-2"
+              >
+                <i class="bi bi-check-circle-fill text-success"></i>
+              </div>
+              <div
+                *ngIf="
+                  employeeForm.get('lastName')?.invalid &&
+                  employeeForm.get('lastName')?.touched
+                "
+                class="invalid-feedback position-absolute top-10 end-0 mt-1 me-2"
+              >
+                <i class="bi bi-x-circle-fill text-danger"></i> Apellido es
+                requerido
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="row mb-3">
+          <div class="col-md-6 mt-1">
+            <label for="employeeType" class="form-label"
+              >Tipo<span class="text-danger">*</span></label
+            >
+            <div class="position-relative">
+              <select
+                formControlName="employeeType"
+                class="form-select"
+                [ngClass]="{
+                  'is-valid': employeeForm.get('employeeType')?.valid,
+                  'is-invalid':
+                    employeeForm.get('employeeType')?.invalid &&
+                    employeeForm.get('employeeType')?.touched &&
+                    employeeForm.get('employeeType')?.value !== 'ADMIN'
+                }"
+                id="employeeType"
+              >
+                <option value="" disabled>Seleccione tipo</option>
+                <option *ngFor="let type of employeeTypes" [value]="type">
+                  {{ type }}
+                </option>
+              </select>
+              <div
+                *ngIf="employeeForm.get('employeeType')?.valid"
+                class="valid-feedback position-absolute top-10 end-0 mt-1 me-2"
+              >
+                <i class="bi bi-check-circle-fill text-success"></i>
+              </div>
+              <div
+                *ngIf="
+                  employeeForm.get('employeeType')?.invalid &&
+                  employeeForm.get('employeeType')?.touched
+                "
+                class="invalid-feedback position-absolute top-10 end-0 mt-1 me-2"
+              >
+                <i class="bi bi-x-circle-fill text-danger"></i> Tipo es
+                requerido
+              </div>
+            </div>
+          </div>
+          <div class="col-md-6 mt-1">
+            <label for="hiringDate" class="form-label"
+              >Fecha de Contratación<span class="text-danger">*</span></label
+            >
+            <div class="position-relative">
+              <input
+                formControlName="hiringDate"
+                type="date"
+                class="form-control"
+                [ngClass]="{
+                  'is-valid': employeeForm.get('hiringDate')?.valid,
+                  'is-invalid':
+                    employeeForm.get('hiringDate')?.invalid &&
+                    employeeForm.get('hiringDate')?.touched
+                }"
+                id="hiringDate"
+              />
+              <div
+                *ngIf="employeeForm.get('hiringDate')?.valid"
+                class="valid-feedback position-absolute top-10 end-0 mt-1 me-2"
+              >
+                <i class="bi bi-check-circle-fill text-success"></i>
+              </div>
+              <div
+                *ngIf="
+                  employeeForm.get('hiringDate')?.invalid &&
+                  employeeForm.get('hiringDate')?.touched
+                "
+                class="invalid-feedback position-absolute top-10 end-0 mt-1 me-2"
+              >
+                <i class="bi bi-x-circle-fill text-danger"></i> Fecha es
+                requerida
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="row mb-3 mt-1">
+          <div class="col-md-6">
+            <label for="documentType" class="form-label"
+              >Tipo de Documento<span class="text-danger">*</span></label
+            >
+            <div class="position-relative">
+              <select
+                formControlName="documentType"
+                class="form-select"
+                [ngClass]="{
+                  'is-valid': employeeForm.get('documentType')?.valid,
+                  'is-invalid':
+                    employeeForm.get('documentType')?.invalid &&
+                    employeeForm.get('documentType')?.touched
+                }"
+                id="documentType"
+              >
+                <option value="" disabled>Seleccione tipo de documento</option>
+                <option *ngFor="let type of documentTypes" [value]="type">
+                  {{ type }}
+                </option>
+              </select>
+              <div
+                *ngIf="employeeForm.get('documentType')?.valid"
+                class="valid-feedback position-absolute top-10 end-0 mt-1 me-2"
+              >
+                <i class="bi bi-check-circle-fill text-success"></i>
+              </div>
+              <div
+                *ngIf="
+                  employeeForm.get('documentType')?.invalid &&
+                  employeeForm.get('documentType')?.touched
+                "
+                class="invalid-feedback position-absolute top-10 end-0 mt-1 me-2"
+              >
+                <i class="bi bi-x-circle-fill text-danger"></i> Tipo de
+                documento es requerido
+              </div>
+            </div>
+          </div>
+          <div class="col-md-6 mt-1">
+            <label for="docNumber" class="form-label"
+              >Documento<span class="text-danger">*</span></label
+            >
+            <div class="position-relative">
+              <input
+                type="text"
+                formControlName="docNumber"
+                class="form-control"
+                [ngClass]="{
+                  'is-valid': employeeForm.get('docNumber')?.valid,
+                  'is-invalid':
+                    employeeForm.get('docNumber')?.invalid &&
+                    employeeForm.get('docNumber')?.touched
+                }"
+                id="docNumber"
+                placeholder="Ingrese el número de documento"
+              />
+              <div
+                *ngIf="employeeForm.get('docNumber')?.valid"
+                class="valid-feedback position-absolute top-10 end-0 mt-1 me-2"
+              >
+                <i class="bi bi-check-circle-fill text-success"></i>
+              </div>
+              <div
+                *ngIf="
+                  employeeForm.get('docNumber')?.invalid &&
+                  employeeForm.get('docNumber')?.touched
+                "
+                class="invalid-feedback position-absolute top-10 end-0 mt-1 me-2"
+              >
+                <i class="bi bi-x-circle-fill text-danger"></i> Documento es
+                requerido
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="row mb-4">
+          <div class="col-md-12 mt-1">
+            <label for="salary" class="form-label"
+              >Salario<span class="text-danger">*</span></label
+            >
+            <div class="input-group position-relative ms-2">
+              <span class="input-group-text">$</span>
+              <input
+                type="number"
+                formControlName="salary"
+                class="form-control"
+                [ngClass]="{
+                  'is-valid': employeeForm.get('salary')?.valid,
+                  'is-invalid':
+                    employeeForm.get('salary')?.invalid &&
+                    employeeForm.get('salary')?.touched
+                }"
+                id="salary"
+                placeholder="Ingrese el salario"
+              />
+              <div
+                *ngIf="employeeForm.get('salary')?.valid"
+                class="valid-feedback position-absolute top-10 end-0 mt-1 me-2"
+              >
+                <i class="bi bi-check-circle-fill text-success"></i>
+              </div>
+              <div
+                *ngIf="
+                  employeeForm.get('salary')?.invalid &&
+                  employeeForm.get('salary')?.touched
+                "
+                class="invalid-feedback position-absolute top-10 end-0 mt-1 me-2"
+              >
+                <i class="bi bi-x-circle-fill text-danger"></i> Salario es
+                requerido
+              </div>
+            </div>
+          </div>
+          <!-- <div class="col-md-6">
+            <label for="email" class="form-label">Email<span class="text-danger">*</span></label>
+            <div class="position-relative">
+                <input type="email" formControlName="email" class="form-control"
+                       [ngClass]="{'is-valid': employeeForm.get('email')?.valid,
+                                   'is-invalid': employeeForm.get('email')?.invalid && employeeForm.get('email')?.touched}"
+                       id="email" placeholder="Ingrese el email">
+                <div *ngIf="employeeForm.get('email')?.valid" class="valid-feedback position-absolute top-0 end-0 mt-1 me-2">
+                    <i class="bi bi-check-circle-fill text-success"></i>
+                </div>
+                <div *ngIf="employeeForm.get('email')?.invalid && employeeForm.get('email')?.touched" class="invalid-feedback position-absolute top-10 end-0 mt-1 me-2">
+                    <i class="bi bi-x-circle-fill text-danger"></i> Email es requerido
                 </div>
             </div>
+        </div> -->
         </div>
-        <div class="col-md-6 d-flex align-items-center">
-            <label for="lastName" class="form-label me-2">Apellido<span class="text-danger">*</span></label>
-            <div class="position-relative flex-grow-1">
-                <input type="text" formControlName="lastName" class="form-control" 
-                       [ngClass]="{'is-valid': employeeForm.get('lastName')?.valid, 
-                                   'is-invalid': employeeForm.get('lastName')?.invalid && employeeForm.get('lastName')?.touched}" 
-                       id="lastName" placeholder="Ingrese el apellido">
-                <div *ngIf="employeeForm.get('lastName')?.valid" class="valid-feedback position-absolute top-10 end-0 mt-1 me-2"></div>
-                <div *ngIf="employeeForm.get('lastName')?.invalid && employeeForm.get('lastName')?.touched" class="invalid-feedback position-absolute top-10 end-0 mt-1 me-2">
-                    Apellido es requerido
-                </div>
-            </div>
-        </div>
-    </div>
-    <div class="row mb-3">
-        <div class="col-md-6 d-flex align-items-center">
-            <label for="employeeType" class="form-label me-2">Tipo<span class="text-danger">*</span></label>
-            <div class="position-relative flex-grow-1">
-                <select formControlName="employeeType" class="form-select" 
-                        [ngClass]="{'is-valid': employeeForm.get('employeeType')?.valid, 
-                                    'is-invalid': employeeForm.get('employeeType')?.invalid && employeeForm.get('employeeType')?.touched 
-                                    && employeeForm.get('employeeType')?.value !== 'ADMIN'}" 
-                        id="employeeType">
-                    <option value="" disabled>Seleccione tipo</option>
-                    <option *ngFor="let type of employeeTypes" [value]="type">{{ type }}</option>
-                </select>
-                <div *ngIf="employeeForm.get('employeeType')?.valid" class="valid-feedback position-absolute top-10 end-0 mt-1 me-2"></div>
-                <div *ngIf="employeeForm.get('employeeType')?.invalid && employeeForm.get('employeeType')?.touched" class="invalid-feedback position-absolute top-10 end-0 mt-1 me-2">
-                    Tipo es requerido
-                </div>
-            </div>
-        </div>
-        <div class="col-md-6 d-flex align-items-center">
-            <label for="hiringDate" class="form-label me-2">Fecha de Contratación<span class="text-danger">*</span></label>
-            <div class="position-relative flex-grow-1">
-                <input formControlName="hiringDate" type="date" class="form-control" 
-                       [ngClass]="{'is-valid': employeeForm.get('hiringDate')?.valid, 
-                                   'is-invalid': employeeForm.get('hiringDate')?.invalid && employeeForm.get('hiringDate')?.touched}" 
-                       id="hiringDate">
-                <div *ngIf="employeeForm.get('hiringDate')?.valid" class="valid-feedback position-absolute top-10 end-0 mt-1 me-2"></div>
-                <div *ngIf="employeeForm.get('hiringDate')?.invalid && employeeForm.get('hiringDate')?.touched" class="invalid-feedback position-absolute top-10 end-0 mt-1 me-2">
-                    Fecha es requerida
-                </div>
-            </div>
-        </div>
-    </div>
-    <div class="row mb-3 mt-1">
-        <div class="col-md-6 d-flex align-items-center">
-            <label for="documentType" class="form-label me-2">Tipo de Documento<span class="text-danger">*</span></label>
-            <div class="position-relative flex-grow-1">
-                <select formControlName="documentType" class="form-select" 
-                        [ngClass]="{'is-valid': employeeForm.get('documentType')?.valid, 
-                                    'is-invalid': employeeForm.get('documentType')?.invalid && employeeForm.get('documentType')?.touched}" 
-                        id="documentType">
-                    <option value="" disabled>Seleccione tipo de documento</option>
-                    <option *ngFor="let type of documentTypes" [value]="type">{{ type }}</option>
-                </select>
-                <div *ngIf="employeeForm.get('documentType')?.valid" class="valid-feedback position-absolute top-10 end-0 mt-1 me-2"></div>
-                <div *ngIf="employeeForm.get('documentType')?.invalid && employeeForm.get('documentType')?.touched" class="invalid-feedback position-absolute top-10 end-0 mt-1 me-2">
-                    Tipo de documento es requerido
-                </div>
-            </div>
-        </div>
-        <div class="col-md-6 d-flex align-items-center">
-            <label for="docNumber" class="form-label me-2">Documento<span class="text-danger">*</span></label>
-            <div class="position-relative flex-grow-1">
-                <input type="text" formControlName="docNumber" class="form-control" 
-                       [ngClass]="{'is-valid': employeeForm.get('docNumber')?.valid, 
-                                   'is-invalid': employeeForm.get('docNumber')?.invalid && employeeForm.get('docNumber')?.touched}" 
-                       id="docNumber" placeholder="Ingrese el número de documento">
-                <div *ngIf="employeeForm.get('docNumber')?.valid" class="valid-feedback position-absolute top-10 end-0 mt-1 me-2"></div>
-                <div *ngIf="employeeForm.get('docNumber')?.invalid && employeeForm.get('docNumber')?.touched" class="invalid-feedback position-absolute top-10 end-0 mt-1 me-2">
-                    Documento es requerido
-                </div>
-            </div>
-        </div>
-    </div>
-    <div class="row mb-4">
-        <div class="col-md-12 mt-1 d-flex align-items-center">
-            <label for="salary" class="form-label me-2">Salario<span class="text-danger">*</span></label>
-            <div class="input-group position-relative flex-grow-1 ms-2">
-                <span class="input-group-text">$</span>
-                <input type="number" formControlName="salary" class="form-control" 
-                       [ngClass]="{'is-valid': employeeForm.get('salary')?.valid, 
-                                   'is-invalid': employeeForm.get('salary')?.invalid && employeeForm.get('salary')?.touched}" 
-                       id="salary" placeholder="Ingrese el salario">
-                <div *ngIf="employeeForm.get('salary')?.valid" class="valid-feedback position-absolute top-10 end-0 mt-1 me-2"></div>
-                <div *ngIf="employeeForm.get('salary')?.invalid && employeeForm.get('salary')?.touched" class="invalid-feedback position-absolute top-10 end-0 mt-1 me-2">
-                    Salario es requerido
-                </div>
-            </div>
-        </div>
-    </div>
-    
-    <!-- <div class="row mb-4">
+        <!-- <div class="row mb-4">
         <div class="col-md-12">
             <label for="phone" class="form-label">Teléfono<span class="text-danger">*</span></label>
             <div class="position-relative">
-                <input type="tel" formControlName="phone" class="form-control" 
-                       [ngClass]="{'is-valid': employeeForm.get('phone')?.valid, 
-                                   'is-invalid': employeeForm.get('phone')?.invalid && employeeForm.get('phone')?.touched}" 
+                <input type="tel" formControlName="phone" class="form-control"
+                       [ngClass]="{'is-valid': employeeForm.get('phone')?.valid,
+                                   'is-invalid': employeeForm.get('phone')?.invalid && employeeForm.get('phone')?.touched}"
                        id="phone" placeholder="Ingrese el teléfono">
                 <div *ngIf="employeeForm.get('phone')?.valid" class="valid-feedback position-absolute top-0 end-0 mt-1 me-2">
                     <i class="bi bi-check-circle-fill text-success"></i>
                 </div>
-                <div *ngIf="employeeForm.get('phone')?.invalid && employeeForm.get('phone')?.touched" class="invalid-feedback position-absolute top-10 end-0 mt-1 me-2">  
+                <div *ngIf="employeeForm.get('phone')?.invalid && employeeForm.get('phone')?.touched" class="invalid-feedback position-absolute top-10 end-0 mt-1 me-2">
                   <i class="bi bi-x-circle-fill text-danger"></i> Teléfono es requerido
                 </div>
             </div>
         </div>
     </div> -->
-    <button type="submit" class="btn btn-primary" [disabled]="employeeForm.invalid">{{ !isEdit ? 'Registrar' : 'Modificar' }}</button>
-</form>
-</div>
+        <button
+          type="submit"
+          class="btn btn-primary"
+          [disabled]="employeeForm.invalid"
+        >
+          {{ !isEdit ? "Registrar" : "Modificar" }}
+        </button>
+      </form>
+    </div>
 
-<ng-template #infoModal let-modal>
-    <div class="modal-header fs-6 py-1">
+    <ng-template #infoModal let-modal>
+      <div class="modal-header fs-6 py-1">
         <h4 class="modal-title">Formulario de Empleados</h4>
-        <button type="button" class="btn-close" aria-label="Close" (click)="modal.dismiss()"></button>
+        <button
+          type="button"
+          class="btn-close"
+          aria-label="Close"
+          (click)="modal.dismiss()"
+        ></button>
       </div>
       <div class="modal-body fs-6 py-2">
         <div class="container-fluid">
           <!-- Introducción -->
           <div class="alert alert-info mb-2 py-2">
             <h5 class="alert-heading">¿Qué es esta pantalla?</h5>
-            <p class="mb-0 small">Esta pantalla te permite registrar/actualizar un empleado.</p>
+            <p class="mb-0 small">
+              Esta pantalla te permite registrar/actualizar un empleado.
+            </p>
           </div>
-      
+
           <!-- Campos Principales -->
           <div class="card mb-2">
             <div class="card-header py-1">
@@ -158,15 +344,19 @@
             <div class="card-body py-2">
               <ul class="list-group list-group-flush">
                 <li class="list-group-item py-1">
-                  <strong>Campos a ingresar:</strong> Se solicitarán: Nombre, Apellido, Tipo, Documento, Tipo de Documento, Salario y Fecha de Contratación.
+                  <strong>Campos a ingresar:</strong> Se solicitarán: Nombre,
+                  Apellido, Tipo, Documento, Tipo de Documento, Salario y Fecha
+                  de Contratación.
                 </li>
                 <li class="list-group-item py-1">
-                    <strong>ATENCIÓN:</strong> La opción de GUARDAR solo se habilitará si todos los campos se encuentran correctamente completados.
-                  </li>
+                  <strong>ATENCIÓN:</strong> La opción de GUARDAR solo se
+                  habilitará si todos los campos se encuentran correctamente
+                  completados.
+                </li>
               </ul>
             </div>
           </div>
-      
+
           <!-- Acciones -->
           <div class="card mb-2">
             <div class="card-header py-1">
@@ -175,29 +365,39 @@
             <div class="card-body py-2">
               <ul class="list-group list-group-flush">
                 <li class="list-group-item py-1">
-                  <strong>Guardar:</strong> En caso de que todos los campos se encuentren correctamente completados se guardará el nuevo empleado.
+                  <strong>Guardar:</strong> En caso de que todos los campos se
+                  encuentren correctamente completados se guardará el nuevo
+                  empleado.
                 </li>
                 <li class="list-group-item py-1">
-                  <strong>Cancelar:</strong> Se cancela el registro o la actualización del empleado y nos devuelve al listado de empleados.
+                  <strong>Cancelar:</strong> Se cancela el registro o la
+                  actualización del empleado y nos devuelve al listado de
+                  empleados.
                 </li>
               </ul>
             </div>
           </div>
-      
+
           <!-- Nota (OPCIONAL) -->
           <div class="alert alert-warning py-2 mb-0">
             <h5 class="alert-heading">Nota:</h5>
-            <p class="mb-0 small">Asegúrate de verificar la información antes de modificar, ingresar o eliminar un empleado.</p>
+            <p class="mb-0 small">
+              Asegúrate de verificar la información antes de modificar, ingresar
+              o eliminar un empleado.
+            </p>
           </div>
         </div>
       </div>
       <div class="modal-footer py-2">
-        <button type="button" class="btn btn-primary" (click)="modal.close()">Entendido</button>
+        <button type="button" class="btn btn-primary" (click)="modal.close()">
+          Entendido
+        </button>
       </div>
-      
-  </ng-template>
+    </ng-template>
 
-  <app-employee-access></app-employee-access>
-  <app-employee-contact></app-employee-contact>
-  <!-- <app-access-schedule></app-access-schedule>
+    <app-employee-access></app-employee-access>
+    <app-employee-contact></app-employee-contact>
+    <!-- <app-access-schedule></app-access-schedule>
 <app-contact></app-contact> -->
+  </div>
+</div>

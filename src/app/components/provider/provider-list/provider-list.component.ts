@@ -1,280 +1,322 @@
-import { Component, ElementRef, inject, OnInit, TemplateRef, ViewChild } from '@angular/core';
-import {  Supplier } from '../../../models/supplier.model';
-import { ProvidersService } from '../../../services/providers.service';
-import Swal from 'sweetalert2';
-import { Router, RouterLink } from '@angular/router';
-import { FormBuilder, FormControl, FormGroup, FormsModule, ReactiveFormsModule } from '@angular/forms';
-import { ServiceType } from '../../../models/enums/service-tpye.enum';
+import { Component, CUSTOM_ELEMENTS_SCHEMA, ElementRef, inject, OnInit, TemplateRef, ViewChild } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { StatusType } from '../../../models/inventory.model';
+import { ReactiveFormsModule, FormsModule, FormBuilder, FormControl, FormGroup } from '@angular/forms';
 import { NgbModal } from '@ng-bootstrap/ng-bootstrap';
-
-//exportar a pdf y excel
-import jsPDF from 'jspdf';
-import 'jspdf-autotable';
+import { Router, RouterModule } from '@angular/router';
+import { ProvidersService } from '../../../services/providers.service';
+import { Supplier } from '../../../models/supplier.model';
+import { ToastService, MainContainerComponent, ConfirmAlertComponent } from 'ngx-dabd-grupo01';
+import { debounceTime, distinctUntilChanged } from 'rxjs';
 import * as XLSX from 'xlsx';
+import jsPDF from 'jspdf';
 import autoTable from 'jspdf-autotable';
-import { debounceTime, distinctUntilChanged, filter } from 'rxjs';
-import { ToastService } from 'ngx-dabd-grupo01';
+import { Chart, ChartType, registerables } from 'chart.js';
+
+Chart.register(...registerables);
+
 
 @Component({
   selector: 'app-provider-list',
   standalone: true,
-  imports: [ReactiveFormsModule, CommonModule, RouterLink, FormsModule],
+  imports: [
+    CommonModule, // Para *ngIf y *ngFor
+    ReactiveFormsModule, // Para formControl
+    FormsModule, // Para ngModel
+    RouterModule, // Para routerLink
+    MainContainerComponent, // Componente del contenedor principal
+    ConfirmAlertComponent 
+  ],
   templateUrl: './provider-list.component.html',
-  styleUrl: './provider-list.component.css'
+  styleUrls: ['./provider-list.component.css'],
+  schemas: [CUSTOM_ELEMENTS_SCHEMA] // Agrega esta línea
+
 })
-export class ProviderListComponent implements OnInit{
+export class ProviderListComponent implements OnInit {
+  @ViewChild('pieChart') pieChartRef!: ElementRef;
   @ViewChild('providersTable') providersTable!: ElementRef;
-  
-  mockProviders: Supplier[] = [
-    { id: 1, name: 'Proveedor 1', cuil: '20-12345678-9', service: 'Mantenimiento', contact: '1234567890', address: 'Calle 123', enabled: true },
-    { id: 2, name: 'Proveedor 2', cuil: '20-87654321-9', service: 'Limpieza', contact: '0987654321', address: 'Avenida 456', enabled: false },
-    { id: 3, name: 'Proveedor 3', cuil: '20-11111111-9', service: 'Seguridad', contact: '1111111111', address: 'Plaza 789', enabled: true },
-    { id: 4, name: 'Proveedor 4', cuil: '20-22222222-9', service: 'Transporte', contact: '2222222222', address: 'Ruta 012', enabled: false },
-    { id: 5, name: 'Proveedor 5', cuil: '20-33333333-9', service: 'Catering', contact: '3333333333', address: 'Boulevard 345', enabled: true }
-  ];
-
-  providerList: Supplier[] = [];
-  filteredProviders: Supplier[] = []; // Proveedores filtrados
-  private originalProviders: Supplier[] = [];
-  isLoading = false;
-  searchFilter = new FormControl('');
-  searchFilterAll = new FormControl('');
-
   @ViewChild('infoModal') infoModal!: TemplateRef<any>;
 
-  sortedProviderList: Supplier[] = [];
-  sortColumn: string = '';
-  sortDirection: 'asc' | 'desc' = 'asc';
+  // sortColumn: string = '';
+  // sortDirection: 'asc' | 'desc' = 'asc';
 
+  providerList: Supplier[] = [];
+  filteredProviders: Supplier[] = [];
+  private originalProviders: Supplier[] = []; // Se usa como referencia para filtros
+  isLoading = false;
 
-  serviceTypes = Object.values(ServiceType);
-  statusTypes = Object.values(StatusType);
-
+  searchFilterAll = new FormControl('');
   filterForm: FormGroup;
-  nameFilter = new FormControl('');
-  cuilFilter = new FormControl('');
-  serviceFilter = new FormControl('');
-  phoneFilter = new FormControl('');
 
   showModalFilter: boolean = false;
 
   currentPage: number = 1;
-  totalPages: number = 1;
+  totalItems: number = 0;
   itemsPerPage: number = 10;
+  pageSize: number = 10;
+  sizeOptions: number[] = [5,10, 20, 50, 100];
 
-   // Track current filter state
-   currentFilter: 'all' | 'true' | 'false' = 'all';
+
+  activeCount: number = 0;
+  inactiveCount: number = 0;
+  pieChart!: Chart;
+  barChart: any;
+  serviceCountMap: { [key: string]: number } = {};
 
   private providerService = inject(ProvidersService);
   private router = inject(Router);
-  private fb = inject(FormBuilder);
   private modalService = inject(NgbModal);
+  private toastService = inject(ToastService);
 
-  constructor(private toastService: ToastService) {
+  constructor(private ProvidersService: ProvidersService,private fb: FormBuilder) {
     this.filterForm = this.fb.group({
-      enabled: ['']
+      name: new FormControl(''),
+      cuil: new FormControl(''),
+      service: new FormControl(''),
+      phone: new FormControl(''),
+      enabled: new FormControl('')
+    });
+
+     // Configuración de filtro de búsqueda de TOODO ALL
+     this.searchFilterAll.valueChanges
+     .pipe(
+       debounceTime(300),
+       distinctUntilChanged()
+     )
+     .subscribe(searchTerm => {
+       this.filterProviders(searchTerm || '');
+     });
+}
+
+  ngOnInit(): void {
+    this.getProviders();
+    this.setupFilterSubscriptions();
+  }
+  //METRICAS
+    
+  createPieChart(): void {
+    if (this.pieChart) {
+      this.pieChart.destroy();
+    }
+    this.pieChart = new Chart(this.pieChartRef.nativeElement, {
+      type: 'pie' as ChartType,
+      data: {
+        labels: ['Activos', 'Inactivos'],
+        datasets: [
+          {
+            data: [this.activeCount, this.inactiveCount],
+            backgroundColor: ['#28a745', '#dc3545'],
+          }
+        ]
+      },
+      options: {
+        responsive: true,
+        plugins: {
+          legend: {
+            position: 'top'
+          }
+        }
+      }
+    });
+  }
+  calculateMetrics(): void {
+    // Contadores de activos e inactivos
+    this.activeCount = this.providerList.filter(provider => provider.enabled === true).length;
+    this.inactiveCount = this.providerList.filter(provider => provider.enabled === false).length;
+
+    // Calcula la cantidad de proveedores por tipo de servicio
+    this.serviceCountMap = this.providerList.reduce((acc, provider) => {
+      const service = provider.service;
+      if (service) {
+        acc[service] = (acc[service] || 0) + 1;
+      }
+      return acc;
+    }, {} as { [key: string]: number });
+  }
+
+  createBarChart(): void {
+    if (this.barChart) {
+      this.barChart.destroy();
+    }
+
+    const ctx = document.getElementById('barChart') as HTMLCanvasElement;
+    const serviceTypes = Object.keys(this.serviceCountMap);
+    const serviceCounts = Object.values(this.serviceCountMap);
+
+    this.barChart = new Chart(ctx, {
+      type: 'bar',
+      data: {
+        labels: serviceTypes,
+        datasets: [{
+          label: 'Cantidad de Proveedores',
+          data: serviceCounts,
+          backgroundColor: '#007bff'
+        }]
+      },
+      options: {
+        responsive: true,
+        plugins: {
+          legend: { display: false }
+        },
+        scales: {
+          x: { title: { display: true, text: 'Tipo de Servicio' } },
+          y: { title: { display: true, text: 'Cantidad' }, beginAtZero: true }
+        }
+      }
     });
   }
 
-  ngOnInit(): void {
-    // this.mockGetProviders(); //Para testear si funcionan
-    this.getProviders(); //Metodo real
-    this.setupFilterSubscriptions();  
+  filterProviders(searchTerm: string): void {
+    if (!searchTerm) {
+      this.providerList = [...this.originalProviders];
+      return;
+    }
+
+    this.providerList = this.originalProviders.filter(provider =>
+      provider.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      provider.cuil.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      provider.service.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      provider.contact.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      provider.address.toLowerCase().includes(searchTerm.toLowerCase())
+    );
   }
+  
 
   openModalFilter(): void {
     this.showModalFilter = true;
   }
+  openInfoModal(content: TemplateRef<any>) {
+    this.modalService.open(content, { centered: true });
+  }
 
-  closeModalFilter(applyFilters: boolean): void {
+  closeModalFilter(): void {
     this.showModalFilter = false;
-    if (applyFilters) {
-      this.applyFilters();
-    }
-  }
-  openModal(){
-
-  }
-
-  showInfo(): void {
-    this.modalService.open(this.infoModal, { centered: true });
   }
 
   private setupFilterSubscriptions(): void {
-    Object.keys(this.filterForm.controls).forEach(key => {
-      this.filterForm.get(key)?.valueChanges.pipe(
-        debounceTime(300),
-        distinctUntilChanged()
-      ).subscribe(() => {
-        this.applyFilters();
-      });
-    });
+    // Object.keys(this.filterForm.controls).forEach(key => {
+    //   this.filterForm.get(key)?.valueChanges.subscribe(() => {
+    //     this.applyFilters();
+    //   });
+    // });
   }
-
-
-  sortProviders(column: keyof Supplier): void {
-    // Cambia la dirección de orden si la columna ya está seleccionada, sino reinicia a 'asc'
-    this.sortDirection = this.sortColumn === column ? (this.sortDirection === 'asc' ? 'desc' : 'asc') : 'asc';
-    this.sortColumn = column;
-  
-    // Ordena la lista
-    this.providerList = [...this.providerList].sort((a, b) => {
-      const valueA = a[column];
-      const valueB = b[column];
-  
-      if (valueA == null || valueB == null) return 0; // Evita ordenamiento si es null o undefined
-  
-      if (valueA < valueB) return this.sortDirection === 'asc' ? -1 : 1;
-      if (valueA > valueB) return this.sortDirection === 'asc' ? 1 : -1;
-      return 0;
-    });
-  }
-  
-  getSortIcon(column: string): string {
-    if (this.sortColumn === column) {
-      return this.sortDirection === 'asc' ? 'fa fa-arrow-up' : 'fa fa-arrow-down';
-    }
-    return 'fa fa-sort';
-  }
-  
 
   trackByFn(index: number, item: Supplier): number {
-    return item.id; // Devuelve el ID del proveedor como clave
-  }
+    return item.id; // Suponiendo que `id` es un identificador único de cada proveedor
+  }  
 
-  getProviders() {
+  // getProviders(page: number = 0, size: number = this.pageSize): void {
+  //   this.isLoading = true;
+  //   const filters = this.getFilters(); // Obtiene los filtros actuales si es necesario
+  
+  //   this.providerService.getProviders({ ...filters, page, size }).subscribe({
+  //     next: (response) => {
+  //       this.originalProviders = response.content;
+  //       this.providerList = [...this.originalProviders];
+  //       this.filteredProviders = [...this.originalProviders];
+  //       this.totalItems = response.totalElements; // Ajusta `totalItems` según la respuesta de la API
+  //       this.isLoading = false;
+  
+  //       // Calcula las métricas y actualiza el gráfico
+  //       this.calculateMetrics();
+  //       this.createPieChart();
+  //     },
+  //     error: (error) => {
+  //       console.error('Error al obtener los proveedores:', error);
+  //       this.toastService.sendError('Error al cargar proveedores.');
+  //       this.isLoading = false;
+  //     }
+  //   });
+  // }
+  getProviders(page: number = 0, size: number = this.pageSize): void {
     this.isLoading = true;
-    this.nameFilter.valueChanges.subscribe( data => {
-      if(data === null || data === ''){
-        this.getProviders();
-      }
-      this.providerList = this.providerList.filter(
-        x => x.name.toLowerCase().includes(data!.toLowerCase())
-      )
-    })
-    this.cuilFilter.valueChanges.subscribe( data => {
-      if(data === null || data === ''){
-        this.getProviders();
-      }
-      this.providerList = this.providerList.filter(
-        x => x.cuil.toLowerCase().includes(data!.toLowerCase())
-      )
-    })
-    this.phoneFilter.valueChanges.subscribe( data => {
-      if(data === null || data === ''){
-        this.getProviders();
-      }
-      this.providerList = this.providerList.filter(
-        x => x.contact.toLowerCase().includes(data!.toLowerCase())
-      )
-    })
-    this.serviceFilter.valueChanges.subscribe( data => {
-      if(data === null || data === ''){
-        this.getProviders();
-      }
-      this.providerList = this.providerList.filter(
-        x => x.service.toLowerCase().includes(data!.toLowerCase())
-      )
-    })
+    const filters = this.getFilters();
 
-    this.searchFilterAll.valueChanges.subscribe( data => {
-      if(data === null || data === ''){
-        this.getProviders();
+    this.providerService.getProviders({ ...filters, page, size }).subscribe({
+      next: (response) => {
+        this.originalProviders = response.content;
+        this.providerList = [...this.originalProviders];
+        this.filteredProviders = [...this.originalProviders];
+        this.totalItems = response.totalElements;
+        this.isLoading = false;
+
+        // Calcula métricas y crea gráficos
+        this.calculateMetrics();
+        this.createPieChart();
+        this.createBarChart();
+      },
+      error: (error) => {
+        console.error('Error al obtener los proveedores:', error);
+        this.toastService.sendError('Error al cargar proveedores.');
+        this.isLoading = false;
       }
-      this.providerList = this.providerList.filter(
-        x => x.name.toLowerCase().includes(data!.toLowerCase())||
-         x.cuil.toLowerCase().includes(data!.toLowerCase())||
-         x.contact.toLowerCase().includes(data!.toLowerCase())||
-         x.service.toLowerCase().includes(data!.toLowerCase())
-      )
-    })
-    
-    this.providerService.getProviders().subscribe((providerList) => {
-      this.filteredProviders = providerList;
-      this.providerList = providerList;
-      this.isLoading = false;
     });
   }
 
-  applyFilters(): void {
-    const filters = {
-      addressId: this.filterForm.get('addressId')?.value,
-      enabled: this.filterForm.get('enabled')?.value,
-      state: this.currentFilter === 'all' ? null : this.currentFilter === 'true'
-    };
-
-    // Eliminar propiedades con valores vacíos
-    Object.keys(filters).forEach(key => {
-      if (!filters[key as keyof typeof filters]) {
-        delete filters[key as keyof typeof filters];
-      }
-    });
-
-    this.providerService.getProviders(filters).subscribe(providers => {
-      this.providerList = providers;
-      this.filteredProviders = providers;
-      this.originalProviders = providers;
-    });
-    
+  onItemsPerPageChange(): void {
+    this.currentPage = 1; // Reinicia a la primera página
+    this.getProviders(this.currentPage - 1, this.pageSize);
   }
   
-  // Método para buscar proveedores por CUIL
-  searchByCUIL(): void {
-    const cuil = this.filterForm.get('cuil')?.value;
-    if (cuil) {
-      this.filteredProviders = this.providerList.filter(provider => provider.cuil.includes(cuil));
-    } else {
-      this.filteredProviders = this.providerList; // Restablece la lista si no hay CUIL ingresado
-    }
+  onPageChange(event: any): void {
+    const page = event as number; // Asegura que sea tratado como número
+    this.currentPage = page;
+    this.getProviders(this.currentPage - 1, this.pageSize);
   }
-  searchByContact() {
-    this.applyFilters();
-  }
-
-  clearSearch() {
-    this.nameFilter.reset();
-    this.cuilFilter.reset();
-    this.serviceFilter.reset();
-    this.phoneFilter.reset();
-    this.filterForm.reset({
-      addressId: '',
-      enabled: ''
-    });
-    this.currentFilter = 'all';
-    this.showAllProviders();
-    this.applyFilters();
+  
+  
+  // Método para obtener los filtros actuales (opcional, si los estás usando)
+  private getFilters(): any {
+    return {
+      name: this.filterForm.get('name')?.value || '',
+      cuil: this.filterForm.get('cuil')?.value || '',
+      service: this.filterForm.get('service')?.value || '',
+      phone: this.filterForm.get('phone')?.value || '',
+      enabled: this.filterForm.get('enabled')?.value
+    };
   }
 
-  editProvider(id: number) {
-    this.router.navigate(['/providers/form', id]);
-  }
+applyFilters(): void {
+  const filters = {
+    name: this.filterForm.get('name')?.value?.toLowerCase() || '',
+    cuil: this.filterForm.get('cuil')?.value || '',
+    service: this.filterForm.get('service')?.value?.toLowerCase() || '',
+    phone: this.filterForm.get('phone')?.value || '',
+    enabled: this.filterForm.get('enabled')?.value !== '' 
+    ? this.filterForm.get('enabled')?.value === 'true' 
+      ? true 
+      : false 
+    : null
+};
 
-  deleteProvider(id: number){
-    Swal.fire({
-      title: '¿Estás seguro?',
-      text: 'No podras revertir esto!',
-      icon: 'warning',
-      showCancelButton: true,
-      confirmButtonColor: '#3085d6',
-      cancelButtonColor: '#d33',
-      confirmButtonText: 'Si, eliminar!',
-      cancelButtonText: 'Cancelar'
-    }).then((result) => {
-      if(result.isConfirmed){
-        this.providerService.deleteProvider(id).subscribe({
-          next: (response) => {
-            this.toastService.sendSuccess("El proveedor ha sido eliminado con éxito.");
-            this.getProviders();
-          },
-          error: (error) => {
-            this.toastService.sendError("Hubo un error en la eliminación del proveedor.");
-          }
-        });
-      }
-    })
-  }
+  console.log('Applying filters:', filters);
+
+  // Filtra siempre a partir de originalProviders
+  this.filteredProviders = this.originalProviders.filter(provider => {
+    const matchesName = filters.name ? provider.name.toLowerCase().includes(filters.name) : true;
+    const matchesCuil = filters.cuil ? provider.cuil.includes(filters.cuil) : true;
+    const matchesService = filters.service ? provider.service.toLowerCase().includes(filters.service) : true;
+    const matchesPhone = filters.phone ? provider.contact.includes(filters.phone) : true;
+    const matchesEnabled = filters.enabled !== null ? provider.enabled === filters.enabled : true;
+
+    return matchesName && matchesCuil && matchesService && matchesPhone && matchesEnabled;
+  });
+
+  console.log('Filtered providers:', this.filteredProviders);
+
+  // Actualiza la lista visible con los resultados filtrados
+  this.providerList = [...this.filteredProviders];
+  this.closeModalFilter();
+}
+
+
+clearFilters(): void {
+  this.filterForm.reset(); // Restablece todos los filtros
+  this.filterForm.get('enabled')?.setValue(''); // Establece el campo "Estado" en "Todos los Estados"
+  this.providerList = [...this.originalProviders]; // Restaura la lista completa de proveedores
+  this.filteredProviders = [...this.originalProviders];
+  this.showModalFilter = false; // Cierra el modal
+}
+
 
   exportToPDF() {
     const doc = new jsPDF();
@@ -282,17 +324,18 @@ export class ProviderListComponent implements OnInit{
     const tableRows: any[][] = [];
   
     this.providerList.forEach((provider) => {
-      // const providerAddress = this.addresses.find((addr) => addr.id === provider.addressId);
+       //const providerAddress = this.addresses.find((addr) => addr.id === provider.addressId);
       const providerData = [
         provider.name,
         provider.cuil,
         provider.service,
-        // providerAddress ? providerAddress.street_address : 'N/A', // Mostramos la dirección
+        provider.address,
+        provider.contact,
+        //providerAddress ? providerAddress.street_address : 'N/A', // Mostramos la dirección
         provider.enabled ? 'Activo' : 'Inactivo'
       ];
       tableRows.push(providerData);
     });
-  
     autoTable(doc, {
       head: [tableColumn],
       body: tableRows,
@@ -317,7 +360,6 @@ export class ProviderListComponent implements OnInit{
       // Aquí puedes añadir una notificación al usuario si lo deseas
     }
   }
-
   private createTableFromData(): HTMLTableElement {
     const table = document.createElement('table');
     const thead = table.createTHead();
@@ -331,19 +373,9 @@ export class ProviderListComponent implements OnInit{
       headerRow.appendChild(th);
     });
 
-    // Crear filas de datos
-    // this.providerList.forEach(provider => {
-    //   const row = tbody.insertRow();
-    //   [provider.name, provider.serviceType, provider.contact, provider.state].forEach(text => {
-    //     const cell = row.insertCell();
-    //     cell.textContent = text;
-    //   });
-    // });
     this.providerList.forEach((provider) => {
-      // const providerAddress = this.addresses.find((addr) => addr.id === provider.addressId);
       const row = tbody.insertRow();
       [provider.name, provider.cuil, provider.service, 
-        // providerAddress ? providerAddress.street_address : 'N/A',
          provider.enabled ? 'Activo' : 'Inactivo'].forEach((text) => {
         const cell = row.insertCell();
         cell.textContent = text;
@@ -352,101 +384,29 @@ export class ProviderListComponent implements OnInit{
 
     return table;
   }
-  goToNextPage() {
-    if (this.currentPage < this.totalPages) {
-      this.currentPage++;
-      // Actualizar lista de empleados
-    }
-  }
-  
-  goToPreviousPage() {
-    if (this.currentPage > 1) {
-      this.currentPage--;
-      // Actualizar lista de empleados
-    }
+
+    editProvider(id: number) {
+    this.router.navigate(['/providers/form', id]);
   }
 
+  deleteProvider(id: number): void {
+    const modalRef = this.modalService.open(ConfirmAlertComponent);
+    modalRef.componentInstance.alertTitle = 'Confirmación';
+    modalRef.componentInstance.alertMessage = '¿Estás seguro de eliminar este proveedor?';
+    modalRef.componentInstance.alertVariant = 'delete';
 
-  /* Metodos de filtrado por botones*/
-  filterActiveProviders(): void {
-    console.log(this.providerList.filter(provider => provider.enabled));
-    this.currentFilter = 'true';
-    //Para mockear
-    this.providerList = this.originalProviders.filter(provider => provider.enabled);
-    this.filteredProviders = [...this.providerList];
-    console.log("Estas usando el filtro activo");
-    //Pegada a la api
-    //this.applyFilters();
-  }
-
-  filterInactiveProviders(): void {
-    console.log(this.providerList.filter(provider => !provider.enabled));
-    this.currentFilter = 'false';
-    //Para mockear
-    this.providerList = this.originalProviders.filter(provider => !provider.enabled);
-    this.filteredProviders = [...this.providerList];
-    console.log("Estas usando el filtro inactivo");
-     //Pegada a la Api
-    //this.applyFilters();
-  }
-
-  showAllProviders(): void {
-    console.log(this.providerList)
-    this.currentFilter = 'all';
-    //Para mockear
-    this.providerList = [...this.originalProviders];
-    this.filteredProviders = [...this.originalProviders];
-    console.log("Estas usando el filtro todos");
-    //Pegada a la Api
-    this.applyFilters();
-  }
-  // Modified to use mock data
-  mockGetProviders() {
-    this.isLoading = true;
-    // Simulate API call delay
-    setTimeout(() => {
-   // Guardar una copia de los datos originales
-   this.originalProviders = [...this.mockProviders];
-   this.providerList = [...this.mockProviders];
-   this.filteredProviders = [...this.mockProviders];
-   this.isLoading = false;
- }, 500);
-
-    // Keep existing filter subscriptions
-    this.nameFilter.valueChanges.subscribe(data => {
-      if (data === null || data === '') {
-        
+    modalRef.result.then((result) => {
+      if (result) {
+        this.providerService.deleteProvider(id).subscribe({
+          next: () => {
+            this.toastService.sendSuccess("Proveedor eliminado correctamente");
+            this.getProviders();
+          },
+          error: () => {
+            this.toastService.sendError("Error al eliminar el proveedor");
+          }
+        });
       }
-      this.filteredProviders = this.providerList.filter(
-        x => x.name.toLowerCase().includes(data!.toLowerCase())
-      );
     });
-
-    // ... (rest of the existing filter subscriptions)
-    console.log("Estas usando el metodo mockGetProviders");
   }
-  // Helper method to apply current filter state
-
- /* private applyCurrentFilter(): void {
-    switch (this.currentFilter) {
-      case 'true':
-        this.providerList = this.originalProviders.filter(provider => provider.enabled);
-        break;
-      case 'false':
-        this.providerList = this.originalProviders.filter(provider => !provider.enabled);
-        break;
-      default:
-        this.providerList = [...this.originalProviders];
-    }
-    this.filteredProviders = [...this.providerList];
-    console.log("Estas usando el metodo appluyCurrentFilter");
-  }*/
- 
-    // Método para actualizar el filtro y la lista de proveedores en función del estado activo/inactivo
- setFilter(filter: 'all' | 'true' | 'false'): void {
-  this.currentFilter = filter;
-  //this.applyCurrentFilter();
-  this.applyFilters();
-  console.log("Estas usando el metodo setFilter");
-}
 }
