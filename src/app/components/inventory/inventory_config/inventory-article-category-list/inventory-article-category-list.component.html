@@ -1,75 +1,120 @@
-<div class="container mt-5">
-<h3 class="h3">Lista de categorías de artículos</h3>
-<!-- Mensaje de no hay resultados -->
-<div *ngIf="!isLoading && categories.length === 0" class="alert alert-info">
-  No se encontraron inventarios con los filtros seleccionados.
-</div>
-<button
-        class="btn btn-outline-primary mx-1"
-        (click)="onCategoryUpdate()"
-        data-bs-toggle="tooltip"
-        data-bs-placement="top"
-        title="Agregar artículo">
-        <i class="bi bi-plus-lg"></i>
-    </button>
+<app-main-container title="Lista de categorías de artículos">
+  <!-- Barra de búsqueda y botones de acción -->
+  <div class="d-flex justify-content-between align-items-center mb-3">
 
-     <!-- FormGroup filters -->
-
-  <form class="row g-3 mt-3">
-    <div class="container">
-      <table class="table table-striped border rounded-lg-overflow-hidden">
-        <thead class="bg-dark text-white">
-          <tr>
-            <th>
-              Denominanción
-            </th>
-            <th>
-              Estado
-            </th>
-            <th>Acciones</th>
-          </tr>
-        </thead>
-        <tbody>
-          <tr *ngFor="let category of categories">
-            <td>{{ category.denomination }}</td>
-            <td>
-              @if (category.status.toString() == "ACTIVE") {
-                <p class="mb-0">
-                  <i class="bi bi-check2-circle text-success" style="font-size: 1.5rem;"></i>
-                </p>
-              } @else {
-                <p class="mb-0">
-                  <i class="bi bi-x-circle text-danger" style="font-size: 1.5rem;"></i>
-                </p>
-              }
-            </td>
-            <td>
-              @if(category.status.toString() == "ACTIVE") {
-                <!-- Botón para editar con ícono -->
-                <button class="btn btn-sm btn-primary me-1" (click)="onCategoryUpdate(category)" title="Editar">
-                  <i class="bi bi-pencil"></i>
-                </button>
-
-                <!-- Botón para eliminar con ícono -->
-                <button class="btn btn-sm btn-danger me-1" (click)="deleteCategory(category.id!)" title="Eliminar">
-                  <i class="bi bi-trash"></i>
-                </button>
-              }
-              <!-- @if (category.status.toString() == "INACTIVE") {
-              <button class="btn btn-sm btn-success me-2" (click)="activateCategory(category.id)" title="Activar">
-                <i class="bi bi-check-circle"></i>
-              </button>
-              } -->
-            </td>
-          </tr>
-        </tbody>
-      </table>
+    <div class="input-group w-25">
+      <span class="input-group-text">
+        <i class="bi bi-search"></i>
+      </span>
+      <input
+        type="text"
+        class="form-control"
+        placeholder="Buscar por denominación..."
+        [formControl]="searchFilter"
+        (input)="applyFilters()" 
+      />
+    <div class="dropdown">
+      <button
+        type="button"
+        class="btn btn-outline-info dropdown-toggle"
+        data-bs-toggle="dropdown"
+        aria-expanded="false"
+      >
+        <i class="bi bi-funnel-fill"></i> Filtros
+      </button>
+      <ul class="dropdown-menu">
+        <li>
+          <button class="dropdown-item" (click)="filterByStatus('ACTIVE')">Activo</button>
+        </li>
+        <li>
+          <button class="dropdown-item" (click)="filterByStatus('INACTIVE')">Inactivo</button>
+        </li>
+        <li>
+          <button class="dropdown-item" (click)="filterByStatus('')">Todos</button>
+        </li>
+      </ul>
+    </div>    
     </div>
-  </form>
-</div>
 
-    <app-article-category-update
+    <div class="d-flex">
+      <button class="btn btn-outline-primary me-2" (click)="onCategoryUpdate()">
+        <i class="bi bi-plus-lg"></i></button>
+      <button class="btn btn-success me-2" (click)="exportToExcel()">
+        <i class="bi bi-file-earmark-excel"></i>
+      </button>
+      <button class="btn btn-danger" (click)="exportToPDF()">
+        <i class="bi bi-file-earmark-pdf"></i>
+      </button>
+    </div>
+  </div>
+
+  <!-- Tabla de categorías -->
+  <table class="table table-striped mt-3">
+    <thead>
+      <tr>
+        <th>Denominación</th>
+        <th>Estado</th>
+        <th>Acciones</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr *ngIf="categories.length === 0">
+        <td colspan="3" class="text-center">No se encontraron categorías</td>
+      </tr>
+      <tr *ngFor="let category of categories">
+        <td>{{ category.denomination }}</td>
+        <td>
+          <i *ngIf="category.status.toString() === 'ACTIVE'" class="bi bi-check2-circle text-success" style="font-size: 1.5rem;"></i>
+          <i *ngIf="category.status.toString() !== 'ACTIVE'" class="bi bi-x-circle text-danger" style="font-size: 1.5rem;"></i>
+        </td>
+        <td>
+          <button class="btn btn-sm btn-primary me-2" (click)="onCategoryUpdate(category)">
+            <i class="bi bi-pencil"></i> Editar
+          </button>
+          <button class="btn btn-sm btn-danger" (click)="deleteCategory(category.id)">
+            <i class="bi bi-trash"></i> Eliminar
+          </button>
+        </td>
+      </tr>
+    </tbody>
+  </table>
+
+  <!-- Modal de Filtros -->
+  <div *ngIf="showModalFilter" class="modal fade show" tabindex="-1" role="dialog" style="display: block;">
+    <div class="modal-dialog modal-dialog-centered" role="document">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title">Filtrar Categorías</h5>
+          <button type="button" class="btn-close" (click)="closeModalFilter()"></button>
+        </div>
+        <div class="modal-body">
+          <form [formGroup]="filterForm">
+            <div class="form-group">
+              <label>Denominación</label>
+              <input type="text" class="form-control" formControlName="denomination">
+            </div>
+            <div class="form-group">
+              <label>Estado</label>
+              <select class="form-select" formControlName="status">
+                <option value="">Todos</option>
+                <option value="ACTIVE">Activo</option>
+                <option value="INACTIVE">Inactivo</option>
+              </select>
+            </div>
+          </form>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-outline-danger" (click)="clearFilters()">Limpiar</button>
+          <button type="button" class="btn btn-primary" (click)="applyFilters()">Aplicar Filtros</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Componente de Alta/Edición -->
+  <app-article-category-update
     *ngIf="showCategoryUpdate"
     [category]="selectedCategory"
     (closeModal)="onCategoryUpdateClose()"
   ></app-article-category-update>
+</app-main-container>
