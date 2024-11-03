@@ -1,11 +1,8 @@
-import { Component, inject, OnInit, TemplateRef, ViewChild } from '@angular/core';
+import { Component, inject, OnInit, Output, TemplateRef, ViewChild } from '@angular/core';
 import { AbstractControl, FormControl, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
-import { EmployeeType } from '../../../models/employee.model';
-import { DocumentType } from '../../../models/employee.model';
-import { StatusType } from '../../../models/employee.model';
+import { EmployeeType, Employee, DocumentType, StatusType } from '../../../models/employee.model';
 import { ActivatedRoute, Router } from '@angular/router';
 import { EmployeesService } from '../../../services/employees.service';
-import { Employee } from '../../../models/employee.model';
 import { debounceTime, map, switchMap } from 'rxjs';
 import { MapperService } from '../../../services/MapperCamelToSnake/mapper.service';
 import { ToastService } from 'ngx-dabd-grupo01';
@@ -33,6 +30,7 @@ export class EmployeeFormComponent implements OnInit {
     salary: new FormControl(0, [Validators.required, Validators.min(0)]),
     state: new FormControl(StatusType.ACTIVE),
   });
+ currentEmployeeId: number|undefined;
 
   constructor(private toastService: ToastService) {}
 
@@ -89,7 +87,7 @@ export class EmployeeFormComponent implements OnInit {
       } else {
         employeeData.id
         this.createEmployee(employeeData);
-        this.router.navigate(['/employee-list']); // Redirect to employee list       
+        //this.router.navigate(['/employees/list']); // Redirect to employee list       
       }
     }
   }
@@ -135,6 +133,9 @@ export class EmployeeFormComponent implements OnInit {
     this.employeeService.addEmployee(employee).subscribe({
       next: (response) => {
         this.toastService.sendSuccess("El Empleado ha sido creado con éxito.");
+        if( response.id){
+          this.currentEmployeeId = response.id;
+        }
         this.resetForm(); // Limpia el formulario
       },
       error: (error) => {
