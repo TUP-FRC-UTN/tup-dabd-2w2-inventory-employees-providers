@@ -135,12 +135,12 @@
       <div class="d-flex flex-wrap gap-2">
         @for (day of daysOfWeek; track day.id) {
           <button
-          type="button"
-          (click)="toggleDay(day.id)"
-          class="btn btn-sm flex-grow-1 {{selectedDays.includes(day.id) ? 
-            'btn-primary' : 'btn-outline-primary'}}"
-          >
-          {{day.label}}
+            type="button"
+            (click)="toggleDay(day.id)"
+            class="btn btn-sm flex-grow-1 {{selectedDays.includes(day.id) ? 
+              'btn-light-blue' : 'btn-outline-light-blue'}}"
+              >
+            {{day.label}}
           </button>
         }
       </div>

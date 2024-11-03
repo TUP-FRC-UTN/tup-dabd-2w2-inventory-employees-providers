@@ -15,3 +15,21 @@
   .card-body .row .col-12.col-md-4 {
     max-width: 33.3333%;
   }
+
+  .btn-light-blue {
+    background-color: #2890f9; 
+    border-color: #2890f9;
+    color: #fff;
+  }
+  .btn-light-blue:hover {
+    background-color: #1a78d6;
+    border-color: #1a78d6;
+  }
+  .btn-outline-light-blue {
+    border-color: #2890f9;
+    color: #2890f9;
+  }
+  .btn-outline-light-blue:hover {
+    background-color: #2890f9;
+    color: #fff;
+  }
