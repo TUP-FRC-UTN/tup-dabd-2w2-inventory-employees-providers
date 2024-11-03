@@ -114,6 +114,7 @@ getInventories(): void {
         article: this.mapperService.toCamelCase(inventory.article) // Convertir el artículo a camelCase
       }));
   });
+  console.log(this.inventories)
   })};
 
  // Método para convertir la unidad de medida a una representación amigable
@@ -129,22 +130,6 @@ getDisplayUnit(unit: MeasurementUnit): string {
           return unit; // Retorna el valor original si no coincide
   }
 }
-
-getDisplayCategory(articleCategory: ArticleCategory): string {
-  switch (articleCategory) {
-      case ArticleCategory.CONSUMABLES:
-          return 'Consumible';
-      case ArticleCategory.DURABLES:
-          return 'Durable';
-      case ArticleCategory.MATERIALS_CONSTRUCTION:
-          return 'Mat. Construcción';
-      case ArticleCategory.OTHERS:
-      return 'Otros';
-      default:
-          return "Otros"; // Retorna el valor original si no coincide
-  }
-}
-
 
   deleteInventory(id: number): void {
     Swal.fire({

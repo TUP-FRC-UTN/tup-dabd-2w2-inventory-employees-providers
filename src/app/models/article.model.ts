@@ -35,7 +35,7 @@ export enum ArticleCategory {
     name: string;
     description?: string;
     articleCondition: ArticleCondition;
-    articleCategory: ArticleCategory;
+    articleCategory: ArticleCateg;
     articleType: ArticleType;
     measurementUnit: MeasurementUnit;
   }

@@ -202,7 +202,7 @@
             <tr *ngFor="let inventory of inventories">
               <td class="text-center">{{ inventory.article.identifier || "-" }}</td>
               <td>{{ inventory.article.name }}</td>
-              <td>{{ getDisplayCategory(inventory.article.articleCategory) }}</td>
+              <td>{{inventory.article.articleCategory?.denomination}}</td>
               <td class="text-center">{{ inventory.stock }}</td>
               <td>{{ getDisplayUnit(inventory.article.measurementUnit) }}</td>
               <td class="text-center">{{ inventory.minStock || "-" }}</td>
