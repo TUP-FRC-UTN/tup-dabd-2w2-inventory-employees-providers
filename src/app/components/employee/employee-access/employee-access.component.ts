@@ -41,6 +41,7 @@ export class EmployeeAccessComponent implements OnInit{
   };
 
   selectedDays: string[] = [];
+  selectedShift: ShiftType = ShiftType.MORNING;
   showDaysError = false;
 
   accessForm = new FormGroup({
@@ -63,6 +64,11 @@ export class EmployeeAccessComponent implements OnInit{
       this.selectedDays.splice(index, 1);
     }
     this.showDaysError = false;
+  }
+
+  toggleShift(shift: ShiftType): void {
+    this.selectedShift = shift;
+    this.accessForm.get('shiftType')?.setValue(shift);
   }
 
   getSelectedDaysLabels(): string[] {

@@ -54,7 +54,18 @@
         <label class="form-label">
           Tipo de Turno <span class="text-danger">*</span>
         </label>
-        <select 
+        <div class="d-flex flex-wrap gap-2">
+          @for (shift of shiftTypes; track shift) {
+            <button 
+            type="button"
+            (click)="toggleShift(shift)"
+            class="btn btn-sm flex-grow-1 {{selectedShift === shift ?
+            'btn-primary' : 'btn-outline-primary'}}">
+              {{ shiftTypeLabels[shift] }}
+            </button>
+          }
+        </div>
+        <!-- <select 
           formControlName="shiftType"
           class="form-select"
           [class.is-invalid]="accessForm.get('shiftType')?.invalid && 
@@ -64,7 +75,7 @@
           @for (shift of shiftTypes; track shift) {
             <option [value]="shift">{{ shiftTypeLabels[shift] }}</option>
           }
-        </select>
+        </select> -->
         @if (accessForm.get('shiftType')?.invalid && accessForm.get('shiftType')?.touched) {
           <div class="invalid-feedback">
             Tipo de turno es requerido
