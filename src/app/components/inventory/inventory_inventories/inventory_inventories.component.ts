@@ -186,14 +186,19 @@ getDisplayCategory(articleCategory: ArticleCategory): string {
   }
 
   onRegisterTransactionClose(){
+    console.log('onRegisterTransactionClose');
+    debugger
     this.showRegisterTransactionForm = this.showRegisterTransactionForm;
     this.selectedInventoryId = "";
+    this.getInventories();
+
   }
   onTransactionsClose(){
     this.showTransactions = this.showTransactions;
     this.selectedInventory = null;
   }
   onInventoryUpdateClose() {
+    debugger
     this.showInventoryUpdate = false;
     this.selectedInventory = null;
     this.getInventories();

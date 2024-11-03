@@ -307,11 +307,12 @@
     </form>
     </div>
   <app-article *ngIf="showRegisterForm" (closeRegister)="onRegisterClose()" />
-  <app-transaction
-    *ngIf="showRegisterTransactionForm"
-    [inventoryId]="selectedInventoryId"
-    (closeRegisterTransaction)="onRegisterTransactionClose()"
-  />
+
+  <app-transaction   *ngIf="showRegisterTransactionForm"
+  [inventoryId]="selectedInventoryId"
+  (closeRegisterTransaction)="onRegisterTransactionClose()"
+  ></app-transaction>
+
   <app-inventory-transaction-table
     *ngIf="showTransactions"
     [inventory]="selectedInventory"
