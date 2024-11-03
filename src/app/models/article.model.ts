@@ -1,3 +1,5 @@
+import { StatusType } from "./inventory.model";
+
 export enum ArticleCategory {
     DURABLES = 'DURABLES',
     CONSUMABLES = 'CONSUMABLES',
@@ -55,3 +57,14 @@ export enum ArticleCategory {
     location: string;
     price: number;
   }
+
+  export interface ArticleCateg {
+    id: number;
+    denomination: string;
+    status: StatusType;
+  }
+
+  export interface ArticleCategPost {
+    denomination: string;
+  }
+

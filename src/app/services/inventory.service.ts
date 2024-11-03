@@ -1,7 +1,7 @@
 import { inject, Injectable } from '@angular/core';
 import { HttpClient, HttpParams } from '@angular/common/http';
 import { map, Observable } from 'rxjs';
-import { Article, ArticleInventoryPost, ArticlePost } from '../models/article.model';
+import { Article, ArticleCateg, ArticleCategory, ArticleCategPost, ArticleInventoryPost, ArticlePost } from '../models/article.model';
 import { Inventory, Transaction, TransactionPost } from '../models/inventory.model';
 
 @Injectable({
@@ -9,7 +9,9 @@ import { Inventory, Transaction, TransactionPost } from '../models/inventory.mod
 })
 export class InventoryService {
 
+
    private apiArticlesUrl = 'http://localhost:8080/articles'; // URL de la API para los ítems DEL BACK
+   private apiArticleCategoriesUrl = 'http://localhost:8080/articleCategories';
    private apiInventoriesUrl = 'http://localhost:8080/inventories'; // URL de la API para los inventarios
    private apiTransactionsUrl = 'http://localhost:8080/transactions'; // URL de la API para las transacciones
 
@@ -120,7 +122,25 @@ export class InventoryService {
 
     return this.http.get<any>(`${this.apiInventoriesUrl}/pageable`, { params })
   }
+
+  // CRUD para ArticleCategories
+  getArticleCategories(): Observable<ArticleCateg[]> {
+    return this.http.get<ArticleCateg[]>(this.apiArticleCategoriesUrl);
+  }
+  deleteCategories(categoryId: number): Observable<void> {
+    return this.http.delete<void>(`${this.apiArticleCategoriesUrl}/${categoryId}`);
+  }
+  updateCategory(id: number, updatedCategory: Partial<ArticleCateg>): Observable<ArticleCateg> {
+    return this.http.put<ArticleCateg>(`${this.apiArticleCategoriesUrl}/${id}`, updatedCategory);
+  }
+
+  createCategory(category: ArticleCategPost): Observable<ArticleCategPost> {
+    console.log('creacion',category);
+    return this.http.post<ArticleCategPost>(this.apiArticleCategoriesUrl, category);
+  }
 }
+
+
 export interface Page<T> {
   content: T[];
   totalElements: number;

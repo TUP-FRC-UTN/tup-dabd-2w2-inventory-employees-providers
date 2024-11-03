@@ -1,0 +1,90 @@
+<!-- employee-access.component.html -->
+<div class="card mt-4">
+    <div class="card-body">
+      <h3 class="mb-4">Horarios de Acceso</h3>
+      <form [formGroup]="accessForm" class="mt-3">
+        <div class="row mb-3">
+          <div class="col-md-6">
+            <label for="dateFrom" class="form-label">Fecha Desde<span class="text-danger">*</span></label>
+            <div class="position-relative">
+              <input type="date" formControlName="dateFrom" class="form-control" 
+                     [ngClass]="{'is-valid': accessForm.get('dateFrom')?.valid && accessForm.get('dateFrom')?.touched,
+                                'is-invalid': accessForm.get('dateFrom')?.invalid && accessForm.get('dateFrom')?.touched}" 
+                     id="dateFrom">
+              <div *ngIf="accessForm.get('dateFrom')?.invalid && accessForm.get('dateFrom')?.touched" 
+                   class="invalid-feedback">
+                Fecha desde es requerida
+              </div>
+            </div>
+          </div>
+          <div class="col-md-6">
+            <label for="dateTo" class="form-label">Fecha Hasta<span class="text-danger">*</span></label>
+            <div class="position-relative">
+              <input type="date" formControlName="dateTo" class="form-control" 
+                     [ngClass]="{'is-valid': accessForm.get('dateTo')?.valid && accessForm.get('dateTo')?.touched,
+                                'is-invalid': accessForm.get('dateTo')?.invalid && accessForm.get('dateTo')?.touched}" 
+                     id="dateTo">
+              <div *ngIf="accessForm.get('dateTo')?.invalid && accessForm.get('dateTo')?.touched" 
+                   class="invalid-feedback">
+                Fecha hasta es requerida
+              </div>
+            </div>
+          </div>
+        </div>
+  
+        <div class="row mb-3">
+          <div class="col-md-6">
+            <label for="hourFrom" class="form-label">Hora Desde<span class="text-danger">*</span></label>
+            <div class="position-relative">
+              <input type="time" formControlName="hourFrom" class="form-control" 
+                     [ngClass]="{'is-valid': accessForm.get('hourFrom')?.valid && accessForm.get('hourFrom')?.touched,
+                                'is-invalid': accessForm.get('hourFrom')?.invalid && accessForm.get('hourFrom')?.touched}" 
+                     id="hourFrom">
+              <div *ngIf="accessForm.get('hourFrom')?.invalid && accessForm.get('hourFrom')?.touched" 
+                   class="invalid-feedback">
+                Hora desde es requerida
+              </div>
+            </div>
+          </div>
+          <div class="col-md-6">
+            <label for="hourTo" class="form-label">Hora Hasta<span class="text-danger">*</span></label>
+            <div class="position-relative">
+              <input type="time" formControlName="hourTo" class="form-control" 
+                     [ngClass]="{'is-valid': accessForm.get('hourTo')?.valid && accessForm.get('hourTo')?.touched,
+                                'is-invalid': accessForm.get('hourTo')?.invalid && accessForm.get('hourTo')?.touched}" 
+                     id="hourTo">
+              <div *ngIf="accessForm.get('hourTo')?.invalid && accessForm.get('hourTo')?.touched" 
+                   class="invalid-feedback">
+                Hora hasta es requerida
+              </div>
+            </div>
+          </div>
+        </div>
+  
+        <!-- Días de la semana -->
+        <div class="row mb-3">
+          <div class="col-md-12">
+            <label class="form-label">Días de la Semana<span class="text-danger">*</span></label>
+            <div class="position-relative">
+              <div class="d-flex flex-wrap gap-2">
+                <button
+                  *ngFor="let day of daysOfWeek"
+                  type="button"
+                  class="btn"
+                  [class.btn-primary]="isDaySelected(day.id)"
+                  [class.btn-outline-primary]="!isDaySelected(day.id)"
+                  (click)="toggleDay(day.id)"
+                >
+                  {{ day.label }}
+                </button>
+              </div>
+              <div *ngIf="accessForm.get('daysOfWeek')?.invalid && accessForm.get('daysOfWeek')?.touched" 
+                   class="invalid-feedback d-block">
+                Seleccione al menos un día de la semana
+              </div>
+            </div>
+          </div>
+        </div>
+      </form>
+    </div>
+  </div>
