@@ -1,19 +1,39 @@
 import { Component, inject, OnInit, TemplateRef, ViewChild } from '@angular/core';
-import { FormBuilder, FormGroup, Validators } from '@angular/forms';
+import { FormBuilder, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
 import { ServicesService } from '../../../services/services.service';
 import { Service } from '../../../models/service.model';
 import Swal from 'sweetalert2';
 import { ActivatedRoute, Router } from '@angular/router';
 import { NgbModal } from '@ng-bootstrap/ng-bootstrap';
 import { ToastService } from 'ngx-dabd-grupo01';
+import { CommonModule } from '@angular/common';
 
 @Component({
   selector: 'app-service-form',
   standalone: true,
-  imports: [],
+  imports: [ReactiveFormsModule, CommonModule],
   templateUrl: './service-form.component.html',
   styleUrl: './service-form.component.css'
 })
-export class ServiceFormComponent {
+export class ServiceFormComponent implements OnInit {
+  serviceForm: FormGroup;
+  isEditMode = false;
+  currentServiceId: number | null = null;
 
+  private servicesService = inject(ServicesService);
+  private fb = inject(FormBuilder);
+  private route = inject(ActivatedRoute);
+  private router = inject(Router);
+  private modalService = inject(NgbModal);
+
+  constructor(private toastService: ToastService) {
+    this.serviceForm = this.fb.group({
+      name: ['', Validators.required],
+      cuit: ['', Validators.required],
+      type: ['', Validators.required],
+      contact: ['', Validators.required],
+      address: ['', Validators.required],
+      details: ['', Validators.required]
+    });
+  }
 }
