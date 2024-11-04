@@ -91,7 +91,7 @@
                                        ,
                             'is-invalid': employeeForm.get('employeeType')?.invalid && 
                                          employeeForm.get('employeeType')?.touched &&
-                                         employeeForm.get('employeeType')?.value !== 'ADMIN'
+                                         employeeForm.get('employeeType')?.value !== 'ADMINISTRATIVO'
                           }"
                           id="employeeType"
                         >
@@ -442,7 +442,7 @@
     <div class="d-flex justify-content-end gap-2">
         @if (!currentEmployeeId) {
             <button type="button" class="btn btn-secondary" (click)="onCancel()">Cancelar</button>
-            <button type="submit" class="btn btn-primary" [disabled]="employeeForm.invalid" (click)="return()">
+            <button type="submit" class="btn btn-primary" [disabled]="employeeForm.invalid" >
               {{ !isEdit ? 'Registrar' : 'Modificar' }} 
             </button>
           }
