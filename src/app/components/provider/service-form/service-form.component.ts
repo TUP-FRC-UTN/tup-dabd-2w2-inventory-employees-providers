@@ -63,4 +63,21 @@ export class ServiceFormComponent implements OnInit {
       }
     }
   }
+
+  @ViewChild('infoModal') infoModal!: TemplateRef<any>;
+
+  addService(serviceData: Service): void {
+    this.servicesService.addService(serviceData).subscribe({
+      next: () => {
+        this.toastService.sendSuccess("El servicio ha sido creado con éxito.");
+        this.resetForm();
+        this.router.navigate(['/services/list']);
+      },
+      error: () => {
+        this.toastService.sendError("Hubo un error en la creación del servicio.");
+      }
+    });
+  }
+
+  
 }
