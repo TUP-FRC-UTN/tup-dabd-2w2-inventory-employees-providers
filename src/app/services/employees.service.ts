@@ -1,7 +1,7 @@
 import { inject, Injectable } from '@angular/core';
 import { HttpClient, HttpParams } from '@angular/common/http';
 import { BehaviorSubject, map, Observable } from 'rxjs';
-import { Employee, EmployeeFilter, EmployeePayment, StatusType } from '../models/employee.model';
+import { Employee, EmployeeFilter, EmployeePayment, EmployeeSchedule, StatusType } from '../models/employee.model';
 import { MapperService } from './MapperCamelToSnake/mapper.service';
 
 
@@ -16,6 +16,16 @@ export class EmployeesService {
   private http = inject(HttpClient);
   private selectedEmployee = new BehaviorSubject<Employee | null>(null);
   private mapperService = inject(MapperService);
+
+  private apiUrlSHIFT = 'http://localhost:8007/shift'; // URL de la API para empleados
+
+  createSchedule(schedule: EmployeeSchedule): Observable<EmployeeSchedule> {
+    return this.http.post<EmployeeSchedule>(this.apiUrlSHIFT, schedule);
+  }
+
+  getEmployeeSchedules(employeeId: number): Observable<EmployeeSchedule[]> {
+    return this.http.get<EmployeeSchedule[]>(`${this.apiUrl}/employee/${employeeId}`);
+  }
   
 
   getEmployeesPageable(
@@ -89,6 +99,11 @@ export class EmployeesService {
       map(employees => this.mapperService.toCamelCase(employees))
     );
   }
+  // searchEmployees(filters: any): Observable<Employee[]> {
+  //   // Asegúrate de que el endpoint y el método de envío sean correctos
+  //   return this.http.post<Employee[]>(`${this.apiUrl}/search`, filters);
+  // }
+  
 
 }
 

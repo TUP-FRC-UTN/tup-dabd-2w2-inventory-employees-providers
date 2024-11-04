@@ -1,7 +1,8 @@
 <div class="card">
-  <div class="card-body">
-    <div class="m-4">
-      @if(!isEdit){
+    <div class="card-body">
+<div class="m-4">
+    
+  @if(!isEdit){
       <h2 class="mb-4">Registrar Empleado:</h2>
       } @else {
       <h2 class="mb-4">Modificar Empleado:</h2>
@@ -30,16 +31,14 @@
                 *ngIf="employeeForm.get('firstName')?.valid"
                 class="valid-feedback position-absolute top-10 end-0 mt-1 me-2"
               >
-                <i class="bi bi-check-circle-fill text-success"></i>
               </div>
               <div
                 *ngIf="
                   employeeForm.get('firstName')?.invalid &&
                   employeeForm.get('firstName')?.touched
                 "
-                class="invalid-feedback position-absolute top-10 end-10 mt-10 me-10"
               >
-                <i class="bi bi-x-circle-fill text-danger"></i> Nombre es
+               Nombre es
                 requerido
               </div>
             </div>
@@ -66,7 +65,6 @@
                 *ngIf="employeeForm.get('lastName')?.valid"
                 class="valid-feedback position-absolute top-10 end-0 mt-1 me-2"
               >
-                <i class="bi bi-check-circle-fill text-success"></i>
               </div>
               <div
                 *ngIf="
@@ -74,8 +72,7 @@
                   employeeForm.get('lastName')?.touched
                 "
                 class="invalid-feedback position-absolute top-10 end-0 mt-1 me-2"
-              >
-                <i class="bi bi-x-circle-fill text-danger"></i> Apellido es
+              > Apellido es
                 requerido
               </div>
             </div>
@@ -108,7 +105,6 @@
                 *ngIf="employeeForm.get('employeeType')?.valid"
                 class="valid-feedback position-absolute top-10 end-0 mt-1 me-2"
               >
-                <i class="bi bi-check-circle-fill text-success"></i>
               </div>
               <div
                 *ngIf="
@@ -116,8 +112,7 @@
                   employeeForm.get('employeeType')?.touched
                 "
                 class="invalid-feedback position-absolute top-10 end-0 mt-1 me-2"
-              >
-                <i class="bi bi-x-circle-fill text-danger"></i> Tipo es
+              >Tipo es
                 requerido
               </div>
             </div>
@@ -143,7 +138,6 @@
                 *ngIf="employeeForm.get('hiringDate')?.valid"
                 class="valid-feedback position-absolute top-10 end-0 mt-1 me-2"
               >
-                <i class="bi bi-check-circle-fill text-success"></i>
               </div>
               <div
                 *ngIf="
@@ -151,8 +145,7 @@
                   employeeForm.get('hiringDate')?.touched
                 "
                 class="invalid-feedback position-absolute top-10 end-0 mt-1 me-2"
-              >
-                <i class="bi bi-x-circle-fill text-danger"></i> Fecha es
+              > Fecha es
                 requerida
               </div>
             </div>
@@ -184,7 +177,6 @@
                 *ngIf="employeeForm.get('documentType')?.valid"
                 class="valid-feedback position-absolute top-10 end-0 mt-1 me-2"
               >
-                <i class="bi bi-check-circle-fill text-success"></i>
               </div>
               <div
                 *ngIf="
@@ -193,7 +185,7 @@
                 "
                 class="invalid-feedback position-absolute top-10 end-0 mt-1 me-2"
               >
-                <i class="bi bi-x-circle-fill text-danger"></i> Tipo de
+              Tipo de
                 documento es requerido
               </div>
             </div>
@@ -220,7 +212,6 @@
                 *ngIf="employeeForm.get('docNumber')?.valid"
                 class="valid-feedback position-absolute top-10 end-0 mt-1 me-2"
               >
-                <i class="bi bi-check-circle-fill text-success"></i>
               </div>
               <div
                 *ngIf="
@@ -228,8 +219,7 @@
                   employeeForm.get('docNumber')?.touched
                 "
                 class="invalid-feedback position-absolute top-10 end-0 mt-1 me-2"
-              >
-                <i class="bi bi-x-circle-fill text-danger"></i> Documento es
+              >Documento es
                 requerido
               </div>
             </div>
@@ -259,7 +249,6 @@
                 *ngIf="employeeForm.get('salary')?.valid"
                 class="valid-feedback position-absolute top-10 end-0 mt-1 me-2"
               >
-                <i class="bi bi-check-circle-fill text-success"></i>
               </div>
               <div
                 *ngIf="
@@ -267,54 +256,53 @@
                   employeeForm.get('salary')?.touched
                 "
                 class="invalid-feedback position-absolute top-10 end-0 mt-1 me-2"
-              >
-                <i class="bi bi-x-circle-fill text-danger"></i> Salario es
+              > Salario es
                 requerido
               </div>
             </div>
+        </div>
+        <div class="card mb-4 mt-4">
+            <div class="card-header d-flex justify-content-between align-items-center">
+              <h5 class="card-title mb-0">Contactos</h5>
+              <button type="button" class="btn btn-primary btn-sm" (click)="addContact()">
+                    <i class="bi bi-plus"></i> 
+              </button>
+            </div>
+            <div class="card-body">
+              <div formArrayName="contacts">
+                <div *ngFor="let contact of contacts.controls; let i=index" [formGroupName]="i" class="row mb-2">
+                  <div class="col-md-5">
+                    <select formControlName="contact_type" class="form-select">
+                      <option value="">Seleccione tipo</option>
+                      <option *ngFor="let type of contactTypes" [value]="type">{{type}}</option>
+                    </select>
+                  </div>
+                  <div class="col-md-5">
+                    <input type="text" 
+                           formControlName="contact_value" 
+                           class="form-control" 
+                           [placeholder]="contact.get('contact_type')?.value === 'EMAIL' ? 'Ingrese email' : 'Ingrese teléfono'">
+                  </div>
+                  <div class="col-md-2">
+                    <button type="button" class="btn btn-danger btn-sm" (click)="removeContact(i)">
+                        <i class="bi bi-x"></i>
+                    </button>
+                  </div>
+                </div>
+              </div>
+            </div>
           </div>
-          <!-- <div class="col-md-6">
-            <label for="email" class="form-label">Email<span class="text-danger">*</span></label>
-            <div class="position-relative">
-                <input type="email" formControlName="email" class="form-control"
-                       [ngClass]="{'is-valid': employeeForm.get('email')?.valid,
-                                   'is-invalid': employeeForm.get('email')?.invalid && employeeForm.get('email')?.touched}"
-                       id="email" placeholder="Ingrese el email">
-                <div *ngIf="employeeForm.get('email')?.valid" class="valid-feedback position-absolute top-0 end-0 mt-1 me-2">
-                    <i class="bi bi-check-circle-fill text-success"></i>
-                </div>
-                <div *ngIf="employeeForm.get('email')?.invalid && employeeForm.get('email')?.touched" class="invalid-feedback position-absolute top-10 end-0 mt-1 me-2">
-                    <i class="bi bi-x-circle-fill text-danger"></i> Email es requerido
-                </div>
-            </div>
-        </div> -->
-        </div>
-        <!-- <div class="row mb-4">
-        <div class="col-md-12">
-            <label for="phone" class="form-label">Teléfono<span class="text-danger">*</span></label>
-            <div class="position-relative">
-                <input type="tel" formControlName="phone" class="form-control"
-                       [ngClass]="{'is-valid': employeeForm.get('phone')?.valid,
-                                   'is-invalid': employeeForm.get('phone')?.invalid && employeeForm.get('phone')?.touched}"
-                       id="phone" placeholder="Ingrese el teléfono">
-                <div *ngIf="employeeForm.get('phone')?.valid" class="valid-feedback position-absolute top-0 end-0 mt-1 me-2">
-                    <i class="bi bi-check-circle-fill text-success"></i>
-                </div>
-                <div *ngIf="employeeForm.get('phone')?.invalid && employeeForm.get('phone')?.touched" class="invalid-feedback position-absolute top-10 end-0 mt-1 me-2">
-                  <i class="bi bi-x-circle-fill text-danger"></i> Teléfono es requerido
-                </div>
-            </div>
-        </div>
-    </div> -->
-        <button
-          type="submit"
-          class="btn btn-primary"
-          [disabled]="employeeForm.invalid"
-        >
-          {{ !isEdit ? "Registrar" : "Modificar" }}
-        </button>
-      </form>
     </div>
+    <div class="d-flex justify-content-end gap-2">
+        @if (!currentEmployeeId) {
+            <button type="button" class="btn btn-secondary" (click)="onCancel()">Cancelar</button>
+            <button type="submit" class="btn btn-primary" [disabled]="employeeForm.invalid">
+              {{ !isEdit ? 'Registrar' : 'Modificar' }}
+            </button>
+          }
+      </div>
+</form>
+</div>
 
     <ng-template #infoModal let-modal>
       <div class="modal-header fs-6 py-1">
@@ -395,9 +383,11 @@
       </div>
     </ng-template>
 
-    <app-employee-access></app-employee-access>
-    <app-employee-contact></app-employee-contact>
-    <!-- <app-access-schedule></app-access-schedule>
-<app-contact></app-contact> -->
-  </div>
-</div>
+  @if (currentEmployeeId) {
+    <div class="mt-4">
+      <app-employee-access 
+        [employeeId]="currentEmployeeId"
+        (schedulesSaved)="startNewEmployee()"
+      ></app-employee-access>
+    </div>
+  }
