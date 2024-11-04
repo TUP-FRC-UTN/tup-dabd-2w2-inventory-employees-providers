@@ -36,4 +36,15 @@ export class ServiceFormComponent implements OnInit {
       details: ['', Validators.required]
     });
   }
+
+  ngOnInit(): void {
+    this.route.paramMap.subscribe(params => {
+      const id = params.get('id');
+      if (id) {
+        this.isEditMode = true;
+        this.currentServiceId = +id;
+        this.loadServiceData(this.currentServiceId);
+      }
+    });
+  }
 }
