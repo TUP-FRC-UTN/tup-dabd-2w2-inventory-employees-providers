@@ -28,32 +28,32 @@
     <table class="table table-striped">
       <thead class="bg-light">
         <tr>
-          <th class="px-4 py-3"> 
+          <th > 
             Empleado 
           </th>
-          <th class="px-4 py-3"> 
+          <th > 
             Tipo
           </th>
-          <th class="px-4 py-3"> 
+          <th > 
             Documento 
           </th>
-          <th class="px-4 py-3">
+          <th >
             Fecha Contratación 
            </th>
-          <th class="px-4 py-3">
+          <th >
             Estado 
           </th>
-          <th class="px-4 py-3 text-center">Acciones</th>
+          <th class="text-center">Acciones</th>
         </tr>
       </thead>
 
       <tbody>
         <tr *ngFor="let employee of filteredEmployeeList; let i = index">
-          <td class="px-4 py-3">{{ employee.lastName }}, {{ employee.firstName }}</td>
-          <td class="px-4 py-3">{{ employee.employeeType }}</td>
-          <td class="px-4 py-3">{{ employee.docNumber }}</td>
-          <td class="px-4 py-3">{{ employee.hiringDate | date:'dd/MM/yyyy' }}</td>
-          <td class="px-4 py-3">
+          <td >{{ employee.lastName }}, {{ employee.firstName }}</td>
+          <td >{{ employee.employeeType }}</td>
+          <td >{{ employee.docNumber }}</td>
+          <td >{{ employee.hiringDate | date:'dd/MM/yyyy' }}</td>
+          <td >
             <p class="mb-0">
               <i
                 *ngIf="employee.state.toString() == 'IN_SERVICE'"
@@ -67,17 +67,32 @@
               ></i>
             </p>
           </td>
-          <td class="px-4 py-3">
+          <td >
             <div class="d-flex justify-content-center gap-2">
               <!-- Botón de Editar -->
-              <button 
+              <button
+                *ngIf="employee.state != 'DOWN'"
                 (click)="editEmployee(employee)"
                 class="btn btn-warning btn-sm"
                 title="Editar"
               >
               <i class="bi bi-pencil"></i> 
               </button>
+
+              <button class="btn btn-info btn-sm" (click)="showDetailModal(detailModal, employee.id)">
+                <i class="bi bi-eye"></i>
+              </button>
           
+              <!-- Botón de Editar (Deshabilitado) -->
+              <button
+                *ngIf="employee.state == 'DOWN'"
+                disabled
+                class="btn btn-warning btn-sm"
+                title="Editar"
+              >
+                <i class="bi bi-pencil"></i>
+              </button>
+
               <!-- Botón de Eliminar -->
               <button 
                 *ngIf="employee.state != 'DOWN'"
@@ -108,18 +123,39 @@
   </div>
 
   <!-- Paginación -->
-  <div class="d-flex justify-content-between align-items-center mt-3">
-    <select id="itemsPerPage" class="form-select form-select-sm" [(ngModel)]="itemsPerPage" (change)="onItemsPerPageChange()">
-      <option *ngFor="let option of sizeOptions" [value]="option">{{ option }} Elementos</option>
-    </select>
-    <ngb-pagination
-    [(page)]="currentPage"
-    [pageSize]="itemsPerPage"
-    [collectionSize]="totalItems"
-    (pageChange)="onPageChange($event)">
-  </ngb-pagination>
+  <div class="d-flex justify-content-between align-items-center p-3 border-top">
+    <!-- Left side - Items per page dropdown -->
+    <div class="d-flex align-items-center">
+      <span class="me-2">Elementos por página:</span>
+      <select (change)="onItemsPerPageChange()" class="form-select form-select-sm" style="width: auto;" [(ngModel)]="pageSize">
+        <option value="5">5</option>
+        <option value="10">10</option>
+        <option value="20">20</option>
+        <option value="50">50</option>
+      </select>
     </div>
+  
 
+  
+    <!-- Navigation buttons -->
+    <div class="ms-3">
+      <button class="btn btn-outline-secondary btn-sm me-1"
+              [disabled]="currentPage === 0"
+              (click)="goToPreviousPage()">
+        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-chevron-left" viewBox="0 0 16 16">
+          <path fill-rule="evenodd" d="M11.354 1.646a.5.5 0 0 1 0 .708L5.707 8l5.647 5.646a.5.5 0 0 1-.708.708l-6-6a.5.5 0 0 1 0-.708l6-6a.5.5 0 0 1 .708 0z"/>
+        </svg>
+      </button>
+      <button class="btn btn-outline-secondary btn-sm"
+              [disabled]="currentPage === totalPages -1"
+              (click)="goToNextPage()">
+        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-chevron-right" viewBox="0 0 16 16">
+          <path fill-rule="evenodd" d="M4.646 1.646a.5.5 0 0 1 .708 0l6 6a.5.5 0 0 1 0 .708l-6 6a.5.5 0 0 1-.708-.708L10.293 8 4.646 2.354a.5.5 0 0 1 0-.708z"/>
+        </svg>
+      </button>
+    </div>
+  </div>
+  
   <!-- Modal de Información -->
   <ng-template #infoModal let-modal>
     <div class="modal-body">
@@ -271,3 +307,88 @@
 
 
 </app-main-container>
+
+<ng-template #detailModal let-modal>
+  <div class="modal-header">
+    <h4 class="modal-title" id="modal-basic-title">Detalles del Empleado</h4>
+    <button type="button" class="btn-close" aria-label="Close" (click)="modal.dismiss()"></button>
+  </div>
+  <div class="modal-body">
+    <div class="container" *ngIf="selectedEmployee">
+      <div class="row mb-3">
+        <!-- Nombre Completo -->
+        <div class="col-md-6">
+          <div class="card">
+            <div class="card-body">
+              <h6 class="card-subtitle mb-1 text-muted">Nombre Completo</h6>
+              <p class="card-text">{{selectedEmployee.lastName}}, {{selectedEmployee.firstName}}</p>
+            </div>
+          </div>
+        </div>
+        <!-- Documento -->
+        <div class="col-md-6">
+          <div class="card">
+            <div class="card-body">
+              <h6 class="card-subtitle mb-1 text-muted">Documento</h6>
+              <p class="card-text">{{selectedEmployee.documentType}}: {{selectedEmployee.docNumber}}</p>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="row mb-3">
+        <!-- Tipo de Empleado -->
+        <div class="col-md-6">
+          <div class="card">
+            <div class="card-body">
+              <h6 class="card-subtitle mb-1 text-muted">Tipo de Empleado</h6>
+              <p class="card-text">{{selectedEmployee.employeeType}}</p>
+            </div>
+          </div>
+        </div>
+        <!-- Estado -->
+        <div class="col-md-6">
+          <div class="card">
+            <div class="card-body d-flex align-items-center">
+              <h6 class="card-subtitle mb-1 text-muted me-2">Estado</h6>
+              <i
+                *ngIf="selectedEmployee.state.toString() == 'IN_SERVICE'"
+                class="bi bi-check2-circle text-success"
+                style="font-size: 1.5rem;"
+              ></i>
+              <i
+                *ngIf="selectedEmployee.state.toString() != 'IN_SERVICE'"
+                class="bi bi-x-circle text-danger"
+                style="font-size: 1.5rem;"
+              ></i>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="row mb-3">
+        <!-- Salario -->
+        <div class="col-md-6">
+          <div class="card">
+            <div class="card-body">
+              <h6 class="card-subtitle mb-1 text-muted">Salario</h6>
+              <p class="card-text">${{selectedEmployee.salary}}</p>
+            </div>
+          </div>
+        </div>
+        <!-- Contacto -->
+        <div class="col-md-6">
+          <div class="card">
+            <div class="card-body">
+              <h6 class="card-subtitle mb-1 text-muted">Contacto</h6>
+              <p class="card-text">{{selectedEmployee.contactType}}: {{selectedEmployee.contactValue}}</p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div class="modal-footer">
+    <button type="button" class="btn btn-secondary" (click)="modal.close()">Cerrar</button>
+  </div>
+</ng-template>

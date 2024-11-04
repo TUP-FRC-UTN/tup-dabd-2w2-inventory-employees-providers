@@ -30,6 +30,16 @@ export class EmployeeFormComponent implements OnInit {
     salary: new FormControl(0, [Validators.required, Validators.min(0)]),
     state: new FormControl(StatusType.ACTIVE),
     contacts: new FormArray([]),
+    address: new FormGroup({
+      street_address: new FormControl('', [Validators.required]),
+      number: new FormControl(0, [Validators.required, Validators.min(0)]),
+      floor: new FormControl(0, [Validators.required, Validators.min(0)]),
+      apartment: new FormControl(''),
+      city: new FormControl('', [Validators.required]),
+      province: new FormControl('', [Validators.required]),
+      country: new FormControl('', [Validators.required]),
+      postal_code: new FormControl(0, [Validators.required, Validators.min(0)])
+    })
   });
 
   contactTypes = ['PHONE', 'EMAIL'];
@@ -126,7 +136,17 @@ export class EmployeeFormComponent implements OnInit {
       documentType: DocumentType.DNI,
       docNumber: '',
       state: StatusType.ACTIVE,
-      salary: 0
+      salary: 0,
+      address: {
+        street_address: '',
+        number: 0,
+        floor: 0,
+        apartment: '',
+        city: '',
+        province: '',
+        country: '',
+        postal_code: 0
+      }
     });
     this.contacts.clear();
     this.addContact();
@@ -165,7 +185,8 @@ export class EmployeeFormComponent implements OnInit {
         hiring_date: formValue.hiringDate,
         salary: formValue.salary,
         state: formValue.state,
-        contact: this.contacts.length > 0 ? this.contacts.at(0).value : null
+        contact: this.contacts.length > 0 ? this.contacts.at(0).value : null,
+        address: formValue.address
       };
   
       return employeeData;

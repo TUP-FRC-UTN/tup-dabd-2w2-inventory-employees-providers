@@ -3,8 +3,8 @@ import { CommonModule } from '@angular/common';
 import { ReactiveFormsModule, FormsModule, FormBuilder, FormControl, FormGroup } from '@angular/forms';
 import { NgbModal, NgbPaginationModule } from '@ng-bootstrap/ng-bootstrap';
 import { Router, RouterModule } from '@angular/router';
-import { ProvidersService } from '../../../services/providers.service';
-import { Supplier } from '../../../models/supplier.model';
+import { ServicesService } from '../../../services/services.service';
+import { Service } from '../../../models/service.model';
 import { ToastService, MainContainerComponent, ConfirmAlertComponent } from 'ngx-dabd-grupo01';
 import { debounceTime, distinctUntilChanged } from 'rxjs';
 import * as XLSX from 'xlsx';
@@ -15,7 +15,7 @@ import { Chart, ChartType, registerables } from 'chart.js';
 Chart.register(...registerables);
 
 @Component({
-  selector: 'app-provider-list',
+  selector: 'app-service-list',
   standalone: true,
   imports: [
     CommonModule,
@@ -26,18 +26,18 @@ Chart.register(...registerables);
     ConfirmAlertComponent,
     NgbPaginationModule
   ],
-  templateUrl: './provider-list.component.html',
-  styleUrls: ['./provider-list.component.css'],
+  templateUrl: './service-list.component.html',
+  styleUrls: ['./service-list.component.css'],
   schemas: [CUSTOM_ELEMENTS_SCHEMA]
 })
-export class ProviderListComponent implements OnInit {
+export class ServiceListComponent implements OnInit {
   @ViewChild('pieChart') pieChartRef!: ElementRef;
-  @ViewChild('providersTable') providersTable!: ElementRef;
+  @ViewChild('servicesTable') servicesTable!: ElementRef;
   @ViewChild('infoModal') infoModal!: TemplateRef<any>;
 
-  providerList: Supplier[] = [];
-  filteredProviders: Supplier[] = [];
-  private originalProviders: Supplier[] = [];
+  serviceList: Service[] = [];
+  filteredServices: Service[] = [];
+  //private originalService: Service[] = [];
   isLoading = false;
 
   searchFilterAll = new FormControl('');
@@ -46,17 +46,18 @@ export class ProviderListComponent implements OnInit {
   showModalFilter: boolean = false;
 
   currentPage: number = 1;
-  totalPages:number = 1;
+  totalPages: number = 1;
   totalItems: number = 0;
   pageSize: number = 10;
 
+  //  Variables de Metricas
   activeCount: number = 0;
   inactiveCount: number = 0;
   pieChart!: Chart;
   barChart: any;
-  serviceCountMap: { [key: string]: number } = {};
+  typeCountMap: { [key: string]: number } = {};
 
-  private providerService = inject(ProvidersService);
+  private serviceService = inject(ServicesService);
   private router = inject(Router);
   private modalService = inject(NgbModal);
   private toastService = inject(ToastService);
@@ -64,62 +65,62 @@ export class ProviderListComponent implements OnInit {
   constructor(private fb: FormBuilder) {
     this.filterForm = this.fb.group({
       name: [''],
-      cuil: [''],
-      service: [''],
+      cuit: [''],
+      type: [''],
       contact: [''],
       address: [''],
       enabled: ['']
     });
 
-    // Configure global search with debounce
     this.searchFilterAll.valueChanges
       .pipe(
         debounceTime(300),
         distinctUntilChanged()
       )
       .subscribe(searchTerm => {
-        this.getProviders(this.currentPage - 1, this.pageSize, searchTerm || '');
+        this.getServices(this.currentPage - 1, this.pageSize, searchTerm || '');
       });
   }
 
   ngOnInit(): void {
-    this.getProviders();
+    this.getServices();
   }
 
-  getProviders(page: number = 0, size: number = this.pageSize, searchTerm?: string): void {
+  getServices(page: number = 0, size: number = this.pageSize, searchTerm?: string): void {
     this.isLoading = true;
-    
+
     const filters = {
       ...this.getFilters(),
       page,
       size
     };
-  
+
     if (searchTerm) {
       filters.name = searchTerm;
-      filters.cuil = searchTerm;
-      filters.service = searchTerm;
+      filters.cuit = searchTerm;
+      filters.type = searchTerm;
       filters.contact = searchTerm;
       filters.address = searchTerm;
     }
-  
-    this.providerService.getProviders(filters).subscribe({
+
+    this.serviceService.getServices(filters).subscribe({
       next: (response) => {
-        this.providerList = response.content;
-        this.originalProviders = response.content;
-        this.filteredProviders = response.content;
+        this.serviceList = response.content;
+        this.filteredServices = response.content;
+        //this.originalService = response.content;
         this.totalItems = response.totalElements;
-        // Calculate total pages
+
+        //  Calcular total de paginas
         this.totalPages = Math.ceil(this.totalItems / this.pageSize);
         this.isLoading = false;
-  
+
         this.calculateMetrics();
         this.createPieChart();
         this.createBarChart();
       },
       error: (error) => {
-        console.error('Error fetching providers:', error);
-        this.toastService.sendError('Error al cargar proveedores.');
+        console.error('Error fetching services:', error);
+        this.toastService.sendError('Error al cargar servicios.');
         this.isLoading = false;
       }
     });
@@ -129,7 +130,6 @@ export class ProviderListComponent implements OnInit {
     const formValues = this.filterForm.value;
     const filters: any = {};
 
-    // Only add non-empty values to the filters
     Object.keys(formValues).forEach(key => {
       const value = formValues[key];
       if (value !== '' && value !== null && value !== undefined) {
@@ -140,39 +140,40 @@ export class ProviderListComponent implements OnInit {
     return filters;
   }
 
+
   applyFilters(): void {
-    this.currentPage = 1; // Reset to first page when applying filters
-    this.getProviders(0, this.pageSize); // Get first page with new filters
+    this.currentPage = 1;
+    this.getServices(0, this.pageSize);
     this.closeModalFilter();
   }
 
   clearFilters(): void {
     this.filterForm.reset();
     this.currentPage = 1;
-    this.getProviders(0, this.pageSize);
+    this.getServices(0, this.pageSize);
     this.showModalFilter = false;
   }
 
   onItemsPerPageChange(): void {
     this.currentPage = 1;
     this.totalPages = Math.ceil(this.totalItems / this.pageSize);
-    this.getProviders(0, this.pageSize);
+    this.getServices(0, this.pageSize);
   }
 
   onPageChange(page: number): void {
     this.currentPage = page;
-    this.getProviders(page - 1, this.pageSize);
+    this.getServices(page - 1, this.pageSize);
   }
 
-  // Metrics calculation methods
+  // Calculo de Metricas
   calculateMetrics(): void {
-    this.activeCount = this.providerList.filter(provider => provider.enabled === true).length;
-    this.inactiveCount = this.providerList.filter(provider => provider.enabled === false).length;
+    this.activeCount = this.serviceList.filter(service => service.enabled === true).length;
+    this.inactiveCount = this.serviceList.filter(service => service.enabled === false).length;
 
-    this.serviceCountMap = this.providerList.reduce((acc, provider) => {
-      const service = provider.service;
-      if (service) {
-        acc[service] = (acc[service] || 0) + 1;
+    this.typeCountMap = this.serviceList.reduce((acc, service) => {
+      const type = service.type;
+      if (type) {
+        acc[type] = (acc[type] || 0) + 1;
       }
       return acc;
     }, {} as { [key: string]: number });
@@ -209,15 +210,15 @@ export class ProviderListComponent implements OnInit {
     }
 
     const ctx = document.getElementById('barChart') as HTMLCanvasElement;
-    const serviceTypes = Object.keys(this.serviceCountMap);
-    const serviceCounts = Object.values(this.serviceCountMap);
+    const serviceTypes = Object.keys(this.typeCountMap);
+    const serviceCounts = Object.values(this.typeCountMap);
 
     this.barChart = new Chart(ctx, {
       type: 'bar',
       data: {
         labels: serviceTypes,
         datasets: [{
-          label: 'Cantidad de Proveedores',
+          label: 'Cantidad de Servicios',
           data: serviceCounts,
           backgroundColor: '#007bff'
         }]
@@ -244,17 +245,16 @@ export class ProviderListComponent implements OnInit {
     this.showModalFilter = false;
   }
 
-  // Export methods remain the same
   exportToExcel(): void {
     try {
-      let element = document.getElementById('providersTable');
+      let element = document.getElementById('servicesTable');
       if (!element) {
         element = this.createTableFromData();
       }
       const ws: XLSX.WorkSheet = XLSX.utils.table_to_sheet(element);
       const wb: XLSX.WorkBook = XLSX.utils.book_new();
-      XLSX.utils.book_append_sheet(wb, ws, 'Proveedores');
-      XLSX.writeFile(wb, 'proveedores.xlsx');
+      XLSX.utils.book_append_sheet(wb, ws, 'Servicios');
+      XLSX.writeFile(wb, 'servicios.xlsx');
     } catch (error) {
       console.error('Error exporting to Excel:', error);
     }
@@ -262,19 +262,19 @@ export class ProviderListComponent implements OnInit {
 
   exportToPDF(): void {
     const doc = new jsPDF();
-    const tableColumn = ['Nombre', 'CUIL', 'Tipo de servicio', 'Dirección', 'Numero de Telefono', 'Estado'];
+    const tableColumn = ['Nombre', 'CUIT', 'Tipo de Servicio', 'Contacto', 'Direccion', 'Estado'];
     const tableRows: any[][] = [];
 
-    this.providerList.forEach((provider) => {
-      const providerData = [
-        provider.name,
-        provider.cuil,
-        provider.service,
-        provider.address,
-        provider.contact,
-        provider.enabled ? 'Activo' : 'Inactivo'
+    this.serviceList.forEach((service) => {
+      const serviceData = [
+        service.name,
+        service.cuit,
+        service.type,
+        service.contact,
+        service.address,
+        service.enabled ? 'Activo' : 'Inactivo'
       ];
-      tableRows.push(providerData);
+      tableRows.push(serviceData);
     });
 
     autoTable(doc, {
@@ -282,7 +282,7 @@ export class ProviderListComponent implements OnInit {
       body: tableRows,
     });
 
-    doc.save('proveedores.pdf');
+    doc.save('servicios.pdf');
   }
 
   private createTableFromData(): HTMLTableElement {
@@ -291,20 +291,21 @@ export class ProviderListComponent implements OnInit {
     const tbody = table.createTBody();
 
     const headerRow = thead.insertRow();
-    ['Nombre', 'CUIL', 'Tipo de servicio', 'Contacto', 'Estado'].forEach(text => {
+    ['Nombre', 'CUIT', 'Tipo de servicio', 'Contacto', 'Direccion', 'Estado'].forEach(text => {
       const th = document.createElement('th');
       th.textContent = text;
       headerRow.appendChild(th);
     });
 
-    this.providerList.forEach((provider) => {
+    this.serviceList.forEach((service) => {
       const row = tbody.insertRow();
       [
-        provider.name,
-        provider.cuil,
-        provider.service,
-        provider.contact,
-        provider.enabled ? 'Activo' : 'Inactivo'
+        service.name,
+        service.cuit,
+        service.type,
+        service.contact,
+        service.address,
+        service.enabled ? 'Activo' : 'Inactivo'
       ].forEach((text) => {
         const cell = row.insertCell();
         cell.textContent = text;
@@ -314,33 +315,32 @@ export class ProviderListComponent implements OnInit {
     return table;
   }
 
-  // Navigation methods
-  editProvider(id: number): void {
-    this.router.navigate(['/providers/form', id]);
+  editService(id: number): void {
+    this.router.navigate(['/services/form', id]);
   }
 
-  deleteProvider(id: number): void {
+  deleteService(id: number): void {
     const modalRef = this.modalService.open(ConfirmAlertComponent);
     modalRef.componentInstance.alertTitle = 'Confirmación';
-    modalRef.componentInstance.alertMessage = '¿Estás seguro de eliminar este proveedor?';
+    modalRef.componentInstance.alertMessage = '¿Estás seguro de eliminar este servicio?';
     modalRef.componentInstance.alertVariant = 'delete';
 
     modalRef.result.then((result) => {
       if (result) {
-        this.providerService.deleteProvider(id).subscribe({
+        this.serviceService.deleteService(id).subscribe({
           next: () => {
-            this.toastService.sendSuccess("Proveedor eliminado correctamente");
-            this.getProviders();
+            this.toastService.sendSuccess("Servicio eliminado correctamente");
+            this.getServices();
           },
           error: () => {
-            this.toastService.sendError("Error al eliminar el proveedor");
+            this.toastService.sendError("Error al eliminar el servicio");
           }
         });
       }
     });
   }
 
-  trackByFn(index: number, item: Supplier): number {
+  trackByFn(index: number, item: Service): number {
     return item.id;
   }
 
@@ -351,14 +351,14 @@ export class ProviderListComponent implements OnInit {
   goToPreviousPage() {
     if (this.currentPage > 1) {
       this.currentPage--;
-      this.getProviders(this.currentPage - 1, this.pageSize);
+      this.getServices(this.currentPage - 1, this.pageSize);
     }
   }
   
   goToNextPage() {
     if (this.currentPage < this.totalPages) {
       this.currentPage++;
-      this.getProviders(this.currentPage - 1, this.pageSize);
+      this.getServices(this.currentPage - 1, this.pageSize);
     }
   }
 }
