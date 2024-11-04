@@ -139,4 +139,25 @@ export class ServiceListComponent implements OnInit {
   editService(id: number): void {
     this.router.navigate(['/services/form', id]);
   }
+
+  deleteService(id: number): void {
+    const modalRef = this.modalService.open(ConfirmAlertComponent);
+    modalRef.componentInstance.alertTitle = 'Confirmación';
+    modalRef.componentInstance.alertMessage = '¿Estás seguro de eliminar este servicio?';
+    modalRef.componentInstance.alertVariant = 'delete';
+
+    modalRef.result.then((result) => {
+      if (result) {
+        this.serviceService.deleteService(id).subscribe({
+          next: () => {
+            this.toastService.sendSuccess("Servicio eliminado correctamente");
+            this.getServices();
+          },
+          error: () => {
+            this.toastService.sendError("Error al eliminar el servicio");
+          }
+        });
+      }
+    });
+  }
 }
