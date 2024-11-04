@@ -11,10 +11,56 @@ import { debounceTime, distinctUntilChanged } from 'rxjs';
 @Component({
   selector: 'app-service-list',
   standalone: true,
-  imports: [],
+  imports: [
+    CommonModule,
+    ReactiveFormsModule,
+    FormsModule,
+    RouterModule,
+    MainContainerComponent,
+    ConfirmAlertComponent,
+    NgbPaginationModule
+  ],
   templateUrl: './service-list.component.html',
-  styleUrl: './service-list.component.css'
+  styleUrls: ['./service-list.component.css'],
+  schemas: [CUSTOM_ELEMENTS_SCHEMA]
 })
-export class ServiceListComponent {
+export class ServiceListComponent implements OnInit {
 
+  @ViewChild('servicesTable') servicesTable!: ElementRef;
+  @ViewChild('infoModal') infoModal!: TemplateRef<any>;
+
+  serviceList: Service[] = [];
+  filteredServices: Service[] = [];
+  isLoading = false;
+
+  searchFilterAll = new FormControl('');
+  filterForm: FormGroup;
+
+  currentPage: number = 1;
+  totalPages: number = 1;
+  totalItems: number = 0;
+  pageSize: number = 10;
+
+  private serviceService = inject(ServicesService);
+  private router = inject(Router);
+  private modalService = inject(NgbModal);
+  private toastService = inject(ToastService);
+
+  constructor(private fb: FormBuilder) {
+    this.filterForm = this.fb.group({
+      name: [''],
+      provider: [''],
+      contact: [''],
+      enabled: ['']
+    });
+
+    this.searchFilterAll.valueChanges
+      .pipe(
+        debounceTime(300),
+        distinctUntilChanged()
+      )
+      .subscribe(searchTerm => {
+        this.getServices(this.currentPage - 1, this.pageSize, searchTerm || '');
+      });
+  }
 }
