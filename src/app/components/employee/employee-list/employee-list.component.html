@@ -99,13 +99,12 @@
   <div class="d-flex justify-content-between align-items-center p-3 border-top">
     <!-- Left side - Items per page dropdown -->
     <div class="d-flex align-items-center">
-      <span class="me-2">Elementos por página:</span>
       <select (change)="onItemsPerPageChange()" class="form-select form-select-sm" style="width: auto;"
         [(ngModel)]="pageSize">
-        <option value="5">5</option>
-        <option value="10">10</option>
-        <option value="20">20</option>
-        <option value="50">50</option>
+        <option value="5">5 Elementos</option>
+        <option value="10">10 Elementos</option>
+        <option value="20">20 Elementos</option>
+        <option value="50">50 Elementos</option>
       </select>
     </div>
 
