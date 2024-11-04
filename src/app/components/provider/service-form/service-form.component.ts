@@ -47,4 +47,20 @@ export class ServiceFormComponent implements OnInit {
       }
     });
   }
+
+  onSubmit(): void {
+    if (this.serviceForm.valid) {
+      const formData = { ...this.serviceForm.value };
+      if (!this.isEditMode) {
+        delete formData.id;
+      }
+
+      if (this.isEditMode && this.currentServiceId !== null) {
+        formData.id = this.currentServiceId;
+        this.updateService(formData);
+      } else {
+        this.addService(formData);
+      }
+    }
+  }
 }
