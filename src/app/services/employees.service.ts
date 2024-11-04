@@ -3,6 +3,7 @@ import { HttpClient, HttpParams } from '@angular/common/http';
 import { BehaviorSubject, map, Observable } from 'rxjs';
 import { Employee, EmployeeFilter, EmployeePayment, EmployeeSchedule, StatusType } from '../models/employee.model';
 import { MapperService } from './MapperCamelToSnake/mapper.service';
+import { PaginatedResponse } from '../models/api-response';
 
 
 @Injectable({
@@ -105,6 +106,28 @@ export class EmployeesService {
   // }
   
 
+  getAllEmployeesPaged(filters: {
+    page?: number;
+    size?: number;
+    firstName?: string;
+    lastName?: string;
+    type?: string;
+    docType?: string;
+    docNumber?: string;
+    state?: string;
+    date?: string;
+    salary?: string;
+  }): Observable<PaginatedResponse<Employee>> {
+    let params = new HttpParams();
+    
+    Object.entries(filters).forEach(([key, value]) => {
+      if (value !== undefined && value !== '') {
+        params = params.append(key, value.toString());
+      }
+    });
+
+    return this.http.get<PaginatedResponse<Employee>>(`${this.apiUrl}/paged`, { params });
+  }  
 }
 
 interface PageResponse<T> {
