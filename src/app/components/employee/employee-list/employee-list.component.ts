@@ -56,7 +56,10 @@ export class EmployeeListComponent implements OnInit {
   pageSize: number = 10;
   sizeOptions: number[] = [5, 10, 20, 50, 100];
 
+  selectedEmployee?: Employee;
+
   // Services
+
   private employeeService = inject(EmployeesService);
   private router = inject(Router);
   private modalService = inject(NgbModal);
@@ -284,6 +287,24 @@ export class EmployeeListComponent implements OnInit {
     });
   }
 
+
+  showDetailModal(content: any, id: number) {
+    this.employeeService.getEmployeeById(id).subscribe({
+      next: (employee) => {
+        this.selectedEmployee = employee;
+        this.modalService.open(content, {
+          ariaLabelledBy: 'modal-basic-title',
+          size: 'lg'
+        });
+      },
+      error: (error) => {
+        console.error('Error al cargar los detalles del empleado:', error);
+        this.toastService.sendError('Error al cargar los detalles del empleado.');
+      }
+    });
+  }
+
+
   goToPreviousPage() {
     if (this.currentPage > 0) {
       this.currentPage--;
@@ -298,3 +319,4 @@ export class EmployeeListComponent implements OnInit {
     }
   }
 }
+
