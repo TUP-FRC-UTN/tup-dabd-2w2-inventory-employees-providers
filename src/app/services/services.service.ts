@@ -13,11 +13,14 @@ export class ServicesService {
     constructor(private http: HttpClient) {}
 
     getServices(filters?: {
-        name?: string,
-        type?: string,
-        enabled?: boolean,
-        page?: number,
-        size?: number
+        page?: number,      // Nro de pagina
+        size?: number       // Items en la pagina
+        name?: string,      // Nombre del servicio o empresa
+        cuit?: string,      // CUIT del servicio (no es CUIL!)
+        type?: string,      // Tipo de servicio o empresa
+        contact?: string,   // Telefono
+        address?: string,   // Direccion, calle, altura, etc.
+        enabled?: boolean,  // Borrado logico
       }): Observable<PaginatedResponse<Service>> {
         let params = new HttpParams();
       
