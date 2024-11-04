@@ -23,7 +23,7 @@ export class EmployeeFormComponent implements OnInit {
     id:new FormControl(0),
     firstName: new FormControl('', [Validators.required, Validators.minLength(3), Validators.maxLength(100)]),
     lastName: new FormControl('', [Validators.required, Validators.minLength(3), Validators.maxLength(100)]),
-    employeeType: new FormControl(EmployeeType.ADMIN, Validators.required),
+    employeeType: new FormControl(EmployeeType.ADMINTRATIVO, Validators.required),
     hiringDate: new FormControl(new Date().toISOString().split('T')[0], [Validators.required]), // Default to today
     documentType: new FormControl(DocumentType.DNI, Validators.required),
     docNumber: new FormControl('', [Validators.required, Validators.pattern(/^[0-9.-]*$/)]),
@@ -92,8 +92,9 @@ export class EmployeeFormComponent implements OnInit {
 
   getById(id: number) {
     this.currentId=id;
-    this.employeeService.getEmployee(id).subscribe((data) => {
+    this.employeeService.getEmployeeById(id).subscribe((data) => {
       data = this.mapperService.toCamelCase(data);
+      console.log(data);
       this.employeeForm.patchValue({
         id:data.id,
         firstName: data.firstName,
@@ -104,6 +105,8 @@ export class EmployeeFormComponent implements OnInit {
         docNumber: data.docNumber,
         state: StatusType.ACTIVE,
         salary: data.salary,
+        //TODO: ver que traiga la informacion del contacto y del address
+        //address: data.address
       });
     });
     this.isEdit=true;
@@ -131,7 +134,7 @@ export class EmployeeFormComponent implements OnInit {
       id: 0,
       firstName: '',
       lastName: '',
-      employeeType: EmployeeType.ADMIN,
+      employeeType: EmployeeType.MANTENIMIENTO,
       hiringDate: new Date().toISOString().split('T')[0],
       documentType: DocumentType.DNI,
       docNumber: '',
@@ -197,6 +200,8 @@ export class EmployeeFormComponent implements OnInit {
   }
 
   createEmployee(employee: Employee) {
+    console.log(employee);
+    console.log("Este es el metodo de createEmployee");
     this.employeeService.addEmployee(employee).subscribe({
       next: (response) => {
         this.toastService.sendSuccess("El Empleado ha sido creado con éxito.");

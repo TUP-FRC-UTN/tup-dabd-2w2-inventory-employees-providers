@@ -78,7 +78,7 @@
                 <div class="col-md-6 mb-3 mb-md-0">
                   <div class="row align-items-center">
                     <label for="employeeType" class="col-4 mb-0">
-                      Tipo <span class="text-danger">*</span>
+                      Rol <span class="text-danger">*</span>
                     </label>
                     <div class="col-8">
                       <div class="position-relative">
@@ -91,11 +91,11 @@
                                        ,
                             'is-invalid': employeeForm.get('employeeType')?.invalid &&
                                          employeeForm.get('employeeType')?.touched &&
-                                         employeeForm.get('employeeType')?.value !== 'ADMIN'
+                                         employeeForm.get('employeeType')?.value !== 'ADMINISTRATIVO'
                           }"
                           id="employeeType"
                         >
-                          <option value="" disabled>Seleccione tipo</option>
+                          <option value="" disabled>Seleccione Rol</option>
                           <option *ngFor="let type of employeeTypes" [value]="type">
                             {{ type }}
                           </option>
@@ -105,7 +105,7 @@
                         </div>
                         <div *ngIf="employeeForm.get('employeeType')?.invalid && employeeForm.get('employeeType')?.touched"
                              class="invalid-feedback">
-                          Tipo es requerido
+                          Rol es requerido
                         </div>
                       </div>
                     </div>
@@ -447,8 +447,8 @@
     <div class="d-flex justify-content-end gap-2">
         @if (!currentEmployeeId) {
             <button type="button" class="btn btn-secondary" (click)="onCancel()">Cancelar</button>
-            <button type="submit" class="btn btn-primary" [disabled]="employeeForm.invalid">
-              {{ !isEdit ? 'Registrar' : 'Modificar' }}
+            <button type="submit" class="btn btn-primary" [disabled]="employeeForm.invalid" >
+              {{ !isEdit ? 'Registrar' : 'Modificar' }} 
             </button>
           }
       </div>

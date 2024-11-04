@@ -30,7 +30,7 @@
             Empleado
           </th>
           <th>
-            Tipo
+            Rol
           </th>
           <th>
             Documento
@@ -61,31 +61,33 @@
           </td>
           <td>
             <div class="d-flex justify-content-center gap-2">
-              <!-- Botón de Editar -->
-              <button *ngIf="employee.state != 'DOWN'" (click)="editEmployee(employee)" class="btn btn-warning btn-sm"
-                title="Editar">
-                <i class="bi bi-pencil"></i>
-              </button>
-
-              <button class="btn btn-info btn-sm" (click)="showDetailModal(detailModal, employee.id)">
-                <i class="bi bi-eye"></i>
-              </button>
-
-              <!-- Botón de Editar (Deshabilitado) -->
-              <button *ngIf="employee.state == 'DOWN'" disabled class="btn btn-warning btn-sm" title="Editar">
-                <i class="bi bi-pencil"></i>
-              </button>
-
-              <!-- Botón de Eliminar -->
-              <button *ngIf="employee.state != 'DOWN'" (click)="deleteEmployee(employee.id)"
-                class="btn btn-danger btn-sm" title="Eliminar">
-                <i class="bi bi-trash-fill"></i>
-              </button>
-
-              <!-- Botón de Eliminar (Deshabilitado) -->
-              <button *ngIf="employee.state == 'DOWN'" disabled class="btn btn-danger btn-sm" title="Eliminar">
-                <i class="bi bi-trash-fill"></i>
-              </button>
+              <div class="btn-group" role="group">
+                <!-- Botón principal que despliega el menú -->
+                <button type="button" class="btn btn-sm btn-secondary dropdown-toggle" data-bs-toggle="dropdown"
+                  aria-expanded="false">
+                  <i class="bi bi-three-dots-vertical"></i>
+                </button>
+                <ul class="dropdown-menu">
+                  <li>
+                    <a class="dropdown-item" *ngIf="employee.state != 'DOWN'" (click)="editEmployee(employee)"
+                      title="Editar">
+                      Editar
+                    </a>
+                  </li>
+                  <li>
+                    <a class="dropdown-item" (click)="showDetailModal(detailModal, employee.id)" title="Ver"
+                      aria-disabled="true">
+                      Ver detalles
+                    </a>
+                  </li>
+                  <li>
+                    <a class="dropdown-item text-danger" *ngIf="employee.state != 'DOWN'"
+                      (click)="deleteEmployee(employee.id!)" title="Eliminar">
+                      Eliminar
+                    </a>
+                  </li>
+                </ul>
+              </div>
             </div>
           </td>
         </tr>
@@ -106,8 +108,6 @@
         <option value="50">50</option>
       </select>
     </div>
-
-
 
     <!-- Navigation buttons -->
     <div class="ms-3">
@@ -239,7 +239,7 @@
         <div class="col-md-6">
           <div class="card">
             <div class="card-body">
-              <h6 class="card-subtitle mb-1 text-muted">Tipo de Empleado</h6>
+              <h6 class="card-subtitle mb-1 text-muted">Rol del Empleado</h6>
               <p class="card-text">{{selectedEmployee.employeeType}}</p>
             </div>
           </div>
@@ -273,7 +273,12 @@
           <div class="card">
             <div class="card-body">
               <h6 class="card-subtitle mb-1 text-muted">Contacto</h6>
-              <p class="card-text">{{selectedEmployee.contactType}}: {{selectedEmployee.contactValue}}</p>
+              @if (selectedEmployee.contact != null) {
+              <p class="card-text">{{selectedEmployee.contact.contactType}}: {{selectedEmployee.contact.contactValue}}
+              </p>
+              } @else {
+              <p class="card-text">Sin Contacto</p>
+              }
             </div>
           </div>
         </div>
