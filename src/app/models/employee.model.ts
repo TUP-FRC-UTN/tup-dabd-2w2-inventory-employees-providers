@@ -4,8 +4,10 @@ export enum StatusType {
 }
 
 export enum EmployeeType {
-  ADMIN = 'ADMIN', // Administrador
-  SECURITY = 'SECURITY'
+  ADMINTRATIVO = 'ADMINISTRATIVO', // Administrador
+  GUARDIA = 'GUARDIA',
+  CONTADOR = 'CONTADOR',
+  MANTENIMIENTO = 'MANTENIMIENTO'
 }
 
 export enum DocumentType {
