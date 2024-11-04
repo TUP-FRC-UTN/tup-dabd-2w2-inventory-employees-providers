@@ -1,7 +1,7 @@
 <div class="card">
   <div class="card-body">
     <div class="form-container">
-          <form [formGroup]="employeeForm" (ngSubmit)="saveEmployee()" >           
+          <form [formGroup]="employeeForm" (ngSubmit)="saveEmployee()" >
               @if(!isEdit){
                 <h2 class="h1 mb-4">Registrar Empleado</h2>
                 } @else {
@@ -28,7 +28,7 @@
                           id="firstName"
                           placeholder="Ingrese el nombre"
                         />
-                        <div *ngIf="employeeForm.get('firstName')?.valid" 
+                        <div *ngIf="employeeForm.get('firstName')?.valid"
                              class="valid-feedback position-absolute top-0 end-0">
                         </div>
                         <div *ngIf="employeeForm.get('firstName')?.invalid && employeeForm.get('firstName')?.touched"
@@ -39,7 +39,7 @@
                     </div>
                   </div>
                 </div>
-                
+
                 <!-- Apellido -->
                 <div class="col-md-6">
                   <div class="row align-items-center">
@@ -59,7 +59,7 @@
                           id="lastName"
                           placeholder="Ingrese el apellido"
                         />
-                        <div *ngIf="employeeForm.get('lastName')?.valid" 
+                        <div *ngIf="employeeForm.get('lastName')?.valid"
                              class="valid-feedback position-absolute top-0 end-0">
                         </div>
                         <div *ngIf="employeeForm.get('lastName')?.invalid && employeeForm.get('lastName')?.touched"
@@ -71,7 +71,7 @@
                   </div>
                 </div>
               </div>
-          
+
               <!-- Tipo y Fecha de Contratación -->
               <div class="row mb-3">
                 <!-- Tipo -->
@@ -86,10 +86,10 @@
                           formControlName="employeeType"
                           class="form-select"
                           [ngClass]="{
-                            'is-valid': employeeForm.get('employeeType')?.valid && 
-                                       employeeForm.get('employeeType')?.touched 
+                            'is-valid': employeeForm.get('employeeType')?.valid &&
+                                       employeeForm.get('employeeType')?.touched
                                        ,
-                            'is-invalid': employeeForm.get('employeeType')?.invalid && 
+                            'is-invalid': employeeForm.get('employeeType')?.invalid &&
                                          employeeForm.get('employeeType')?.touched &&
                                          employeeForm.get('employeeType')?.value !== 'ADMINISTRATIVO'
                           }"
@@ -100,7 +100,7 @@
                             {{ type }}
                           </option>
                         </select>
-                        <div *ngIf="employeeForm.get('employeeType')?.valid" 
+                        <div *ngIf="employeeForm.get('employeeType')?.valid"
                              class="valid-feedback position-absolute top-0 end-0">
                         </div>
                         <div *ngIf="employeeForm.get('employeeType')?.invalid && employeeForm.get('employeeType')?.touched"
@@ -111,7 +111,7 @@
                     </div>
                   </div>
                 </div>
-          
+
                 <!-- Fecha de Contratación -->
                 <div class="col-md-6">
                   <div class="row align-items-center">
@@ -125,15 +125,15 @@
                           formControlName="hiringDate"
                           class="form-control"
                           [ngClass]="{
-                            'is-valid': employeeForm.get('hiringDate')?.valid && 
-                                       employeeForm.get('hiringDate')?.touched && 
+                            'is-valid': employeeForm.get('hiringDate')?.valid &&
+                                       employeeForm.get('hiringDate')?.touched &&
                                        employeeForm.get('hiringDate')?.value,
-                            'is-invalid': employeeForm.get('hiringDate')?.invalid && 
+                            'is-invalid': employeeForm.get('hiringDate')?.invalid &&
                                          employeeForm.get('hiringDate')?.touched
                           }"
                           id="hiringDate"
                         />
-                        <div *ngIf="employeeForm.get('hiringDate')?.valid" 
+                        <div *ngIf="employeeForm.get('hiringDate')?.valid"
                              class="valid-feedback position-absolute top-0 end-0">
                         </div>
                         <div *ngIf="employeeForm.get('hiringDate')?.invalid && employeeForm.get('hiringDate')?.touched"
@@ -145,7 +145,7 @@
                   </div>
                 </div>
               </div>
-          
+
               <!-- Documento -->
               <div class="row mb-3">
                 <!-- Tipo de Documento -->
@@ -160,9 +160,9 @@
                           formControlName="documentType"
                           class="form-select"
                           [ngClass]="{
-                            'is-valid': employeeForm.get('documentType')?.valid && 
+                            'is-valid': employeeForm.get('documentType')?.valid &&
                                        employeeForm.get('documentType')?.touched ,
-                            'is-invalid': employeeForm.get('documentType')?.invalid && 
+                            'is-invalid': employeeForm.get('documentType')?.invalid &&
                                          employeeForm.get('documentType')?.touched
                           }"
                           id="documentType"
@@ -172,7 +172,7 @@
                             {{ type }}
                           </option>
                         </select>
-                        <div *ngIf="employeeForm.get('documentType')?.valid" 
+                        <div *ngIf="employeeForm.get('documentType')?.valid"
                              class="valid-feedback position-absolute top-0 end-0">
                         </div>
                         <div *ngIf="employeeForm.get('documentType')?.invalid && employeeForm.get('documentType')?.touched"
@@ -183,7 +183,7 @@
                     </div>
                   </div>
                 </div>
-          
+
                 <!-- Número de Documento -->
                 <div class="col-md-6">
                   <div class="row align-items-center">
@@ -202,8 +202,9 @@
                           }"
                           id="docNumber"
                           placeholder="Ingrese el número de documento"
+                          style="text-align: right;"
                         />
-                        <div *ngIf="employeeForm.get('docNumber')?.valid" 
+                        <div *ngIf="employeeForm.get('docNumber')?.valid"
                              class="valid-feedback position-absolute top-0 end-0">
                         </div>
                         <div *ngIf="employeeForm.get('docNumber')?.invalid && employeeForm.get('docNumber')?.touched"
@@ -215,7 +216,7 @@
                   </div>
                 </div>
               </div>
-          
+
               <!-- Salario -->
               <div class="row mb-4">
                 <div class="col-md-6">
@@ -232,23 +233,24 @@
                             formControlName="salary"
                             class="form-control"
                             [ngClass]="{
-                              'is-valid': employeeForm.get('salary')?.valid && 
-                                         employeeForm.get('salary')?.touched && 
+                              'is-valid': employeeForm.get('salary')?.valid &&
+                                         employeeForm.get('salary')?.touched &&
                                          employeeForm.get('salary')?.value !== 0,
-                              'is-invalid': employeeForm.get('salary')?.invalid && 
-                                           employeeForm.get('salary')?.touched && 
+                              'is-invalid': employeeForm.get('salary')?.invalid &&
+                                           employeeForm.get('salary')?.touched &&
                                            employeeForm.get('salary')?.value === 0
                             }"
                             id="salary"
                             placeholder="Ingrese el salario"
+                            style="text-align: right;"
                           />
                         </div>
-                        <div *ngIf="employeeForm.get('salary')?.valid" 
+                        <div *ngIf="employeeForm.get('salary')?.valid"
                              class="valid-feedback position-absolute top-0 end-0">
                         </div>
                         <div *ngIf="employeeForm.get('salary')?.invalid &&
                                      employeeForm.get('salary')?.touched ||
-                                     employeeForm.get('salary')?.value === 0" 
+                                     employeeForm.get('salary')?.value === 0"
 
                              class="invalid-feedback">
                           Salario es requerido
@@ -258,7 +260,7 @@
                   </div>
                 </div>
               </div>
-          
+
               <!-- Contactos -->
               <div class="card mb-4">
                 <div class="card-header d-flex justify-content-between align-items-center">
@@ -277,12 +279,13 @@
                         </select>
                       </div>
                       <div class="col-md-5">
-                        <input 
+                        <input
                           type="text"
                           formControlName="contact_value"
                           class="form-control"
                           [placeholder]="contact.get('contact_type')?.value === 'EMAIL' ? 'Ingrese email' : 'Ingrese teléfono'"
-                        />
+                          style="text-align: right;"
+                          />
                       </div>
                       <div class="col-md-2">
                         <button type="button" class="btn btn-danger btn-sm" (click)="removeContact(i)">
@@ -331,10 +334,11 @@
                             </label>
                             <div class="col-8">
                               <input type="number" formControlName="number" class="form-control" [ngClass]="{
-                                'is-valid': employeeForm.get('address.number')?.valid 
+                                'is-valid': employeeForm.get('address.number')?.valid
                                 && employeeForm.get('address.number')?.value !== 0,
                                 'is-invalid': employeeForm.get('address.number')?.invalid && employeeForm.get('address.number')?.touched
-                              }" id="number" placeholder="Ingrese el número" />
+                              }" id="number" placeholder="Ingrese el número"
+                              style="text-align: right;" />
                               <div class="invalid-feedback">
                                 El número es requerido
                               </div>
@@ -342,14 +346,14 @@
                           </div>
                         </div>
                       </div>
-                      
+
                       <!-- Piso y Departamento -->
                       <div class="row mb-3">
                         <div class="col-md-6">
                           <div class="form-group row align-items-center">
                             <label for="floor" class="col-4 col-form-label">Piso</label>
                             <div class="col-8">
-                              <input type="number" formControlName="floor" class="form-control" id="floor" placeholder="Ingrese el piso" />
+                              <input  style="text-align: right;" type="number" formControlName="floor" class="form-control" id="floor" placeholder="Ingrese el piso" />
                             </div>
                           </div>
                         </div>
@@ -424,10 +428,11 @@
                             </label>
                             <div class="col-8">
                               <input type="number" formControlName="postal_code" class="form-control" [ngClass]="{
-                                'is-valid': employeeForm.get('address.postal_code')?.valid && 
+                                'is-valid': employeeForm.get('address.postal_code')?.valid &&
                                 employeeForm.get('address.postal_code')?.value !== 0,
                                 'is-invalid': employeeForm.get('address.postal_code')?.invalid && employeeForm.get('address.postal_code')?.touched
-                              }" id="postal_code" placeholder="Ingrese el código postal" />
+                              }" id="postal_code" placeholder="Ingrese el código postal"
+                               style="text-align: right;" />
                               <div class="invalid-feedback">
                                 El código postal es requerido
                               </div>
@@ -450,7 +455,7 @@
 
           </form>
     </div>
-    
+
     <ng-template #infoModal let-modal>
       <div class="modal-header fs-6 py-1">
         <h4 class="modal-title">Formulario de Empleados</h4>
@@ -532,7 +537,7 @@
 
   @if (currentEmployeeId) {
     <div class="mt-4">
-      <app-employee-access 
+      <app-employee-access
         [employeeId]="currentEmployeeId"
         (schedulesSaved)="startNewEmployee()"
       ></app-employee-access>
