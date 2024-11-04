@@ -11,6 +11,7 @@ import jsPDF from 'jspdf';
 import autoTable from 'jspdf-autotable';
 import { CommonModule } from '@angular/common';
 import Swal from 'sweetalert2';
+import { StatusType } from '../../../../models/inventory.model';
 
 @Component({
   selector: 'app-inventory-article-category-list',
@@ -39,6 +40,7 @@ export class InventoryArticleCategoryListComponent implements OnInit {
   isLoading = false;
   selectedCategory: ArticleCateg | null = null;
   showCategoryUpdate: boolean = false;
+  statusType?: StatusType;
 
   // Formulario de filtros
   filterForm: FormGroup;

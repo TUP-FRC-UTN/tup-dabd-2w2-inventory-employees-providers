@@ -67,20 +67,51 @@
           <td>{{ provider.contact }}</td>
           <td>{{ provider.address }}</td>
           <td>
-            <i *ngIf="provider.enabled" class="bi bi-check-circle text-success"></i>
-            <i *ngIf="!provider.enabled" class="bi bi-x-circle text-danger"></i>
+            <i *ngIf="provider.enabled" class="bi bi-check2-circle text-success" style="font-size: 1.5rem;"></i>
+            <i *ngIf="!provider.enabled" class="bi bi-x-circle text-danger" style="font-size: 1.5rem;"></i>
           </td>
           <td>
-            <button class="btn btn-sm rounded-md me-2 text-dark"
-            style="background-color: #f59e0b; border-color: #d97706;"
-            onmouseover="this.style.backgroundColor='#d97706';"
-            onmouseout="this.style.backgroundColor='#f59e0b';"
-            (click)="editProvider(provider.id)"><i class="bi bi-pencil"></i></button>
-            <button  (click)="deleteProvider(provider.id)"
-            class="btn btn-sm rounded-md text-dark"
-            style="background-color: #ef4444; border-color: #dc2626;"
-            onmouseover="this.style.backgroundColor='#dc2626';"
-            onmouseout="this.style.backgroundColor='#ef4444';"><i class="bi bi-trash-fill"></i></button>
+            <div class="d-flex justify-content-left gap-2">
+              <!-- Botón de Editar -->
+              <button 
+                *ngIf="provider.enabled != false"
+                (click)="editProvider(provider.id)"
+                class="btn btn-warning btn-sm"
+                title="Editar"
+              >
+              <i class="bi bi-pencil"></i> 
+              </button>
+
+              <!-- Botón de Editar (Deshabilitado) -->
+              <button 
+                *ngIf="provider.enabled == false"
+                disabled
+                class="btn btn-warning btn-sm"
+                title="Editar"
+              >
+                <i class="bi bi-pencil"></i>
+              </button>
+          
+              <!-- Botón de Eliminar -->
+              <button 
+                *ngIf="provider.enabled != false"
+                (click)="deleteProvider(provider.id)"
+                class="btn btn-danger btn-sm"
+                title="Eliminar"
+              >
+                <i class="bi bi-trash-fill"></i>
+              </button>
+          
+              <!-- Botón de Eliminar (Deshabilitado) -->
+              <button 
+                *ngIf="provider.enabled == false"
+                disabled
+                class="btn btn-danger btn-sm"
+                title="Eliminar"
+              >
+                <i class="bi bi-trash-fill"></i>
+              </button>
+            </div>
           </td>
         </tr>
       </tbody>
