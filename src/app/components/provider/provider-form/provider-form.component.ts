@@ -1,7 +1,5 @@
 import { Component, inject, OnInit, TemplateRef, ViewChild } from '@angular/core';
 import { FormBuilder, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
-import { ServiceType } from '../../../models/enums/service-tpye.enum';
-import { StatusType } from '../../../models/inventory.model';
 import { ProvidersService } from '../../../services/providers.service';
 import Swal from 'sweetalert2';
 import { CommonModule } from '@angular/common';
@@ -19,8 +17,6 @@ import { ToastService } from 'ngx-dabd-grupo01';
 })
 export class ProviderFormComponent implements OnInit{
   providerForm: FormGroup;
-  serviceTypes = Object.values(ServiceType);
-  statusTypes = Object.values(StatusType);
   isEditMode = false;
   currentProviderId: number | null = null;
 
