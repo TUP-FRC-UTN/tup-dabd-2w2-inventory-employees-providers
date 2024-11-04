@@ -50,6 +50,17 @@ export interface EmployeeShifts {
   shiftType: ShiftType; // Tipo de turno (día, noche)
 }
 
+export interface Address {
+  street_address: string;
+  number: number;
+  floor: number;
+  apartment: string;
+  city: string;
+  province: string;
+  country: string;
+  postal_code: number;
+}
+
 // Definimos la interfaz Employee para representar un empleado en el sistema.
 export interface Employee {
   id: number; // Identificador único del empleado.
@@ -61,6 +72,9 @@ export interface Employee {
   hiringDate: string; // Fecha de contratación del empleado.
   salary: number; // Salario del empleado.
   state: StatusType; // Estado del empleado (Activo o Inactivo).
+  address?: Address; // Dirección del empleado.
+  contactValue: string,
+  contactType: ContactType;
   //enabled: boolean; // Estado del empleado (Activo o Inactivo).
 }
 

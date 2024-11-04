@@ -28,32 +28,32 @@
     <table class="table table-striped">
       <thead class="bg-light">
         <tr>
-          <th class="px-4 py-3"> 
+          <th > 
             Empleado 
           </th>
-          <th class="px-4 py-3"> 
+          <th > 
             Tipo
           </th>
-          <th class="px-4 py-3"> 
+          <th > 
             Documento 
           </th>
-          <th class="px-4 py-3">
+          <th >
             Fecha Contratación 
            </th>
-          <th class="px-4 py-3">
+          <th >
             Estado 
           </th>
-          <th class="px-4 py-3 text-center">Acciones</th>
+          <th class="text-center">Acciones</th>
         </tr>
       </thead>
 
       <tbody>
         <tr *ngFor="let employee of filteredEmployeeList; let i = index">
-          <td class="px-4 py-3">{{ employee.lastName }}, {{ employee.firstName }}</td>
-          <td class="px-4 py-3">{{ employee.employeeType }}</td>
-          <td class="px-4 py-3">{{ employee.docNumber }}</td>
-          <td class="px-4 py-3">{{ employee.hiringDate | date:'dd/MM/yyyy' }}</td>
-          <td class="px-4 py-3">
+          <td >{{ employee.lastName }}, {{ employee.firstName }}</td>
+          <td >{{ employee.employeeType }}</td>
+          <td >{{ employee.docNumber }}</td>
+          <td >{{ employee.hiringDate | date:'dd/MM/yyyy' }}</td>
+          <td >
             <p class="mb-0">
               <i
                 *ngIf="employee.state.toString() == 'IN_SERVICE'"
@@ -67,17 +67,32 @@
               ></i>
             </p>
           </td>
-          <td class="px-4 py-3">
+          <td >
             <div class="d-flex justify-content-center gap-2">
               <!-- Botón de Editar -->
-              <button 
+              <button
+                *ngIf="employee.state != 'DOWN'"
                 (click)="editEmployee(employee)"
                 class="btn btn-warning btn-sm"
                 title="Editar"
               >
               <i class="bi bi-pencil"></i> 
               </button>
+
+              <button class="btn btn-info btn-sm" (click)="showDetailModal(detailModal, employee.id)">
+                <i class="bi bi-eye"></i>
+              </button>
           
+              <!-- Botón de Editar (Deshabilitado) -->
+              <button
+                *ngIf="employee.state == 'DOWN'"
+                disabled
+                class="btn btn-warning btn-sm"
+                title="Editar"
+              >
+                <i class="bi bi-pencil"></i>
+              </button>
+
               <!-- Botón de Eliminar -->
               <button 
                 *ngIf="employee.state != 'DOWN'"
@@ -292,3 +307,88 @@
 
 
 </app-main-container>
+
+<ng-template #detailModal let-modal>
+  <div class="modal-header">
+    <h4 class="modal-title" id="modal-basic-title">Detalles del Empleado</h4>
+    <button type="button" class="btn-close" aria-label="Close" (click)="modal.dismiss()"></button>
+  </div>
+  <div class="modal-body">
+    <div class="container" *ngIf="selectedEmployee">
+      <div class="row mb-3">
+        <!-- Nombre Completo -->
+        <div class="col-md-6">
+          <div class="card">
+            <div class="card-body">
+              <h6 class="card-subtitle mb-1 text-muted">Nombre Completo</h6>
+              <p class="card-text">{{selectedEmployee.lastName}}, {{selectedEmployee.firstName}}</p>
+            </div>
+          </div>
+        </div>
+        <!-- Documento -->
+        <div class="col-md-6">
+          <div class="card">
+            <div class="card-body">
+              <h6 class="card-subtitle mb-1 text-muted">Documento</h6>
+              <p class="card-text">{{selectedEmployee.documentType}}: {{selectedEmployee.docNumber}}</p>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="row mb-3">
+        <!-- Tipo de Empleado -->
+        <div class="col-md-6">
+          <div class="card">
+            <div class="card-body">
+              <h6 class="card-subtitle mb-1 text-muted">Tipo de Empleado</h6>
+              <p class="card-text">{{selectedEmployee.employeeType}}</p>
+            </div>
+          </div>
+        </div>
+        <!-- Estado -->
+        <div class="col-md-6">
+          <div class="card">
+            <div class="card-body d-flex align-items-center">
+              <h6 class="card-subtitle mb-1 text-muted me-2">Estado</h6>
+              <i
+                *ngIf="selectedEmployee.state.toString() == 'IN_SERVICE'"
+                class="bi bi-check2-circle text-success"
+                style="font-size: 1.5rem;"
+              ></i>
+              <i
+                *ngIf="selectedEmployee.state.toString() != 'IN_SERVICE'"
+                class="bi bi-x-circle text-danger"
+                style="font-size: 1.5rem;"
+              ></i>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="row mb-3">
+        <!-- Salario -->
+        <div class="col-md-6">
+          <div class="card">
+            <div class="card-body">
+              <h6 class="card-subtitle mb-1 text-muted">Salario</h6>
+              <p class="card-text">${{selectedEmployee.salary}}</p>
+            </div>
+          </div>
+        </div>
+        <!-- Contacto -->
+        <div class="col-md-6">
+          <div class="card">
+            <div class="card-body">
+              <h6 class="card-subtitle mb-1 text-muted">Contacto</h6>
+              <p class="card-text">{{selectedEmployee.contactType}}: {{selectedEmployee.contactValue}}</p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div class="modal-footer">
+    <button type="button" class="btn btn-secondary" (click)="modal.close()">Cerrar</button>
+  </div>
+</ng-template>
