@@ -89,6 +89,11 @@ export class EmployeesService {
       map(employees => this.mapperService.toCamelCase(employees))
     );
   }
+  // searchEmployees(filters: any): Observable<Employee[]> {
+  //   // Asegúrate de que el endpoint y el método de envío sean correctos
+  //   return this.http.post<Employee[]>(`${this.apiUrl}/search`, filters);
+  // }
+  
 
 }
 
