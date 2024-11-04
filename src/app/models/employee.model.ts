@@ -73,6 +73,8 @@ export interface Employee {
   salary: number; // Salario del empleado.
   state: StatusType; // Estado del empleado (Activo o Inactivo).
   address?: Address; // Dirección del empleado.
+  contactValue: string,
+  contactType: ContactType;
   //enabled: boolean; // Estado del empleado (Activo o Inactivo).
 }
 
