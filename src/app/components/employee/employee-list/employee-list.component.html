@@ -112,18 +112,39 @@
   </div>
 
   <!-- Paginación -->
-  <div class="d-flex justify-content-between align-items-center mt-3">
-    <select id="itemsPerPage" class="form-select form-select-sm" [(ngModel)]="itemsPerPage" (change)="onItemsPerPageChange()">
-      <option *ngFor="let option of sizeOptions" [value]="option">{{ option }} Elementos</option>
-    </select>
-    <ngb-pagination
-    [(page)]="currentPage"
-    [pageSize]="itemsPerPage"
-    [collectionSize]="totalItems"
-    (pageChange)="onPageChange($event)">
-  </ngb-pagination>
+  <div class="d-flex justify-content-between align-items-center p-3 border-top">
+    <!-- Left side - Items per page dropdown -->
+    <div class="d-flex align-items-center">
+      <span class="me-2">Elementos por página:</span>
+      <select (change)="onItemsPerPageChange()" class="form-select form-select-sm" style="width: auto;" [(ngModel)]="pageSize">
+        <option value="5">5</option>
+        <option value="10">10</option>
+        <option value="20">20</option>
+        <option value="50">50</option>
+      </select>
     </div>
+  
 
+  
+    <!-- Navigation buttons -->
+    <div class="ms-3">
+      <button class="btn btn-outline-secondary btn-sm me-1"
+              [disabled]="currentPage === 0"
+              (click)="goToPreviousPage()">
+        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-chevron-left" viewBox="0 0 16 16">
+          <path fill-rule="evenodd" d="M11.354 1.646a.5.5 0 0 1 0 .708L5.707 8l5.647 5.646a.5.5 0 0 1-.708.708l-6-6a.5.5 0 0 1 0-.708l6-6a.5.5 0 0 1 .708 0z"/>
+        </svg>
+      </button>
+      <button class="btn btn-outline-secondary btn-sm"
+              [disabled]="currentPage === totalPages -1"
+              (click)="goToNextPage()">
+        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-chevron-right" viewBox="0 0 16 16">
+          <path fill-rule="evenodd" d="M4.646 1.646a.5.5 0 0 1 .708 0l6 6a.5.5 0 0 1 0 .708l-6 6a.5.5 0 0 1-.708-.708L10.293 8 4.646 2.354a.5.5 0 0 1 0-.708z"/>
+        </svg>
+      </button>
+    </div>
+  </div>
+  
   <!-- Modal de Información -->
   <ng-template #infoModal let-modal>
     <div class="modal-body">

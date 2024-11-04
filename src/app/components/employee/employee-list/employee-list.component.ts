@@ -3,7 +3,7 @@ import { FormBuilder, FormControl, FormGroup, FormsModule, ReactiveFormsModule }
 import { NgbModal } from '@ng-bootstrap/ng-bootstrap';
 import { Router, RouterModule } from '@angular/router';
 import { EmployeesService } from '../../../services/employees.service';
-import { Employee, EmployeeType, StatusType } from '../../../models/employee.model';
+import { Employee, EmployeeType, StatusType, DocumentType } from '../../../models/employee.model';
 import { ToastService, MainContainerComponent, ConfirmAlertComponent } from 'ngx-dabd-grupo01';
 import * as XLSX from 'xlsx';
 import jsPDF from 'jspdf';
@@ -26,41 +26,46 @@ import { Chart, ChartType } from 'chart.js';
 })
 export class EmployeeListComponent implements OnInit {
   @ViewChild('infoModal') infoModal!: TemplateRef<any>;
-  showModalFilters: boolean = false;
-
-  //Metricas
   @ViewChild('pieChart') pieChartRef!: ElementRef;
+  
+  showModalFilters: boolean = false;
+  
+  // Metrics
   inServiceCount = 0;
   inactiveCount = 0;
   typeCountMap: { [key: string]: number } = {};
   pieChart!: Chart;
   barChart!: Chart;
 
+  // Lists
   employeeList: Employee[] = [];
   filteredEmployeeList: Employee[] = [];
-  private originalEmployeeList: Employee[] = [];
   isLoading = false;
 
+  // Forms and Filters
   filterForm!: FormGroup;
   searchFilter = new FormControl('');
   statusTypes = Object.values(StatusType);
   employeeTypes = Object.values(EmployeeType);
   documentTypes = Object.values(DocumentType);
 
-  currentPage: number = 1;
+  // Pagination
+  currentPage: number = 0; // Changed to 0-based for backend compatibility
   totalItems: number = 0;
-  itemsPerPage: number = 10;
+  totalPages:number = 0;
+  pageSize: number = 10;
   sizeOptions: number[] = [5, 10, 20, 50, 100];
-  selectedStatus?: StatusType;
 
   selectedEmployee?: Employee;
+
+  // Services
 
   private employeeService = inject(EmployeesService);
   private router = inject(Router);
   private modalService = inject(NgbModal);
   private toastService = inject(ToastService);
   private fb = inject(FormBuilder);
-  private mapperService = inject(MapperService); // Inyectamos MapperService
+  private mapperService = inject(MapperService);
 
   constructor() {
     this.filterForm = this.fb.group({
@@ -73,35 +78,90 @@ export class EmployeeListComponent implements OnInit {
       salary: [''],
       state: ['']
     });
-  
+
+    // Search filter with debounce
     this.searchFilter.valueChanges
       .pipe(debounceTime(300), distinctUntilChanged())
-      .subscribe((searchTerm) => this.applySearchFilter(searchTerm ?? ''));
+      .subscribe(() => this.getEmployees());
   }
 
   ngOnInit(): void {
     this.getEmployees();
-    this.calculateMetrics();
-    this.createPieChart();
-    this.createBarChart();
   }
 
-  //METRICAS
+  getEmployees(page: number = 0, size: number = this.pageSize, searchTerm?: string): void {
+    this.isLoading = true;
+    const filters = {
+      page: this.currentPage,
+      size: this.pageSize,
+      firstName: this.filterForm.get('firstName')?.value || '',
+      lastName: this.filterForm.get('lastName')?.value || '',
+      type: this.filterForm.get('employeeType')?.value || '',
+      docType: this.filterForm.get('docType')?.value || '',
+      docNumber: this.filterForm.get('docNumber')?.value || '',
+      state: this.filterForm.get('state')?.value || '',
+      date: this.filterForm.get('hiringDate')?.value || '',
+      salary: this.filterForm.get('salary')?.value || ''
+    };
+
+    this.employeeService.getAllEmployeesPaged(filters).subscribe({
+      next: (response) => {
+        response = this.mapperService.toCamelCase(response);
+        this.employeeList = this.mapperService.toCamelCase(response.content);
+        this.filteredEmployeeList = [...this.employeeList];
+        this.totalItems = response.totalElements;
+        this.totalPages = response.totalPages;
+        this.calculateMetrics();
+        this.createPieChart();
+        this.createBarChart();
+        this.isLoading = false;
+      },
+      error: (error) => {
+        console.error('Error fetching employees:', error);
+        this.toastService.sendError('Error al cargar empleados.');
+        this.isLoading = false;
+      }
+    });
+  }
+
+  applyFilters(): void {
+    this.currentPage = 0; // Reset to first page when applying filters
+    this.getEmployees();
+    this.showModalFilters = false;
+  }
+
+  clearFilters(): void {
+    this.filterForm.reset();
+    this.searchFilter.setValue('');
+    this.currentPage = 0;
+    this.getEmployees();
+  }
+
+  onPageChange(page: number): void {
+    this.currentPage = page - 1; // Convert to 0-based for backend
+    this.getEmployees();
+  }
+
+  onItemsPerPageChange(): void {
+    this.currentPage = 0;
+    this.getEmployees();
+  }
+
+  // Metrics methods
   calculateMetrics(): void {
-    // Contadores de empleados en servicio e inactivos
     this.inServiceCount = this.employeeList.filter(employee => employee.state === 'IN_SERVICE').length;
     this.inactiveCount = this.employeeList.filter(employee => employee.state === 'DOWN').length;
-
-    // Calcula la cantidad de empleados por tipo
+    
     this.typeCountMap = this.employeeList.reduce((acc, employee) => {
-        const type = employee.employeeType;
-        if (type) {
-            acc[type] = (acc[type] || 0) + 1;
-        }
-        return acc;
+      const type = employee.employeeType;
+      if (type) {
+        acc[type] = (acc[type] || 0) + 1;
+      }
+      return acc;
     }, {} as { [key: string]: number });
-}
+  }
 
+  // Chart methods remain the same...
   createPieChart(): void {
     if (this.pieChart) {
       this.pieChart.destroy();
@@ -110,12 +170,10 @@ export class EmployeeListComponent implements OnInit {
       type: 'pie' as ChartType,
       data: {
         labels: ['En Servicio', 'Inactivo'],
-        datasets: [
-          {
-            data: [this.inServiceCount, this.inactiveCount],
-            backgroundColor: ['#28a745', '#dc3545'],
-          }
-        ]
+        datasets: [{
+          data: [this.inServiceCount, this.inactiveCount],
+          backgroundColor: ['#28a745', '#dc3545'],
+        }]
       },
       options: {
         responsive: true,
@@ -160,184 +218,7 @@ export class EmployeeListComponent implements OnInit {
     });
   }
 
-  // Método para abrir el modal de información
-  openInfoModal() {
-    this.modalService.open(this.infoModal, { centered: true });
-  }
-
-  // Método para abrir el modal de filtros
-  openModalFilters() {
-    this.showModalFilters = true;
-  }
-
-  closeModalFilters() {
-    this.showModalFilters = false;
-  }
-
-getEmployees(): void {
-    this.isLoading = true;
-    this.employeeService.getEmployees().subscribe({
-        next: (employeeList) => {
-            this.originalEmployeeList = this.mapperService.toCamelCase(employeeList);
-            this.employeeList = [...this.originalEmployeeList];
-            this.filteredEmployeeList = [...this.originalEmployeeList];
-            this.calculateMetrics(); // Calcula las métricas después de cargar los empleados
-            this.createPieChart();
-            this.createBarChart();
-            this.isLoading = false;
-        },
-        error: (error) => {
-            console.error('Error al obtener empleados:', error);
-            this.toastService.sendError('Error al cargar empleados.');
-            this.isLoading = false;
-        }
-    });
-}
-
-
-  // applyFilters(): void {
-  //   const filters = Object.fromEntries(
-  //     Object.entries(this.filterForm.value).filter(([_, v]) => v != null && v !== "")
-  //   );
-  
-  //   this.isLoading = true;
-  //   this.employeeService.searchEmployees(filters).subscribe({
-  //     next: (employees) => {
-  //       this.employeeList = employees;
-  //       this.filteredEmployeeList = [...employees];
-  //       this.isLoading = false;
-  //     },
-  //     error: (error) => {
-  //       console.error('Error al filtrar empleados:', error);
-  //       this.toastService.sendError('Error al filtrar empleados.');
-  //       this.isLoading = false;
-  //     }
-  //   });
-  // }
-  applyFilters(): void {
-    const filters = {
-      firstName: this.filterForm.get('firstName')?.value?.toLowerCase() || '',
-      lastName: this.filterForm.get('lastName')?.value?.toLowerCase() || '',
-      employeeType: this.filterForm.get('employeeType')?.value || '',
-      docType: this.filterForm.get('docType')?.value || '',
-      docNumber: this.filterForm.get('docNumber')?.value || '',
-      hiringDate: this.filterForm.get('hiringDate')?.value || '',
-      salary: this.filterForm.get('salary')?.value || '',
-      state: this.filterForm.get('state')?.value || '',
-    };
-  
-    console.log('Applying filters:', filters);
-  
-    // Aplica los filtros sobre la lista original
-    this.filteredEmployeeList = this.originalEmployeeList.filter(employee => {
-      const matchesFirstName = filters.firstName ? employee.firstName.toLowerCase().includes(filters.firstName) : true;
-      const matchesLastName = filters.lastName ? employee.lastName.toLowerCase().includes(filters.lastName) : true;
-      const matchesEmployeeType = filters.employeeType ? employee.employeeType === filters.employeeType : true;
-      const matchesDocType = filters.docType ? employee.documentType === filters.docType : true;
-      const matchesDocNumber = filters.docNumber ? employee.docNumber.includes(filters.docNumber) : true;
-      const matchesHiringDate = filters.hiringDate ? new Date(employee.hiringDate).toLocaleDateString() === new Date(filters.hiringDate).toLocaleDateString() : true;
-      const matchesSalary = filters.salary ? employee.salary.toString() === filters.salary.toString() : true;
-      const matchesState = filters.state ? employee.state === filters.state : true;
-  
-      return (
-        matchesFirstName &&
-        matchesLastName &&
-        matchesEmployeeType &&
-        matchesDocType &&
-        matchesDocNumber &&
-        matchesHiringDate &&
-        matchesSalary &&
-        matchesState
-      );
-    });
-  
-    this.showModalFilters = false; // Cierra el modal
-  }
-  
-  updateFilteredEmployees(filters: any): void {
-    this.filteredEmployeeList = this.originalEmployeeList.filter(employee => {
-      const matchesFirstName = filters.firstName ? employee.firstName.toLowerCase().includes(filters.firstName.toLowerCase()) : true;
-      const matchesLastName = filters.lastName ? employee.lastName.toLowerCase().includes(filters.lastName.toLowerCase()) : true;
-      const matchesEmployeeType = filters.employeeType ? employee.employeeType === filters.employeeType : true;
-      const matchesDocType = filters.docType ? employee.documentType === filters.docType : true;
-      const matchesDocNumber = filters.docNumber ? employee.docNumber.includes(filters.docNumber) : true;
-      const matchesHiringDate = filters.hiringDate ? new Date(employee.hiringDate).toLocaleDateString() === new Date(filters.hiringDate).toLocaleDateString() : true;
-      const matchesSalary = filters.salary ? employee.salary.toString() === filters.salary.toString() : true;
-      const matchesState = filters.state ? employee.state === filters.state : true;
-  
-      return (
-        matchesFirstName &&
-        matchesLastName &&
-        matchesEmployeeType &&
-        matchesDocType &&
-        matchesDocNumber &&
-        matchesHiringDate &&
-        matchesSalary &&
-        matchesState
-      );
-    });
-  
-    // Actualiza métricas y gráficos después de aplicar el filtro
-    this.updateMetricsAndCharts();
-  }
-  
-  
-
-  clearFilters(): void {
-    // Restablece todos los filtros en el formulario
-    this.filterForm.reset();
-  
-    // Establece los valores por defecto para los desplegables
-    this.filterForm.get('employeeType')?.setValue(''); // Ajusta el tipo de empleado a "Todos"
-    this.filterForm.get('state')?.setValue(''); // Ajusta el estado a "Todos"
-  
-    // Limpia la barra de búsqueda
-    this.searchFilter.setValue('');
-  
-    // Restaura la lista completa de empleados
-    this.employeeList = [...this.originalEmployeeList];
-    this.filteredEmployeeList = [...this.originalEmployeeList];
-  
-    // Actualiza las métricas y los gráficos para reflejar la lista completa
-    this.updateMetricsAndCharts();
-  }
-  
-  applySearchFilter(searchTerm: string): void {
-    console.log("Buscando empleados con término:", searchTerm);
-  
-    if (!searchTerm) {
-      this.filteredEmployeeList = [...this.originalEmployeeList];
-    } else {
-      this.filteredEmployeeList = this.originalEmployeeList.filter(employee =>
-        employee.firstName.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        employee.lastName.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        employee.docNumber.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        employee.salary.toString().toLowerCase().includes(searchTerm.toLowerCase())
-      );
-    }
-  
-    console.log("Resultado de empleados filtrados:", this.filteredEmployeeList);
-    this.updateMetricsAndCharts();
-    
-  }
-  updateMetricsAndCharts(): void {
-    this.calculateMetrics();
-    this.createPieChart();
-    this.createBarChart();
-  }
-
-  onPageChange(event: any): void {
-    const page = event as number;
-    this.currentPage = page;
-    this.getEmployees();
-  }
-
-  onItemsPerPageChange(): void {
-    this.currentPage = 1; // Reinicia la paginación a la primera página
-    this.getEmployees(); // Llama a getEmployees para actualizar la lista
-  }
-  
-
+  // Export methods
   exportToPDF(): void {
     const doc = new jsPDF();
     autoTable(doc, {
@@ -367,6 +248,20 @@ getEmployees(): void {
     XLSX.writeFile(wb, 'lista-empleados.xlsx');
   }
 
+  // Modal methods
+  openInfoModal(): void {
+    this.modalService.open(this.infoModal, { centered: true });
+  }
+
+  openModalFilters(): void {
+    this.showModalFilters = true;
+  }
+
+  closeModalFilters(): void {
+    this.showModalFilters = false;
+  }
+
+  // CRUD operations
   editEmployee(employee: Employee): void {
     this.router.navigate(['employees/form', employee.id]);
   }
@@ -392,6 +287,7 @@ getEmployees(): void {
     });
   }
 
+
   showDetailModal(content: any, id: number) {
     this.employeeService.getEmployeeById(id).subscribe({
       next: (employee) => {
@@ -407,4 +303,20 @@ getEmployees(): void {
       }
     });
   }
+
+
+  goToPreviousPage() {
+    if (this.currentPage > 0) {
+      this.currentPage--;
+      this.getEmployees();
+    }
+  }
+  
+  goToNextPage() {
+    if (this.currentPage < this.totalPages - 1) {
+      this.currentPage++;
+      this.getEmployees();
+    }
+  }
 }
+
