@@ -12,6 +12,7 @@ export class ServicesService {
     
     constructor(private http: HttpClient) {}
 
+    // El metodo para hacer el get del paginado con filtros
     getServices(filters?: {
         page?: number,      // Nro de pagina
         size?: number       // Items en la pagina
@@ -34,4 +35,11 @@ export class ServicesService {
         }
         return this.http.get<PaginatedResponse<Service>>(`${this.apiUrl}/pageable`, { params });
       }
+
+      // GET BY ID del back
+      getServiceById(id: number): Observable<Service> {
+        return this.http.get<Service>(`${this.apiUrl}/${id}`);
+      }
+
+      
 }
