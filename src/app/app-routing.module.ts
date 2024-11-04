@@ -8,6 +8,7 @@ import { TransactionComponentForm } from './components/inventory/inventory_trans
 import { InventoryTransactionTableComponent } from './components/inventory/inventory_transaction/inventory_transaction_table/inventory_transaction_table.component';
 import { InventoryTableComponent } from './components/inventory/inventory_inventories/inventory_inventories.component';
 import { InventoryArticleCategoryListComponent } from './components/inventory/inventory_config/inventory-article-category-list/inventory-article-category-list.component';
+import { ServiceFormComponent } from './components/provider/service-form/service-form.component';
 
 
 
@@ -18,6 +19,8 @@ export const routes: Routes = [
   { path: 'providers/list', component: ProviderListComponent },
   { path: 'providers/form', component: ProviderFormComponent },
   { path: 'providers/form/:id', component: ProviderFormComponent },
+  { path: 'services/form/', component: ServiceFormComponent },
+  { path: 'services/form/:id', component: ServiceFormComponent },
   { path: 'articles/article', component: ArticleFormComponent},
   { path: 'articles/article/:id', component: ArticleFormComponent },
   { path: 'inventories', component: InventoryTableComponent },
