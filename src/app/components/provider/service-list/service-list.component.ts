@@ -63,4 +63,8 @@ export class ServiceListComponent implements OnInit {
         this.getServices(this.currentPage - 1, this.pageSize, searchTerm || '');
       });
   }
+
+  ngOnInit(): void {
+    this.getServices();
+  }
 }
