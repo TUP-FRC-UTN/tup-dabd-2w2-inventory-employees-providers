@@ -1,4 +1,5 @@
 import { Component } from '@angular/core';
+import {NgbActiveModal} from "@ng-bootstrap/ng-bootstrap";
 
 @Component({
   selector: 'app-service-list-info',
@@ -8,5 +9,5 @@ import { Component } from '@angular/core';
   styleUrl: './service-list-info.component.css'
 })
 export class ServiceListInfoComponent {
-
+  constructor(public activeModal: NgbActiveModal) {}
 }

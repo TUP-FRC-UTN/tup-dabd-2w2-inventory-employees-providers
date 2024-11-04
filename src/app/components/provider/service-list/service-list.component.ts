@@ -11,6 +11,7 @@ import * as XLSX from 'xlsx';
 import jsPDF from 'jspdf';
 import autoTable from 'jspdf-autotable';
 import { Chart, ChartType, registerables } from 'chart.js';
+import { ServiceListInfoComponent } from './service-list-info/service-list-info.component';
 
 Chart.register(...registerables);
 
@@ -360,5 +361,15 @@ export class ServiceListComponent implements OnInit {
       this.currentPage++;
       this.getServices(this.currentPage - 1, this.pageSize);
     }
+  }
+
+  showInfo(): void {
+    this.modalService.open(ServiceListInfoComponent, {
+      size: 'lg',
+      backdrop: 'static',
+      keyboard: false,
+      centered: true,
+      scrollable: true
+    });
   }
 }
