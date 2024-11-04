@@ -150,6 +150,7 @@ export class ArticleFormComponent implements OnInit {
     if(value === ArticleType.REGISTRABLE) {
       this.articleForm.get('identifier')?.enable();
       this.articleForm.get('measurementUnit')?.disable();
+      this.articleForm.get('measurementUnit')?.setValue(MeasurementUnit.UNITS)
       this.articleForm.get('stock')?.disable();
       this.articleForm.get('stock')?.setValue(1);
       this.articleForm.get('stockMin')?.disable();
