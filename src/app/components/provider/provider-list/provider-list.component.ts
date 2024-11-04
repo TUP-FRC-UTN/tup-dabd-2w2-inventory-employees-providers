@@ -344,9 +344,9 @@ export class ProviderListComponent implements OnInit {
     return item.id;
   }
 
-  openInfoModal(content: TemplateRef<any>) {
-    this.modalService.open(content, { centered: true });
-  }
+  // openInfoModal(content: TemplateRef<any>) {
+  //   this.modalService.open(content, { centered: true });
+  // }
 
   goToPreviousPage() {
     if (this.currentPage > 1) {
@@ -360,5 +360,9 @@ export class ProviderListComponent implements OnInit {
       this.currentPage++;
       this.getProviders(this.currentPage - 1, this.pageSize);
     }
+  }
+
+  openInfoModal(content: TemplateRef<any>): void {
+    this.modalService.open(content, { centered: true });
   }
 }
