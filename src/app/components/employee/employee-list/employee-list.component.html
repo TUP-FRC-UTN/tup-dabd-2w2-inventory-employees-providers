@@ -78,6 +78,10 @@
               >
               <i class="bi bi-pencil"></i> 
               </button>
+
+              <button class="btn btn-info btn-sm" (click)="showDetailModal(detailModal, employee.id)">
+                <i class="bi bi-eye"></i>
+              </button>
           
               <!-- Botón de Editar (Deshabilitado) -->
               <button
@@ -303,3 +307,88 @@
 
 
 </app-main-container>
+
+<ng-template #detailModal let-modal>
+  <div class="modal-header">
+    <h4 class="modal-title" id="modal-basic-title">Detalles del Empleado</h4>
+    <button type="button" class="btn-close" aria-label="Close" (click)="modal.dismiss()"></button>
+  </div>
+  <div class="modal-body">
+    <div class="container" *ngIf="selectedEmployee">
+      <div class="row mb-3">
+        <!-- Nombre Completo -->
+        <div class="col-md-6">
+          <div class="card">
+            <div class="card-body">
+              <h6 class="card-subtitle mb-1 text-muted">Nombre Completo</h6>
+              <p class="card-text">{{selectedEmployee.lastName}}, {{selectedEmployee.firstName}}</p>
+            </div>
+          </div>
+        </div>
+        <!-- Documento -->
+        <div class="col-md-6">
+          <div class="card">
+            <div class="card-body">
+              <h6 class="card-subtitle mb-1 text-muted">Documento</h6>
+              <p class="card-text">{{selectedEmployee.documentType}}: {{selectedEmployee.docNumber}}</p>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="row mb-3">
+        <!-- Tipo de Empleado -->
+        <div class="col-md-6">
+          <div class="card">
+            <div class="card-body">
+              <h6 class="card-subtitle mb-1 text-muted">Tipo de Empleado</h6>
+              <p class="card-text">{{selectedEmployee.employeeType}}</p>
+            </div>
+          </div>
+        </div>
+        <!-- Estado -->
+        <div class="col-md-6">
+          <div class="card">
+            <div class="card-body d-flex align-items-center">
+              <h6 class="card-subtitle mb-1 text-muted me-2">Estado</h6>
+              <i
+                *ngIf="selectedEmployee.state.toString() == 'IN_SERVICE'"
+                class="bi bi-check2-circle text-success"
+                style="font-size: 1.5rem;"
+              ></i>
+              <i
+                *ngIf="selectedEmployee.state.toString() != 'IN_SERVICE'"
+                class="bi bi-x-circle text-danger"
+                style="font-size: 1.5rem;"
+              ></i>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="row mb-3">
+        <!-- Salario -->
+        <div class="col-md-6">
+          <div class="card">
+            <div class="card-body">
+              <h6 class="card-subtitle mb-1 text-muted">Salario</h6>
+              <p class="card-text">${{selectedEmployee.salary}}</p>
+            </div>
+          </div>
+        </div>
+        <!-- Contacto -->
+        <div class="col-md-6">
+          <div class="card">
+            <div class="card-body">
+              <h6 class="card-subtitle mb-1 text-muted">Contacto</h6>
+              <p class="card-text">{{selectedEmployee.contactType}}: {{selectedEmployee.contactValue}}</p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div class="modal-footer">
+    <button type="button" class="btn btn-secondary" (click)="modal.close()">Cerrar</button>
+  </div>
+</ng-template>
