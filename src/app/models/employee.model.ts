@@ -15,10 +15,30 @@ export enum DocumentType {
   CUIL= 'CUIL'
 }
 
+//Horarios By Nico 💋
+
 export enum ShiftType {
-  DAY = 'DAY', // Turno de día
-  NIGHT = 'NIGHT' // Turno de noche
+  MORNING = 'MORNING',
+  AFTERNOON = 'AFTERNOON',
+  NIGHT = 'NIGHT'
 }
+
+
+export interface DaySchedule {
+  entry_time: string;
+  exit_time: string;
+}
+
+export interface EmployeeSchedule {
+  employee_id: number;
+  start_date: string;
+  finish_date: string;
+  shift_type: ShiftType;
+  day_schedules: {
+    [key: string]: DaySchedule;
+  };
+}
+// HASTA ACA 💋
 
 export interface ShiftSchedule {
   entryTime: string; // Hora de entrada
