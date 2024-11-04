@@ -9,6 +9,7 @@ import { InventoryTransactionTableComponent } from './components/inventory/inven
 import { InventoryTableComponent } from './components/inventory/inventory_inventories/inventory_inventories.component';
 import { InventoryArticleCategoryListComponent } from './components/inventory/inventory_config/inventory-article-category-list/inventory-article-category-list.component';
 import { ServiceFormComponent } from './components/provider/service-form/service-form.component';
+import { ServiceListComponent } from './components/provider/service-list/service-list.component';
 
 
 
@@ -19,7 +20,7 @@ export const routes: Routes = [
   { path: 'providers/list', component: ProviderListComponent },
   { path: 'providers/form', component: ProviderFormComponent },
   { path: 'providers/form/:id', component: ProviderFormComponent },
-  { path: 'services/list', component: ProviderListComponent },
+  { path: 'services/list', component: ServiceListComponent },
   { path: 'services/form', component: ServiceFormComponent },
   { path: 'services/form/:id', component: ServiceFormComponent },
   { path: 'articles/article', component: ArticleFormComponent},
