@@ -112,4 +112,10 @@ export class ServiceListComponent implements OnInit {
 
     return filters;
   }
+
+
+  applyFilters(): void {
+    this.currentPage = 1;
+    this.getServices(0, this.pageSize);
+  }
 }
