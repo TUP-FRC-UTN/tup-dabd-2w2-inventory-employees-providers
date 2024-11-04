@@ -46,4 +46,10 @@ export class ServicesService {
     return this.http.post<Service>(this.apiUrl, service);
     }
 
+    // PUT del back
+    updateService(service: Service): Observable<Service> {
+        return this.http.put<Service>(this.apiUrl, service);
+    }
+
+    
 }
