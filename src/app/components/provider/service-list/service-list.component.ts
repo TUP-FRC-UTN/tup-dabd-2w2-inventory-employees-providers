@@ -12,10 +12,6 @@ import jsPDF from 'jspdf';
 import autoTable from 'jspdf-autotable';
 import { Chart, ChartType, registerables } from 'chart.js';
 
-
-
-
-
 Chart.register(...registerables);
 
 @Component({

@@ -1,0 +1,165 @@
+<app-main-container title="Lista de Servicios">
+
+    <!-- Header con búsqueda, filtros y botones de acción -->
+    <div class="d-flex justify-content-between align-items-center mb-3">
+      <!-- Sección de búsqueda y filtros -->
+      <div class="input-group w-25">
+        <span class="input-group-text">
+          <i class="bi bi-search"></i>
+        </span>
+        <input
+          type="text"
+          class="form-control"
+          placeholder="Buscar servicios..."
+          [formControl]="searchFilterAll"
+        />
+        <button type="button" class="btn btn-outline-info" (click)="openModalFilter()">
+          <i class="bi bi-funnel-fill"></i>
+        </button>
+      </div>
+  
+      <!-- Botones de Agregar, Exportar a Excel y Exportar a PDF -->
+      <div class="d-flex align-items-center">
+        <button class="btn btn-outline-secondary me-2" (click)="openInfoModal(infoModal)">
+          <i class="bi bi-info-circle"></i>
+        </button>
+        
+        <button type="button" class="btn btn-outline-primary me-2" [routerLink]="['/services/form']">
+          <i class="bi bi-plus"></i>
+        </button>
+        <button type="button" class="btn btn-success me-2" (click)="exportToExcel()">
+          <i class="bi bi-file-earmark-excel"></i>
+        </button>
+        <button type="button" class="btn btn-danger" (click)="exportToPDF()">
+          <i class="bi bi-file-earmark-pdf"></i>
+        </button>
+      </div>
+    </div>
+  
+    <!-- Tabla de servicios -->
+    <div class="table-container mt-3">
+      <table class="table table-striped">
+        <thead *ngIf="serviceList.length > 0">
+          <tr>
+            <th>Nombre del Servicio</th>
+            <th>Proveedor</th>
+            <th>Método de Pago</th>
+            <th>Teléfono de Contacto</th>
+            <th>Dirección</th>
+            <th>Estado</th>
+            <th>Acciones</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr *ngIf="serviceList.length === 0">
+            <td colspan="7" class="text-center">
+              <div class="alert alert-secondary">
+                No hay servicios para mostrar
+              </div>
+            </td>
+          </tr>
+          <tr *ngFor="let service of serviceList; trackBy: trackByFn">
+            <td>{{ service.name }}</td>
+            <td>{{ service.provider }}</td>
+            <td>{{ service.paymentMethod }}</td>
+            <td>{{ service.contactPhone }}</td>
+            <td>{{ service.address }}</td>
+            <td>
+              <i *ngIf="service.enabled" class="bi bi-check2-circle text-success" style="font-size: 1.5rem;"></i>
+              <i *ngIf="!service.enabled" class="bi bi-x-circle text-danger" style="font-size: 1.5rem;"></i>
+            </td>
+            <td>
+              <div class="d-flex justify-content-left gap-2">
+                <!-- Botón de Editar -->
+                <button 
+                  *ngIf="service.enabled"
+                  (click)="editService(service.id)"
+                  class="btn btn-warning btn-sm"
+                  title="Editar"
+                >
+                  <i class="bi bi-pencil"></i> 
+                </button>
+                
+                <!-- Botón de Eliminar -->
+                <button 
+                  *ngIf="service.enabled"
+                  (click)="deleteService(service.id)"
+                  class="btn btn-danger btn-sm"
+                  title="Eliminar"
+                >
+                  <i class="bi bi-trash-fill"></i>
+                </button>
+              </div>
+            </td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  
+    <!-- Paginación y elementos por página -->
+    <div class="d-flex justify-content-between align-items-center p-3 border-top">
+      <div class="d-flex align-items-center">
+        <span class="me-2">Elementos por página:</span>
+        <select (change)="onItemsPerPageChange()" class="form-select form-select-sm" style="width: auto;" [(ngModel)]="pageSize">
+          <option value="5">5</option>
+          <option value="10">10</option>
+          <option value="20">20</option>
+          <option value="50">50</option>
+        </select>
+      </div>
+      <div class="ms-3">
+        <button class="btn btn-outline-secondary btn-sm me-1"
+                [disabled]="currentPage === 1"
+                (click)="goToPreviousPage()">
+          <i class="bi bi-chevron-left"></i>
+        </button>
+        <button class="btn btn-outline-secondary btn-sm"
+                [disabled]="currentPage === totalPages"
+                (click)="goToNextPage()">
+          <i class="bi bi-chevron-right"></i>
+        </button>
+      </div>
+    </div>
+  
+    <!-- Modal de Filtros -->
+    <div *ngIf="showModalFilter" class="modal fade show" tabindex="-1" role="dialog" style="display: block;">
+      <div class="modal-dialog modal-dialog-centered" role="document">
+        <div class="modal-content">
+          <div class="modal-header">
+            <h5 class="modal-title">Filtrar Servicios</h5>
+            <button type="button" class="btn-close" aria-label="Close" (click)="closeModalFilter()"></button>
+          </div>
+          <div class="modal-body">
+            <form [formGroup]="filterForm">
+              <div class="form-group">
+                <label>Nombre del Servicio</label>
+                <input type="text" class="form-control" placeholder="Nombre del Servicio" formControlName="name">
+              </div>
+              <div class="form-group">
+                <label>Proveedor</label>
+                <input type="text" class="form-control" placeholder="Proveedor" formControlName="provider">
+              </div>
+              <div class="form-group">
+                <label>Método de Pago</label>
+                <select class="form-select" formControlName="paymentMethod">
+                  <option value="">Todos los Métodos</option>
+                  <option value="Transferencia">Transferencia</option>
+                  <option value="Efectivo">Efectivo</option>
+                  <option value="MODO">MODO</option>
+                  <option value="Debito">Débito</option>
+                  <option value="Credito">Crédito</option>
+                </select>
+              </div>
+            </form>
+          </div>
+          <div class="modal-footer">
+            <button type="button" class="btn btn-outline-danger" (click)="clearFilters()">
+              <i class="bi bi-trash"></i>
+            </button>
+            <button type="button" class="btn btn-primary" (click)="applyFilters()">Aplicar Filtros</button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </app-main-container>
+  
