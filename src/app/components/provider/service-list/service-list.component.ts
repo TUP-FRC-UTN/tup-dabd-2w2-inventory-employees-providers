@@ -160,4 +160,8 @@ export class ServiceListComponent implements OnInit {
       }
     });
   }
+
+  trackByFn(index: number, item: Service): number {
+    return item.id;
+  }
 }
