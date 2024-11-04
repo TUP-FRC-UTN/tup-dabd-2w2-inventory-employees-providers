@@ -118,4 +118,10 @@ export class ServiceListComponent implements OnInit {
     this.currentPage = 1;
     this.getServices(0, this.pageSize);
   }
+
+  clearFilters(): void {
+    this.filterForm.reset();
+    this.currentPage = 1;
+    this.getServices(0, this.pageSize);
+  }
 }
