@@ -8,5 +8,6 @@ import { PaginatedResponse } from '../models/api-response';
     providedIn: 'root'
   })
 export class ServicesService {
-
+    private apiUrl = 'http://localhost:8013/service'; //URL de la API para servicios
+    
 }
