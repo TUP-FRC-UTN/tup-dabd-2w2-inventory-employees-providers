@@ -1,6 +1,6 @@
 <div class="card">
   <div class="card-body">
-    <div class="container">
+    <div class="form-container">
           <form [formGroup]="employeeForm" (ngSubmit)="saveEmployee()" >           
               @if(!isEdit){
                 <h2 class="h1 mb-4">Registrar Empleado</h2>
@@ -306,8 +306,8 @@
                 }
               </div>
           </form>
-</div>
-
+    </div>
+    
     <ng-template #infoModal let-modal>
       <div class="modal-header fs-6 py-1">
         <h4 class="modal-title">Formulario de Empleados</h4>
