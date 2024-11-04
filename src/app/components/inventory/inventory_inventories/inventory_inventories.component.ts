@@ -1,4 +1,4 @@
-import { ArticleCategory } from './../../../models/article.model';
+
 import { CommonModule } from '@angular/common';
 import { Component, inject, OnInit, TemplateRef, ViewChild } from '@angular/core';
 import { FormBuilder, FormControl, FormGroup, FormsModule, ReactiveFormsModule, Validators } from '@angular/forms';
@@ -12,8 +12,6 @@ import { Inventory, StatusType, } from '../../../models/inventory.model';
 import { Article, MeasurementUnit, Status } from '../../../models/article.model';
 import { InventoryService } from '../../../services/inventory.service';
 import Swal from 'sweetalert2';
-
-//exportar a pdf y excel
 import jsPDF from 'jspdf';
 import 'jspdf-autotable';
 import * as XLSX from 'xlsx';
