@@ -79,5 +79,7 @@ export class ServiceFormComponent implements OnInit {
     });
   }
 
-  
+  showInfo(): void {
+    this.modalService.open(this.infoModal, { centered: true });
+  }
 }
