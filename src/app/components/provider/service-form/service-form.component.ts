@@ -28,8 +28,8 @@ export class ServiceFormComponent implements OnInit {
 
   constructor(private toastService: ToastService) {
     this.serviceForm = this.fb.group({
-      name: ['', Validators.required],
-      cuit: ['', Validators.required],
+      name: ['', [Validators.required, Validators.minLength(3)]],
+      cuit: ['', [Validators.required, Validators.maxLength(11)]],
       type: ['', Validators.required],
       contact: ['', Validators.required],
       address: ['', Validators.required],
