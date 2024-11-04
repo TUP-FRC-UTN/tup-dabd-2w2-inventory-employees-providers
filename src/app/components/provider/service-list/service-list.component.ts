@@ -130,4 +130,10 @@ export class ServiceListComponent implements OnInit {
     this.totalPages = Math.ceil(this.totalItems / this.pageSize);
     this.getServices(0, this.pageSize);
   }
+
+  onPageChange(page: number): void {
+    this.currentPage = page;
+    this.getServices(page - 1, this.pageSize);
+  }
+
 }
