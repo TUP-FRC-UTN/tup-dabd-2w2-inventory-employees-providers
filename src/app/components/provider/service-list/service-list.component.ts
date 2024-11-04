@@ -98,4 +98,18 @@ export class ServiceListComponent implements OnInit {
       }
     });
   }
+
+  private getFilters(): any {
+    const formValues = this.filterForm.value;
+    const filters: any = {};
+
+    Object.keys(formValues).forEach(key => {
+      const value = formValues[key];
+      if (value !== '' && value !== null && value !== undefined) {
+        filters[key] = value;
+      }
+    });
+
+    return filters;
+  }
 }
