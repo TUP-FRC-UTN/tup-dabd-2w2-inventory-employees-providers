@@ -51,5 +51,8 @@ export class ServicesService {
         return this.http.put<Service>(this.apiUrl, service);
     }
 
-    
+    // DELETE del back
+    deleteService(id: number): Observable<void> {
+        return this.http.delete<void>(`${this.apiUrl}/${id}`);
+    }
 }
