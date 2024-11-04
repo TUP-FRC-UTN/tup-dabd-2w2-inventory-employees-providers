@@ -1,4 +1,4 @@
-<app-main-container title="Agenda de Servicios">
+<app-main-container title="Lista de Empresas" (infoButtonClick)="showInfo()">
 
     <!-- Header con búsqueda, filtros y botones de acción -->
     <div class="d-flex justify-content-between align-items-center mb-3">
@@ -20,9 +20,9 @@
   
       <!-- Botones de Agregar, Exportar a Excel y Exportar a PDF -->
       <div class="d-flex align-items-center">
-        <button class="btn btn-outline-secondary me-2" (click)="openInfoModal(infoModal)">
+        <!-- <button class="btn btn-outline-secondary me-2" (click)="openInfoModal(infoModal)">
           <i class="bi bi-info-circle"></i>
-        </button>
+        </button> -->
         
         <button type="button" class="btn btn-outline-primary me-2" [routerLink]="['/services/form']">
           <i class="bi bi-plus"></i>
@@ -119,12 +119,11 @@
     <!-- Paginación y elementos por página -->
     <div class="d-flex justify-content-between align-items-center p-3 border-top">
       <div class="d-flex align-items-center">
-        <span class="me-2">Elementos por página:</span>
         <select (change)="onItemsPerPageChange()" class="form-select form-select-sm" style="width: auto;" [(ngModel)]="pageSize">
-          <option value="5">5</option>
-          <option value="10">10</option>
-          <option value="20">20</option>
-          <option value="50">50</option>
+          <option value="5">5 Elementos</option>
+          <option value="10">10 Elementos</option>
+          <option value="20">20 Elementos</option>
+          <option value="50">50 Elementos</option>
         </select>
       </div>
 
