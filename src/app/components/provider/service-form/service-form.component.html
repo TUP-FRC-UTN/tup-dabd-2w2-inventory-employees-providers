@@ -8,7 +8,7 @@
           <div class="row mb-3">
             <div class="col-md-6">
               <div class="d-flex justify-content-between align-items-center">
-                <label for="name" class="form-label">Nombre del Servicio:</label>
+                <label for="name" class="form-label">Nombre del Servicio</label>
                 <input id="name" formControlName="name" class="form-control" placeholder="Ingrese el nombre"
                        [ngClass]="{
                          'is-invalid': serviceForm.get('name')?.invalid && serviceForm.get('name')?.touched, 
@@ -23,7 +23,7 @@
             <!-- CUIT del Servicio -->
             <div class="col-md-6">
               <div class="d-flex justify-content-between align-items-center">
-                <label for="cuit" class="form-label">CUIT:</label>
+                <label for="cuit" class="form-label">CUIT</label>
                 <input id="cuit" formControlName="cuit" class="form-control" placeholder="Ingrese el CUIT"
                        [ngClass]="{
                          'is-invalid': serviceForm.get('cuit')?.invalid && serviceForm.get('cuit')?.touched, 
@@ -40,7 +40,7 @@
           <div class="row mb-3">
             <div class="col-md-6">
               <div class="d-flex justify-content-between align-items-center">
-                <label for="type" class="form-label">Tipo de Servicio:</label>
+                <label for="type" class="form-label">Tipo de Servicio</label>
                 <input id="type" formControlName="type" class="form-control" placeholder="Ingrese el tipo de servicio"
                        [ngClass]="{
                          'is-invalid': serviceForm.get('type')?.invalid && serviceForm.get('type')?.touched, 
@@ -54,7 +54,7 @@
   
             <div class="col-md-6">
               <div class="d-flex justify-content-between align-items-center">
-                <label for="contact" class="form-label">Contacto:</label>
+                <label for="contact" class="form-label">Contacto</label>
                 <input id="contact" formControlName="contact" class="form-control" placeholder="Ingrese el contacto"
                        [ngClass]="{
                          'is-invalid': serviceForm.get('contact')?.invalid && serviceForm.get('contact')?.touched, 
@@ -71,7 +71,7 @@
           <div class="row mb-3">
             <div class="col-md-12">
               <div class="d-flex justify-content-between align-items-center">
-                <label for="address" class="form-label">Dirección:</label>
+                <label for="address" class="form-label">Dirección</label>
                 <input id="address" formControlName="address" class="form-control" placeholder="Ingrese la dirección"
                        [ngClass]="{
                          'is-invalid': serviceForm.get('address')?.invalid && serviceForm.get('address')?.touched, 
@@ -88,7 +88,7 @@
           <div class="row mb-4">
             <div class="col-md-12">
               <div class="d-flex justify-content-between align-items-center">
-                <label for="details" class="form-label">Detalles:</label>
+                <label for="details" class="form-label">Detalles</label>
                 <textarea id="details" formControlName="details" class="form-control" placeholder="Ingrese los detalles"
                           [ngClass]="{
                             'is-invalid': serviceForm.get('details')?.invalid && serviceForm.get('details')?.touched, 
@@ -103,8 +103,8 @@
           </div>
   
           <!-- Botones de Guardar y Cancelar -->
-          <div class="d-flex justify-content-between">
-            <button type="button" class="btn btn-secondary" (click)="resetForm()" *ngIf="isEditMode">Cancelar</button>
+          <div class="d-flex justify-content-end gap-2">
+            <button type="button" class="btn btn-danger" (click)="resetForm()" >Cancelar </button>
             <button type="submit" class="btn btn-primary" [disabled]="serviceForm.invalid">{{ isEditMode ? 'Actualizar' : 'Guardar' }}</button>
           </div>
           <div class="d-flex justify-content-end mt-3">
