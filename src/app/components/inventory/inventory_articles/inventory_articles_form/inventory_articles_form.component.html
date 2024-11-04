@@ -18,7 +18,8 @@
                   formControlName="articleType"
                   class="form-select ms-2"
                   [ngClass]="{
-                    'is-valid': articleForm.get('articleType')?.valid,
+                    'is-valid': articleForm.get('articleType')?.valid 
+                                && articleForm.get('articleType')?.touched,
                     'is-invalid': articleForm.get('articleType')?.invalid && articleForm.get('articleType')?.touched
                   }"
                 >
@@ -121,7 +122,8 @@
                   formControlName="articleCategory"
                   class="form-select ms-2"
                   [ngClass]="{
-                    'is-valid': articleForm.get('articleCategory')?.valid,
+                    'is-valid': articleForm.get('articleCategory')?.valid
+                    && articleForm.get('articleCategory')?.touched,
                     'is-invalid': articleForm.get('articleCategory')?.invalid && articleForm.get('articleCategory')?.touched
                   }"
                 >
@@ -154,7 +156,8 @@
                   formControlName="measurementUnit"
                   class="form-select ms-2"
                   [ngClass]="{
-                    'is-valid': articleForm.get('measurementUnit')?.valid,
+                    'is-valid': articleForm.get('measurementUnit')?.valid
+                    && articleForm.get('measurementUnit')?.touched,
                     'is-invalid': articleForm.get('measurementUnit')?.invalid && articleForm.get('measurementUnit')?.touched
                   }"
                 >
@@ -270,8 +273,8 @@
         </div>
 
         <!-- Botones -->
-        <div class="d-flex justify-content-between mt-4">
-          <button type="button" class="btn btn-secondary" (click)="return()">
+        <div class="d-flex justify-content-end gap-2">
+          <button type="button" class="btn btn-danger" (click)="return()">
             Cancelar
           </button>
           <button type="submit" class="btn btn-primary">Guardar</button>
