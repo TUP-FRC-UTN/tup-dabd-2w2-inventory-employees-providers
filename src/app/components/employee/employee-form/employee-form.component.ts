@@ -92,8 +92,9 @@ export class EmployeeFormComponent implements OnInit {
 
   getById(id: number) {
     this.currentId=id;
-    this.employeeService.getEmployee(id).subscribe((data) => {
+    this.employeeService.getEmployeeById(id).subscribe((data) => {
       data = this.mapperService.toCamelCase(data);
+      console.log(data);
       this.employeeForm.patchValue({
         id:data.id,
         firstName: data.firstName,
@@ -104,6 +105,8 @@ export class EmployeeFormComponent implements OnInit {
         docNumber: data.docNumber,
         state: StatusType.ACTIVE,
         salary: data.salary,
+        //TODO: ver que traiga la informacion del contacto y del address
+        //address: data.address
       });
     });
     this.isEdit=true;

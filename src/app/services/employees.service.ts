@@ -57,9 +57,12 @@ export class EmployeesService {
   }
 
   getEmployeeById(id: number): Observable<Employee> {
+    console.log("Este es el id:", id);
+   // debugger
     return this.http.get<Employee>(`${this.apiUrl}/${id}`).pipe(
       map(employee => this.mapperService.toCamelCase(employee))
     );
+    
   }
 
   // Agregar un nuevo empleado

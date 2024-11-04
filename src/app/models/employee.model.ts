@@ -75,6 +75,7 @@ export interface Employee {
   address?: Address; // Dirección del empleado.
   contactValue: string,
   contactType: ContactType;
+  contact: Contact;
   //enabled: boolean; // Estado del empleado (Activo o Inactivo).
 }
 
@@ -108,8 +109,8 @@ export enum ContactType {
 
 // Interface para el contacto
 export interface Contact {
-  contact_value: string;
-  contact_type: ContactType;
+  contactValue: string;
+  contactType: ContactType;
 }
 
 // Interface para los días de la semana

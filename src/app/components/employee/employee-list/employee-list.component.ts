@@ -289,13 +289,22 @@ export class EmployeeListComponent implements OnInit {
 
 
   showDetailModal(content: any, id: number) {
+    console.log("Este es el metodo de showDetailModal");
+    //debugger
     this.employeeService.getEmployeeById(id).subscribe({
       next: (employee) => {
+        console.log('Detalles del empleado:', employee);
+        console.log('this.selectedEmployee', this.selectedEmployee);
+        console.log('este es el numero de telefono de this.selectedEmployee', this.selectedEmployee?.contactValue);
         this.selectedEmployee = employee;
+        //debugger
         this.modalService.open(content, {
           ariaLabelledBy: 'modal-basic-title',
           size: 'lg'
         });
+        console.log('this.selectedEmployee', this.selectedEmployee);
+        console.log('este es el numero de telefono de this.selectedEmployee', this.selectedEmployee?.contactValue);
+        console.log(this.selectedEmployee);
       },
       error: (error) => {
         console.error('Error al cargar los detalles del empleado:', error);
