@@ -136,4 +136,7 @@ export class ServiceListComponent implements OnInit {
     this.getServices(page - 1, this.pageSize);
   }
 
+  editService(id: number): void {
+    this.router.navigate(['/services/form', id]);
+  }
 }
