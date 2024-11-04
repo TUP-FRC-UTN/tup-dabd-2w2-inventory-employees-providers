@@ -82,4 +82,17 @@ export class ServiceFormComponent implements OnInit {
   showInfo(): void {
     this.modalService.open(this.infoModal, { centered: true });
   }
+
+  updateService(serviceData: Service): void {
+    this.servicesService.updateService(serviceData).subscribe({
+      next: () => {
+        this.toastService.sendSuccess("El servicio ha sido modificado con éxito.");
+        this.resetForm();
+        this.router.navigate(['/services/list']);
+      },
+      error: () => {
+        this.toastService.sendError("Hubo un error en la modificación del servicio.");
+      }
+    });
+  }
 }
