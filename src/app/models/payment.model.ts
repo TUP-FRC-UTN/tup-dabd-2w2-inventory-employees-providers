@@ -1,16 +1,3 @@
-/**
- *   {
-    "id": 0,
-    "service": "string",
-    "paymentDate": "2024-11-04",
-    "paymentMethod": "string",
-    "amount": 0,
-    "installmentNumber": 0,
-    "installmentTotal": 0,
-    "enabled": true
-  }
- */
-
 export interface Payment {
     id: number;                 //  identificador unico del pago
     service: string;            //  nombre del servicio al que se le paga
