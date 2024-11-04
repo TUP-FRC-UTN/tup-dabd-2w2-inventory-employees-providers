@@ -6,7 +6,7 @@ import { CommonModule } from '@angular/common';
 import { Article, ArticleCategory, ArticleType, ArticleCondition, MeasurementUnit,Status } from '../../../../models/article.model';
 import { MapperService } from '../../../../services/MapperCamelToSnake/mapper.service';
 import { ActivatedRoute, Router, RouterModule } from '@angular/router';
-import { Inventory } from '../../../../models/inventory.model';
+import { Inventory, StatusType } from '../../../../models/inventory.model';
 import { NgbModal } from '@ng-bootstrap/ng-bootstrap';
 import { ToastService } from 'ngx-dabd-grupo01';
 
@@ -74,8 +74,12 @@ export class ArticleFormComponent implements OnInit {
 
   loadCategories(): void {
     this.inventoryService.getArticleCategories().subscribe(
-      (data) => {
-        this.ArticleCategory = data;
+      (data: ArticleCateg[]) => {
+        // Filtra las categorías activas
+        console.log(data);
+        this.ArticleCategory = data.filter(category => category.status.toString() === 'ACTIVE');
+
+        // Verifica si hay categorías activas y establece el valor del formulario
         if (this.ArticleCategory.length > 0) {
           this.articleForm.get('articleCategory')?.setValue(this.ArticleCategory[0].id);
         }
@@ -84,7 +88,7 @@ export class ArticleFormComponent implements OnInit {
         console.error('Error al cargar las categorías', error);
       }
     );
-  }
+}
 
 
   checkIdentifier() {
@@ -146,6 +150,7 @@ export class ArticleFormComponent implements OnInit {
     if(value === ArticleType.REGISTRABLE) {
       this.articleForm.get('identifier')?.enable();
       this.articleForm.get('measurementUnit')?.disable();
+      this.articleForm.get('measurementUnit')?.setValue(MeasurementUnit.UNITS)
       this.articleForm.get('stock')?.disable();
       this.articleForm.get('stock')?.setValue(1);
       this.articleForm.get('stockMin')?.disable();

@@ -1,16 +1,14 @@
-<app-main-container title="Lista de Empleados">
+<app-main-container title="Lista de Empleados" (infoButtonClick)="showInfo()">
 
   <!-- Header con búsqueda, filtros y botones de acción -->
   <div class="d-flex justify-content-between align-items-center mb-3">
     <div class="input-group w-25">
       <span class="input-group-text"><i class="bi bi-search"></i></span>
       <input type="text" class="form-control" placeholder="Buscar empleado..." [formControl]="searchFilter" />
-      <button type="button" class="btn btn-outline-info" (click)="openModalFilters()"><i class="bi bi-funnel-fill"></i></button>
+      <button type="button" class="btn btn-outline-info" (click)="openModalFilters()"><i
+          class="bi bi-funnel-fill"></i></button>
     </div>
     <div class="d-flex align-items-center">
-      <button class="btn btn-outline-secondary me-2" (click)="openInfoModal()">
-        <i class="bi bi-info-circle"></i>
-      </button>
       <button type="button" class="btn btn-outline-primary me-2" [routerLink]="['/employees/form']">
         <i class="bi bi-plus"></i>
       </button>
@@ -28,20 +26,20 @@
     <table class="table table-striped">
       <thead class="bg-light">
         <tr>
-          <th > 
-            Empleado 
+          <th>
+            Empleado
           </th>
-          <th > 
+          <th>
             Rol
           </th>
-          <th > 
-            Documento 
+          <th>
+            Documento
           </th>
-          <th >
-            Fecha Contratación 
-           </th>
-          <th >
-            Estado 
+          <th>
+            Fecha Contratación
+          </th>
+          <th>
+            Estado
           </th>
           <th class="text-center">Acciones</th>
         </tr>
@@ -49,99 +47,51 @@
 
       <tbody>
         <tr *ngFor="let employee of filteredEmployeeList; let i = index">
-          <td >{{ employee.lastName }}, {{ employee.firstName }}</td>
-          <td >{{ employee.employeeType }}</td>
-          <td >{{ employee.docNumber }}</td>
-          <td >{{ employee.hiringDate | date:'dd/MM/yyyy' }}</td>
-          <td >
+          <td>{{ employee.lastName }}, {{ employee.firstName }}</td>
+          <td>{{ employee.employeeType }}</td>
+          <td>{{ employee.docNumber }}</td>
+          <td>{{ employee.hiringDate | date:'dd/MM/yyyy' }}</td>
+          <td>
             <p class="mb-0">
-              <i
-                *ngIf="employee.state.toString() == 'IN_SERVICE'"
-                class="bi bi-check2-circle text-success"
-                style="font-size: 1.5rem;"
-              ></i>
-              <i
-                *ngIf="employee.state.toString() != 'IN_SERVICE'"
-                class="bi bi-x-circle text-danger"
-                style="font-size: 1.5rem;"
-              ></i>
+              <i *ngIf="employee.state.toString() == 'IN_SERVICE'" class="bi bi-check2-circle text-success"
+                style="font-size: 1.5rem;"></i>
+              <i *ngIf="employee.state.toString() != 'IN_SERVICE'" class="bi bi-x-circle text-danger"
+                style="font-size: 1.5rem;"></i>
             </p>
           </td>
-          <td >
-            <!-- <div class="d-flex justify-content-center gap-2"> -->
-              <!-- Botón de Editar -->
-              <!-- <button
-                *ngIf="employee.state != 'DOWN'"
-                (click)="editEmployee(employee)"
-                class="btn btn-warning btn-sm"
-                title="Editar"
-              >
-              <i class="bi bi-pencil"></i> 
-              </button> -->
-
-              <!-- <button class="btn btn-info btn-sm" (click)="showDetailModal(detailModal, employee.id)">
-                <i class="bi bi-eye"></i>
-              </button> -->
-          
-              <!-- Botón de Editar (Deshabilitado) -->
-              <!-- <button
-                *ngIf="employee.state == 'DOWN'"
-                disabled
-                class="btn btn-warning btn-sm"
-                title="Editar"
-              >
-                <i class="bi bi-pencil"></i>
-              </button> -->
-
-              <!-- Botón de Eliminar -->
-              <!-- <button 
-                *ngIf="employee.state != 'DOWN'"
-                (click)="deleteEmployee(employee.id)"
-                class="btn btn-danger btn-sm"
-                title="Eliminar"
-              >
-                <i class="bi bi-trash-fill"></i>
-              </button> -->
-          
-              <!-- Botón de Eliminar (Deshabilitado) -->
-              <!-- <button 
-                *ngIf="employee.state == 'DOWN'"
-                disabled
-                class="btn btn-danger btn-sm"
-                title="Eliminar"
-              >
-                <i class="bi bi-trash-fill"></i>
-              </button> -->
-            <!-- </div> -->
-
-            <div class="btn-group" role="group">
-              <!-- Botón principal que despliega el menú -->
-              <button type="button" class="btn btn-sm btn-secondary dropdown-toggle" data-bs-toggle="dropdown" aria-expanded="false">
-                <i class="bi bi-three-dots-vertical"></i>
-              </button>
-              <ul class="dropdown-menu">
-                <li> 
-                  <a class="dropdown-item" *ngIf="employee.state != 'DOWN'" (click)="editEmployee(employee)" title="Editar">
-                    Editar 
-                  </a>
-                </li>
-                <li>
-                  <a class="dropdown-item" (click)="showDetailModal(detailModal, employee.id)" title="Ver" aria-disabled="true">
-                     Ver detalles
+          <td>
+            <div class="d-flex justify-content-center gap-2">
+              <div class="btn-group" role="group">
+                <!-- Botón principal que despliega el menú -->
+                <button type="button" class="btn btn-sm btn-secondary dropdown-toggle" data-bs-toggle="dropdown"
+                  aria-expanded="false">
+                  <i class="bi bi-three-dots-vertical"></i>
+                </button>
+                <ul class="dropdown-menu">
+                  <li>
+                    <a class="dropdown-item" *ngIf="employee.state != 'DOWN'" (click)="editEmployee(employee)"
+                      title="Editar">
+                      Editar
                     </a>
-                </li>
-                <li>
-                  <a class="dropdown-item text-danger" *ngIf="employee.state != 'DOWN'" (click)="deleteEmployee(employee.id!)" title="Eliminar">
-                    Eliminar
-                  </a>
-                </li>
-              </ul>
+                  </li>
+                  <li>
+                    <a class="dropdown-item" (click)="showDetailModal(detailModal, employee.id)" title="Ver"
+                      aria-disabled="true">
+                      Ver detalles
+                    </a>
+                  </li>
+                  <li>
+                    <a class="dropdown-item text-danger" *ngIf="employee.state != 'DOWN'"
+                      (click)="deleteEmployee(employee.id!)" title="Eliminar">
+                      Eliminar
+                    </a>
+                  </li>
+                </ul>
+              </div>
             </div>
-          </td>         
+          </td>
         </tr>
       </tbody>
-      
-
     </table>
   </div>
 
@@ -150,187 +100,109 @@
     <!-- Left side - Items per page dropdown -->
     <div class="d-flex align-items-center">
       <span class="me-2">Elementos por página:</span>
-      <select (change)="onItemsPerPageChange()" class="form-select form-select-sm" style="width: auto;" [(ngModel)]="pageSize">
+      <select (change)="onItemsPerPageChange()" class="form-select form-select-sm" style="width: auto;"
+        [(ngModel)]="pageSize">
         <option value="5">5</option>
         <option value="10">10</option>
         <option value="20">20</option>
         <option value="50">50</option>
       </select>
     </div>
-  
 
-  
     <!-- Navigation buttons -->
     <div class="ms-3">
-      <button class="btn btn-outline-secondary btn-sm me-1"
-              [disabled]="currentPage === 0"
-              (click)="goToPreviousPage()">
-        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-chevron-left" viewBox="0 0 16 16">
-          <path fill-rule="evenodd" d="M11.354 1.646a.5.5 0 0 1 0 .708L5.707 8l5.647 5.646a.5.5 0 0 1-.708.708l-6-6a.5.5 0 0 1 0-.708l6-6a.5.5 0 0 1 .708 0z"/>
+      <button class="btn btn-outline-secondary btn-sm me-1" [disabled]="currentPage === 0" (click)="goToPreviousPage()">
+        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-chevron-left"
+          viewBox="0 0 16 16">
+          <path fill-rule="evenodd"
+            d="M11.354 1.646a.5.5 0 0 1 0 .708L5.707 8l5.647 5.646a.5.5 0 0 1-.708.708l-6-6a.5.5 0 0 1 0-.708l6-6a.5.5 0 0 1 .708 0z" />
         </svg>
       </button>
-      <button class="btn btn-outline-secondary btn-sm"
-              [disabled]="currentPage === totalPages -1"
-              (click)="goToNextPage()">
-        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-chevron-right" viewBox="0 0 16 16">
-          <path fill-rule="evenodd" d="M4.646 1.646a.5.5 0 0 1 .708 0l6 6a.5.5 0 0 1 0 .708l-6 6a.5.5 0 0 1-.708-.708L10.293 8 4.646 2.354a.5.5 0 0 1 0-.708z"/>
+      <button class="btn btn-outline-secondary btn-sm" [disabled]="currentPage === totalPages -1"
+        (click)="goToNextPage()">
+        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-chevron-right"
+          viewBox="0 0 16 16">
+          <path fill-rule="evenodd"
+            d="M4.646 1.646a.5.5 0 0 1 .708 0l6 6a.5.5 0 0 1 0 .708l-6 6a.5.5 0 0 1-.708-.708L10.293 8 4.646 2.354a.5.5 0 0 1 0-.708z" />
         </svg>
       </button>
     </div>
   </div>
-  
-  <!-- Modal de Información -->
-  <ng-template #infoModal let-modal>
-    <div class="modal-body">
-      <div class="modal-header fs-6 py-1">
-        <h4 class="modal-title">Información de la Lista de Empleados</h4>
-        <button type="button" class="btn-close" aria-label="Close" (click)="modal.dismiss()"></button>
-      </div>
-      <div class="modal-body fs-6 py-2">
-        <div class="container-fluid">
-          <!-- Introducción -->
-          <div class="alert alert-info mb-2 py-2">
-            <h5 class="alert-heading">¿Qué es esta pantalla?</h5>
-            <p class="mb-0 small">Esta pantalla te permite visualizar y gestionar los empleados registrados. Cada sección está diseñada para ofrecer un acceso a la información de manera ordenada y sencilla.</p>
-          </div>
-  
-          <!-- Campos Principales -->
-          <div class="card mb-2">
-            <div class="card-header py-1">
-              <h5 class="mb-0">Datos de Empleados</h5>
+
+  <!-- FILTRO MODAL -->
+  <div *ngIf="showModalFilters" class="modal fade show" tabindex="-1" role="dialog" style="display: block;">
+    <div class="modal-dialog modal-lg" role="document">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title">Filtrar Empleados</h5>
+          <button type="button" class="btn-close" aria-label="Close" (click)="closeModalFilters()"></button>
+        </div>
+        <div class="modal-body">
+          <form [formGroup]="filterForm">
+            <div class="row">
+              <div class="col-md-4">
+                <label>Nombre</label>
+                <input type="text" class="form-control" placeholder="Nombre" formControlName="firstName">
+              </div>
+              <div class="col-md-4">
+                <label>Apellido</label>
+                <input type="text" class="form-control" placeholder="Apellido" formControlName="lastName">
+              </div>
+              <div class="col-md-4">
+                <label>Tipo de Empleado</label>
+                <select class="form-select" formControlName="employeeType">
+                  <option value="">Seleccionar</option>
+                  <!-- Llenado de opciones dinámicas -->
+                  <option *ngFor="let type of employeeTypes" [value]="type">{{ type }}</option>
+                </select>
+              </div>
             </div>
-            <div class="card-body py-2">
-              <ul class="list-group list-group-flush">
-                <li class="list-group-item py-1">
-                  <strong>Lista de Empleados:</strong> Muestra los detalles de cada empleado, incluyendo Empleado,	Tipo,	Documento,	Fecha, Contratación,	Estado.
-                </li>
-                <li class="list-group-item py-1">
-                  <strong>Búsqueda:</strong> Funcionalidad para filtrar la lista de empleados, por empleados activos y/o inactivos, o por otros filtros de búsqueda.
-                </li>
-                <li class="list-group-item py-1">
-                  <strong>Limpiar:</strong> Permite limpiar los filtros seleccionados para la búsqueda.
-                </li>
-                <li class="list-group-item py-1">
-                  <strong>Paginación:</strong> Control para navegar entre múltiples páginas de empleados.
-                </li>
-                <li class="list-group-item py-1">
-                  <strong>Nuevo:</strong> Permite ingresar un nuevo empleado, nos redireccionará a un formulario para completarlo.
-                </li>
-                <li class="list-group-item py-1">
-                  <strong>Exportar:</strong> Botones para exportar la lista a formatos PDF o Excel.
-                </li>
-              </ul>
+            <div class="row mt-3">
+              <div class="col-md-4">
+                <label>Número de Documento</label>
+                <input type="text" class="form-control" placeholder="Número de Documento" formControlName="docNumber">
+              </div>
+              <div class="col-md-4">
+                <label>Estado</label>
+                <select class="form-select" formControlName="state">
+                  <option value="">Seleccionar</option>
+                  <!-- Llenado de opciones dinámicas -->
+                  <option *ngFor="let status of statusTypes" [value]="status">{{ status }}</option>
+                </select>
+              </div>
             </div>
-          </div>
-  
-          <!-- Acciones -->
-          <div class="card mb-2">
-            <div class="card-header py-1">
-              <h5 class="mb-0">Acciones Disponibles</h5>
-            </div>
-            <div class="card-body py-2">
-              <ul class="list-group list-group-flush">
-                <li class="list-group-item py-1">
-                  <strong>Editar:</strong> Nos redireccionará a un formulario para editar el empleado seleccionado.
-                </li>
-                <li class="list-group-item py-1">
-                  <strong>Eliminar:</strong> Nos solicitará confirmación para eliminar el empleado seleccionado.
-                </li>
-                <li class="list-group-item py-1">
-                  <strong>Ver detalles:</strong> Nos brindara informacion del empleado seleccionado.
-                </li>
-              </ul>
-            </div>
-          </div>
-  
-          <!-- Nota (OPCIONAL) -->
-          <div class="alert alert-warning py-2 mb-0">
-            <h5 class="alert-heading">Nota:</h5>
-            <p class="mb-0 small">Asegúrate de verificar la información antes de modificar, ingresar o eliminar un empleado.</p>
-          </div>
+          </form>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-outline-danger" (click)="clearFilters()">
+            <i class="bi bi-trash"></i>
+          </button>
+          <button type="button" class="btn btn-primary" (click)="applyFilters()">Aplicar Filtros</button>
         </div>
       </div>
-      <div class="modal-footer py-2">
-        <button type="button" class="btn btn-primary" (click)="modal.close()">Entendido</button>
-      </div>
-    </div>
-  </ng-template>
-    <!-- FILTRO MODAL -->
-    <div *ngIf="showModalFilters" class="modal fade show" tabindex="-1" role="dialog" style="display: block;">
-      <div class="modal-dialog modal-lg" role="document">
-        <div class="modal-content">
-          <div class="modal-header">
-            <h5 class="modal-title">Filtrar Empleados</h5>
-            <button type="button" class="btn-close" aria-label="Close" (click)="closeModalFilters()"></button>
-          </div>
-          <div class="modal-body">
-            <form [formGroup]="filterForm">
-              <div class="row">
-                <div class="col-md-4">
-                  <label>Nombre</label>
-                  <input type="text" class="form-control" placeholder="Nombre" formControlName="firstName">
-                </div>
-                <div class="col-md-4">
-                  <label>Apellido</label>
-                  <input type="text" class="form-control" placeholder="Apellido" formControlName="lastName">
-                </div>
-                <div class="col-md-4">
-                  <label>Tipo de Empleado</label>
-                  <select class="form-select" formControlName="employeeType">
-                    <option value="">Seleccionar</option>
-                    <!-- Llenado de opciones dinámicas -->
-                    <option *ngFor="let type of employeeTypes" [value]="type">{{ type }}</option>
-                  </select>
-                </div>
-              </div>
-              <div class="row mt-3">
-                <div class="col-md-4">
-                  <label>Número de Documento</label>
-                  <input type="text" class="form-control" placeholder="Número de Documento" formControlName="docNumber">
-                </div>
-                <div class="col-md-4">
-                  <label>Estado</label>
-                  <select class="form-select" formControlName="state">
-                    <option value="">Seleccionar</option>
-                    <!-- Llenado de opciones dinámicas -->
-                    <option *ngFor="let status of statusTypes" [value]="status">{{ status }}</option>
-                  </select>
-                </div>
-              </div>
-            </form>
-          </div>
-          <div class="modal-footer">
-            <button type="button" class="btn btn-outline-danger" (click)="clearFilters()">
-              <i class="bi bi-trash"></i>
-            </button>
-            <button type="button" class="btn btn-primary" (click)="applyFilters()">Aplicar Filtros</button>
-          </div>
-        </div>
-      </div>
-    </div>
-    
-<!-- Metricas -->
-<div class="container mt-5">
-  <h3>Métricas de Empleados</h3>
-  <div class="row">
-    <div class="col-md-3">
-      <!-- Gráfico de torta para estados de empleados -->
-      <canvas #pieChart></canvas>
-    </div>
-    <div class="col-md-3">
-      <p><strong>Total Empleados:</strong> {{ employeeList.length }}</p>
-      <p><strong>Empleados en Servicio:</strong> {{ inServiceCount }}</p>
-      <p><strong>Empleados Inactivos:</strong> {{ inactiveCount }}</p>
-    </div>
-    <div class="col-md-6">
-      <!-- Canvas para el gráfico de barras -->
-      <h5>Empleados por Tipo</h5>
-      <canvas id="barChart"></canvas>
     </div>
   </div>
-</div>
 
-
+  <!-- Metricas -->
+  <div class="container mt-5">
+    <h3>Métricas de Empleados</h3>
+    <div class="row">
+      <div class="col-md-3">
+        <!-- Gráfico de torta para estados de empleados -->
+        <canvas #pieChart></canvas>
+      </div>
+      <div class="col-md-3">
+        <p><strong>Total Empleados:</strong> {{ employeeList.length }}</p>
+        <p><strong>Empleados en Servicio:</strong> {{ inServiceCount }}</p>
+        <p><strong>Empleados Inactivos:</strong> {{ inactiveCount }}</p>
+      </div>
+      <div class="col-md-6">
+        <!-- Canvas para el gráfico de barras -->
+        <h5>Empleados por Tipo</h5>
+        <canvas id="barChart"></canvas>
+      </div>
+    </div>
+  </div>
 
 </app-main-container>
 
@@ -377,16 +249,10 @@
           <div class="card">
             <div class="card-body d-flex align-items-center">
               <h6 class="card-subtitle mb-1 text-muted me-2">Estado</h6>
-              <i
-                *ngIf="selectedEmployee.state.toString() == 'IN_SERVICE'"
-                class="bi bi-check2-circle text-success"
-                style="font-size: 1.5rem;"
-              ></i>
-              <i
-                *ngIf="selectedEmployee.state.toString() != 'IN_SERVICE'"
-                class="bi bi-x-circle text-danger"
-                style="font-size: 1.5rem;"
-              ></i>
+              <i *ngIf="selectedEmployee.state.toString() == 'IN_SERVICE'" class="bi bi-check2-circle text-success"
+                style="font-size: 1.5rem;"></i>
+              <i *ngIf="selectedEmployee.state.toString() != 'IN_SERVICE'" class="bi bi-x-circle text-danger"
+                style="font-size: 1.5rem;"></i>
             </div>
           </div>
         </div>
@@ -408,11 +274,12 @@
             <div class="card-body">
               <h6 class="card-subtitle mb-1 text-muted">Contacto</h6>
               @if (selectedEmployee.contact != null) {
-                <p class="card-text">{{selectedEmployee.contact.contactType}}: {{selectedEmployee.contact.contactValue}}</p>
+              <p class="card-text">{{selectedEmployee.contact.contactType}}: {{selectedEmployee.contact.contactValue}}
+              </p>
               } @else {
-                <p class="card-text">Sin Contacto</p>
+              <p class="card-text">Sin Contacto</p>
               }
-              </div>
+            </div>
           </div>
         </div>
       </div>
