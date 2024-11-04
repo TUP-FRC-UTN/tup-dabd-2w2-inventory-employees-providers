@@ -293,6 +293,146 @@
             </div>
           </div>
     </div>
+
+    <!-- Address -->
+     <!-- Agregar después del div de salary -->
+<div class="card mb-4 mt-4">
+  <div class="card-header">
+    <h5 class="card-title mb-0">Dirección</h5>
+  </div>
+  <div class="card-body">
+    <div formGroupName="address">
+      <div class="row mb-3">
+        <div class="col-md-6">
+          <label for="street_address" class="form-label">Calle<span class="text-danger">*</span></label>
+          <input
+            type="text"
+            formControlName="street_address"
+            class="form-control"
+            [ngClass]="{
+              'is-valid': employeeForm.get('address.street_address')?.valid,
+              'is-invalid': employeeForm.get('address.street_address')?.invalid && 
+                          employeeForm.get('address.street_address')?.touched
+            }"
+            id="street_address"
+            placeholder="Ingrese la calle"
+          />
+          <div class="invalid-feedback">La calle es requerida</div>
+        </div>
+        <div class="col-md-6">
+          <label for="number" class="form-label">Número<span class="text-danger">*</span></label>
+          <input
+            type="number"
+            formControlName="number"
+            class="form-control"
+            [ngClass]="{
+              'is-valid': employeeForm.get('address.number')?.valid,
+              'is-invalid': employeeForm.get('address.number')?.invalid && 
+                          employeeForm.get('address.number')?.touched
+            }"
+            id="number"
+            placeholder="Ingrese el número"
+          />
+          <div class="invalid-feedback">El número es requerido</div>
+        </div>
+      </div>
+      
+      <div class="row mb-3">
+        <div class="col-md-6">
+          <label for="floor" class="form-label">Piso</label>
+          <input
+            type="number"
+            formControlName="floor"
+            class="form-control"
+            id="floor"
+            placeholder="Ingrese el piso"
+          />
+        </div>
+        <div class="col-md-6">
+          <label for="apartment" class="form-label">Departamento</label>
+          <input
+            type="text"
+            formControlName="apartment"
+            class="form-control"
+            id="apartment"
+            placeholder="Ingrese el departamento"
+          />
+        </div>
+      </div>
+
+      <div class="row mb-3">
+        <div class="col-md-6">
+          <label for="city" class="form-label">Ciudad<span class="text-danger">*</span></label>
+          <input
+            type="text"
+            formControlName="city"
+            class="form-control"
+            [ngClass]="{
+              'is-valid': employeeForm.get('address.city')?.valid,
+              'is-invalid': employeeForm.get('address.city')?.invalid && 
+                          employeeForm.get('address.city')?.touched
+            }"
+            id="city"
+            placeholder="Ingrese la ciudad"
+          />
+          <div class="invalid-feedback">La ciudad es requerida</div>
+        </div>
+        <div class="col-md-6">
+          <label for="province" class="form-label">Provincia<span class="text-danger">*</span></label>
+          <input
+            type="text"
+            formControlName="province"
+            class="form-control"
+            [ngClass]="{
+              'is-valid': employeeForm.get('address.province')?.valid,
+              'is-invalid': employeeForm.get('address.province')?.invalid && 
+                          employeeForm.get('address.province')?.touched
+            }"
+            id="province"
+            placeholder="Ingrese la provincia"
+          />
+          <div class="invalid-feedback">La provincia es requerida</div>
+        </div>
+      </div>
+
+      <div class="row mb-3">
+        <div class="col-md-6">
+          <label for="country" class="form-label">País<span class="text-danger">*</span></label>
+          <input
+            type="text"
+            formControlName="country"
+            class="form-control"
+            [ngClass]="{
+              'is-valid': employeeForm.get('address.country')?.valid,
+              'is-invalid': employeeForm.get('address.country')?.invalid && 
+                          employeeForm.get('address.country')?.touched
+            }"
+            id="country"
+            placeholder="Ingrese el país"
+          />
+          <div class="invalid-feedback">El país es requerido</div>
+        </div>
+        <div class="col-md-6">
+          <label for="postal_code" class="form-label">Código Postal<span class="text-danger">*</span></label>
+          <input
+            type="number"
+            formControlName="postal_code"
+            class="form-control"
+            [ngClass]="{
+              'is-valid': employeeForm.get('address.postal_code')?.valid,
+              'is-invalid': employeeForm.get('address.postal_code')?.invalid && 
+                          employeeForm.get('address.postal_code')?.touched
+            }"
+            id="postal_code"
+            placeholder="Ingrese el código postal"
+          />
+          <div class="invalid-feedback">El código postal es requerido</div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
     <div class="d-flex justify-content-end gap-2">
         @if (!currentEmployeeId) {
             <button type="button" class="btn btn-secondary" (click)="onCancel()">Cancelar</button>
