@@ -1,0 +1,143 @@
+<div formGroupName="addressForm" class="row g-3"> 
+    <h5 class="mt-2 p-2">Añadir Dirección</h5>
+
+    <div class="col-md-6">
+        <div class="d-flex flex-row align-items-center">
+            <label for="street-address" class="col-form-label col-md-2">Calle<label class="text-danger">*</label></label>
+            <input type="text" class="form-control" id="street-address" formControlName="streetAddress" />
+            <!-- [ngClass]="{'is-invalid': userForm.get('addressForm')?.get('streetAddress')?.invalid && userForm.get('addressForm')?.get('streetAddress')?.touched, 
+            'is-valid': userForm.get('streetAddress')?.get('streetAddress')?.valid && userForm.get('addressForm')?.get('streetAddress')?.touched}"
+            > -->
+        </div>
+        <div>
+            <!-- @if(userForm.get('addressForm.streetAddress')?.invalid && userForm.get('addressForm.streetAddress')?.touched) {
+                @if(userForm.get('addressForm.streetAddress')?.errors?.['required']) {
+                    <small class="text-danger ms-2">Campo obligatorio.</small>
+                }
+            } -->
+        </div>
+    </div>
+
+    <div class="col-md-6">
+        <div class="d-flex flex-row align-items-center">
+            <label for="number" class="col-form-label col-md-2">Número<label class="text-danger">*</label></label>
+            <input type="number" class="form-control" id="number" formControlName="number" >
+            <!-- [ngClass]="{'is-invalid': userForm.get('addressForm')?.get('number')?.invalid && userForm.get('addressForm')?.get('number')?.touched,
+             'is-valid': userForm.get('addressForm')?.get('number')?.valid && userForm.get('addressForm')?.get('number')?.touched}" -->
+            
+        </div>
+        <div>
+            <!-- @if(userForm.get('addressForm.number')?.invalid && userForm.get('addressForm.number')?.touched) {
+                @if(userForm.get('addressForm.number')?.errors?.['required']) {
+                    <small class="text-danger ms-2">Campo obligatorio.</small>
+                }
+            } -->
+        </div>
+    </div>
+
+    <div class="col-md-6">
+        <div class="d-flex flex-row align-items-center">
+            <label for="floor" class="col-form-label col-md-2">Piso</label>
+            <input type="number" class="form-control" id="floor" formControlName="floor" >
+            <!-- [ngClass]="{'is-invalid': userForm.get('addressForm')?.get('floor')?.invalid && userForm.get('addressForm')?.get('floor')?.touched,
+            'is-valid': userForm.get('addressForm')?.get('floor')?.valid && userForm.get('addressForm')?.get('floor')?.touched}"
+             -->
+        </div>
+    </div>
+
+    <div class="col-md-6">
+        <div class="d-flex flex-row align-items-center">
+            <label for="apartment" class="col-form-label col-md-2">Depto</label>
+            <input type="text" class="form-control" id="apartment" formControlName="apartment" >
+            <!-- [ngClass]="{'is-invalid': userForm.get('addressForm')?.get('apartment')?.invalid && userForm.get('addressForm')?.get('apartment')?.touched,
+             'is-valid': userForm.get('addressForm')?.get('apartment')?.valid && userForm.get('addressForm')?.get('apartment')?.touched}"
+             -->
+        </div>
+    </div>
+
+    <div class="col-md-6">
+        <div class="d-flex flex-row align-items-center">
+            <label for="country" class="col-form-label col-md-2">País<label class="text-danger">*</label></label>
+            <!-- <select id="country" class="form-select" formControlName="country"
+            [ngClass]="{'is-invalid': userForm.get('addressForm')?.get('country')?.invalid && userForm.get('addressForm')?.get('country')?.touched,
+             'is-valid': userForm.get('addressForm')?.get('country')?.valid && userForm.get('addressForm')?.get('country')?.touched}"
+            >
+                @for(country of countryOptions; track $index) {
+                    <option [value]="country.value">{{ country.display }}</option>
+                }
+            </select> -->
+        </div>
+        <div>
+            <!-- @if(userForm.get('addressForm.country')?.invalid && userForm.get('addressForm.country')?.touched) {
+                @if(userForm.get('addressForm.country')?.errors?.['required']) {
+                    <small class="text-danger ms-2">Campo obligatorio.</small>
+                }
+            } -->
+        </div>
+    </div>
+
+    <div class="col-md-6">
+        <div class="d-flex flex-row align-items-center">
+            <label for="province" class="col-form-label col-md-2">Provincia<label class="text-danger">*</label></label>
+            <select id="province" class="form-select" formControlName="province"></select>
+            <!-- [ngClass]="{'is-invalid': userForm.get('addressForm')?.get('province')?.invalid && userForm.get('addressForm')?.get('province')?.touched, 
+            'is-valid': userForm.get('addressForm')?.get('province')?.valid && userForm.get('addressForm')?.get('province')?.touched}"
+            
+                @for(province of provinceOptions; track $index) {
+                    <option [value]="province.value">{{ province.display }}</option>
+                }
+            </select> -->
+        </div>
+        <div>
+            <!-- @if(userForm.get('addressForm.province')?.invalid && userForm.get('addressForm.province')?.touched) {
+                @if(userForm.get('addressForm.province')?.errors?.['required']) {
+                    <small class="text-danger ms-2">Campo obligatorio.</small>
+                }
+            } -->
+        </div>
+    </div>
+    <div class="col-md-6">
+      <div class="d-flex flex-row align-items-center">
+        <label for="city" class="col-form-label col-md-2">Ciudad<label class="text-danger">*</label></label>
+        <input
+          type="text"
+          class="form-control w-100"
+          id="city"
+          formControlName="city"/>
+          <!-- [ngClass]="{'is-invalid': userForm.get('addressForm')?.get('city')?.invalid && userForm.get('addressForm')?.get('city')?.touched,
+           'is-valid': userForm.get('addressForm')?.get('city')?.valid && userForm.get('addressForm')?.get('city')?.touched}"
+        /> -->
+      </div>
+      <div>
+        <!-- @if(userForm.get('addressForm.city')?.invalid &&
+        userForm.get('addressForm.city')?.touched ) {
+        @if(userForm.get('addressForm.city')?.errors?.['required']){
+        <small class="text-danger ms-2">Campo obligatorio.</small> } } -->
+      </div>
+    </div>
+
+    <div class="col-md-6">
+      <div class="row g-0 align-items-center">
+          <label for="postal-code" class="col-form-label col-md-2"
+            >Codigo Postal<label class="text-danger">*</label></label
+          >
+        <div class="col">
+          <input
+            type="number"
+            class="form-control"
+            id="postal-code"
+            formControlName="postalCode"/>
+            <!-- [ngClass]="{'is-invalid': userForm.get('addressForm')?.get('postalCode')?.invalid && userForm.get('addressForm')?.get('postalCode')?.touched,
+             'is-valid': userForm.get('addressForm')?.get('postalCode')?.valid && userForm.get('addressForm')?.get('postalCode')?.touched}"
+            > -->
+        </div>
+        <div class="col-12">
+          <!-- @if(userForm.get('addressForm.postalCode')?.invalid &&
+          userForm.get('addressForm.postalCode')?.touched ) {
+          @if(userForm.get('addressForm.postalCode')?.errors?.['required']){
+          <small class="text-danger">Campo obligatorio.</small>
+          } } -->
+        </div>
+      </div>
+    </div>
+  </div>
