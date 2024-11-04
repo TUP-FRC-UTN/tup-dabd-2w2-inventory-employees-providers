@@ -102,4 +102,16 @@ export class ServiceFormComponent implements OnInit {
     this.currentServiceId = null;
     this.router.navigate(['/services/list']);
   }
+
+  loadServiceData(id: number): void {
+    this.servicesService.getServiceById(id).subscribe({
+      next: (service: Service) => {
+        this.currentServiceId = service.id;
+        this.serviceForm.patchValue(service);
+      },
+      error: () => {
+        Swal.fire('Error', 'No se pudo cargar los datos del servicio', 'error');
+      }
+    });
+  }
 }
