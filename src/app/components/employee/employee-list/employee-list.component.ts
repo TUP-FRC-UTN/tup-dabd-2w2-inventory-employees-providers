@@ -12,6 +12,7 @@ import { debounceTime, distinctUntilChanged } from 'rxjs';
 import { CommonModule } from '@angular/common';
 import { MapperService } from '../../../services/MapperCamelToSnake/mapper.service';
 import { Chart, ChartType } from 'chart.js';
+import { EmployeeListInfoComponent } from './employee-list-info/employee-list-info.component';
 
 @Component({
   selector: 'app-employee-list',
@@ -249,10 +250,6 @@ export class EmployeeListComponent implements OnInit {
   }
 
   // Modal methods
-  openInfoModal(): void {
-    this.modalService.open(this.infoModal, { centered: true });
-  }
-
   openModalFilters(): void {
     this.showModalFilters = true;
   }
@@ -317,6 +314,16 @@ export class EmployeeListComponent implements OnInit {
       this.currentPage++;
       this.getEmployees();
     }
+  }
+
+  showInfo(): void {
+    this.modalService.open(EmployeeListInfoComponent, {
+      size: 'lg',
+      backdrop: 'static',
+      keyboard: false,
+      centered: true,
+      scrollable: true
+    });
   }
 }
 
