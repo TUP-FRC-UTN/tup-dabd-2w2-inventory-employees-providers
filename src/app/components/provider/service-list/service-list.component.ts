@@ -67,4 +67,35 @@ export class ServiceListComponent implements OnInit {
   ngOnInit(): void {
     this.getServices();
   }
+
+  getServices(page: number = 0, size: number = this.pageSize, searchTerm?: string): void {
+    this.isLoading = true;
+
+    const filters = {
+      ...this.getFilters(),
+      page,
+      size
+    };
+
+    if (searchTerm) {
+      filters.name = searchTerm;
+      filters.provider = searchTerm;
+      filters.contact = searchTerm;
+    }
+
+    this.serviceService.getServices(filters).subscribe({
+      next: (response) => {
+        this.serviceList = response.content;
+        this.filteredServices = response.content;
+        this.totalItems = response.totalElements;
+        this.totalPages = Math.ceil(this.totalItems / this.pageSize);
+        this.isLoading = false;
+      },
+      error: (error) => {
+        console.error('Error fetching services:', error);
+        this.toastService.sendError('Error al cargar servicios.');
+        this.isLoading = false;
+      }
+    });
+  }
 }
