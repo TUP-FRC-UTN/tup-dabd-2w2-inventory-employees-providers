@@ -11,6 +11,7 @@ import * as XLSX from 'xlsx';
 import jsPDF from 'jspdf';
 import autoTable from 'jspdf-autotable';
 import { Chart, ChartType, registerables } from 'chart.js';
+import { ProviderListInfoComponent } from './provider-list-info/provider-list-info.component';
 
 Chart.register(...registerables);
 
@@ -361,8 +362,14 @@ export class ProviderListComponent implements OnInit {
       this.getProviders(this.currentPage - 1, this.pageSize);
     }
   }
-
-  openInfoModal(content: TemplateRef<any>): void {
-    this.modalService.open(content, { centered: true });
+  
+  showInfo(): void {
+    this.modalService.open(ProviderListInfoComponent, {
+      size: 'lg',
+      backdrop: 'static',
+      keyboard: false,
+      centered: true,
+      scrollable: true
+    });
   }
 }
