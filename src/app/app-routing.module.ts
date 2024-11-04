@@ -19,6 +19,7 @@ export const routes: Routes = [
   { path: 'providers/list', component: ProviderListComponent },
   { path: 'providers/form', component: ProviderFormComponent },
   { path: 'providers/form/:id', component: ProviderFormComponent },
+  { path: 'services/list', component: ProviderListComponent },
   { path: 'services/form', component: ServiceFormComponent },
   { path: 'services/form/:id', component: ServiceFormComponent },
   { path: 'articles/article', component: ArticleFormComponent},
