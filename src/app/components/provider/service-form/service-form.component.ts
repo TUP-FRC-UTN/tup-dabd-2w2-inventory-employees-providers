@@ -95,4 +95,11 @@ export class ServiceFormComponent implements OnInit {
       }
     });
   }
+
+  resetForm(): void {
+    this.serviceForm.reset();
+    this.isEditMode = false;
+    this.currentServiceId = null;
+    this.router.navigate(['/services/list']);
+  }
 }
