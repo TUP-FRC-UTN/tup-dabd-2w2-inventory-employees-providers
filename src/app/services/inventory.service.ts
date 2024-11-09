@@ -15,10 +15,6 @@ export class InventoryService {
    private apiInventoriesUrl = 'http://localhost:8009/inventories'; // URL de la API para los inventarios
    private apiTransactionsUrl = 'http://localhost:8009/transactions'; // URL de la API para las transacciones
 
-  //private apiArticlesUrl = 'http://localhost:3000/articles'; // URL de la API para los ítems DEL BACK
-  //private apiInventoriesUrl = 'http://localhost:3000/inventories'; // URL de la API para los inventarios
- // private apiTransactionsUrl = 'http://localhost:3000/transactions'; // URL de la API para las transacciones
-
   constructor(private http: HttpClient) {}
 
 
@@ -47,11 +43,11 @@ export class InventoryService {
   deleteArticle(article_id: number): Observable<void> {
     return this.http.patch<void>(`${this.apiArticlesUrl}/${article_id}`, { article_status: 'Inactive' });
   }
-  
+
   getFilteredInventories(filters: any): Observable<Inventory[]> {
     return this.http.get<Inventory[]>(`/api/inventories`, { params: filters });
   }
-  
+
   // CRUD para Inventarios
   getInventories(filters?:{
     measure?: string;
@@ -129,7 +125,7 @@ export class InventoryService {
   }
 
   // CRUD para ArticleCategories
-  
+
   getArticleCategories(): Observable<ArticleCateg[]> {
     return this.http.get<ArticleCateg[]>(`${this.apiArticleCategoriesUrl}`);
   }
