@@ -82,6 +82,15 @@ export class InventoryTableComponent implements OnInit {
     this.filterForm = this.fb.group({
       measure: [this.measurementUnits[2]],
     });
+
+      this.filterForm = this.fb.group({
+        articleNameFilter: [''],
+        stockFilter: [''],
+        locationFilter: [''],
+        measure: [null]  // Agrega 'measure' si necesitas este filtro en particular.
+      });
+
+    
   }
 
   ngOnInit(): void {
@@ -148,7 +157,23 @@ getDisplayUnit(unit: MeasurementUnit): string {
       }
     });
   }
-
+  clearFilters(): void {
+    this.filterForm.reset();  // Reinicia todos los filtros
+    this.applyFilters();      // Aplica los filtros después de limpiar para actualizar la lista
+  }
+  applyFilters(): void {
+    const filters = this.filterForm.value;
+  
+    this.inventoryService.getFilteredInventories(filters).subscribe({
+      next: (filteredInventories) => {
+        this.inventories = filteredInventories;  // Actualiza la lista con los inventarios filtrados
+      },
+      error: () => {
+        alert('Hubo un problema al aplicar los filtros');
+      }
+    });
+  }
+  
   resetForm(): void {
     this.isEditing = false; // Desactivar el modo edición
     this.editingInventoryId = null; // Limpiar el ID del inventario en edición
@@ -163,9 +188,9 @@ getDisplayUnit(unit: MeasurementUnit): string {
     this.selectedInventory = inventory;
     this.showTransactions = !this.showTransactions;
   }
-  onInventoryUpdate(inventory: Inventory){
+  onInventoryUpdate(inventory: Inventory) {
     this.selectedInventory = inventory;
-    this.showInventoryUpdate = !this.showInventoryUpdate;
+    this.showInventoryUpdate = true;
   }
 
   onRegisterTransactionClose(){
