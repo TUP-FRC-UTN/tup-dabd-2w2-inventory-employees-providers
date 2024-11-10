@@ -1,217 +1,126 @@
-<div class="card">
-  <div class="card-body">
-    <div class="container">
-      <form [formGroup]="providerForm" (ngSubmit)="onSubmit()" autocomplete="off">
-        <h2 class="h1 mb-4">{{ isEditMode ? 'Editar Proveedor' : 'Registrar Proveedor' }}</h2>
-
-        <!-- Primera fila - Dos columnas -->
-        <div class="row mb-3">
-          <!-- Nombre -->
-          <div class="col-md-6">
-            <div class="form-group">
-              <div class="d-flex align-items-center mb-1">
-                <label for="name" class="form-label">
-                  Nombre <span class="text-danger">*</span>
-                </label>
-                <input
-                  id="name"
-                  formControlName="name"
-                  class="form-control ms-2"
-                  placeholder="Ingrese el nombre"
-                  [ngClass]="{
-                    'is-valid': providerForm.get('name')?.valid && providerForm.get('name')?.touched,
-                    'is-invalid': providerForm.get('name')?.invalid && providerForm.get('name')?.touched
-                  }"
-                />
-              </div>
-              <div class="error-container">
-                <small
-                  *ngIf="providerForm.get('name')?.invalid && providerForm.get('name')?.touched"
-                  class="text-danger"
-                >
-                  El nombre es requerido.
-                </small>
-              </div>
-            </div>
-          </div>
-
-          <!-- CUIL -->
-          <div class="col-md-6">
-            <div class="form-group">
-              <div class="d-flex align-items-center mb-1">
-                <label for="cuil" class="form-label">
-                  CUIL <span class="text-danger">*</span>
-                </label>
-                <input
-                  id="cuil"
-                  formControlName="cuil"
-                  class="form-control ms-2"
-                  placeholder="Ingrese el CUIL"
-                  [ngClass]="{
-                    'is-valid': providerForm.get('cuil')?.valid && providerForm.get('cuil')?.touched,
-                    'is-invalid': providerForm.get('cuil')?.invalid && providerForm.get('cuil')?.touched
-                  }"
-                />
-              </div>
-              <div class="error-container">
-                <small
-                  *ngIf="providerForm.get('cuil')?.invalid && providerForm.get('cuil')?.touched"
-                  class="text-danger"
-                >
-                  El CUIL debe tener 11 caracteres.
-                </small>
-              </div>
-            </div>
-          </div>
-        </div>
-
-        <!-- Segunda fila - Dos columnas -->
-        <div class="row mb-3">
-          <!-- Servicio -->
-          <div class="col-md-6">
-            <div class="form-group">
-              <div class="d-flex align-items-center mb-1">
-                <label for="service" class="form-label">
-                  Servicio <span class="text-danger">*</span>
-                </label>
-                <input
-                  id="service"
-                  formControlName="service"
-                  class="form-control ms-2"
-                  placeholder="Ingrese el servicio"
-                  [ngClass]="{
-                    'is-valid': providerForm.get('service')?.valid && providerForm.get('service')?.touched,
-                    'is-invalid': providerForm.get('service')?.invalid && providerForm.get('service')?.touched
-                  }"
-                />
-              </div>
-              <div class="error-container">
-                <small
-                  *ngIf="providerForm.get('service')?.invalid && providerForm.get('service')?.touched"
-                  class="text-danger"
-                >
-                  El servicio es requerido.
-                </small>
-              </div>
-            </div>
-          </div>
-
-          <!-- Contacto -->
-          <div class="col-md-6">
-            <div class="form-group">
-              <div class="d-flex align-items-center mb-1">
-                <label for="contact" class="form-label">
-                  Contacto <span class="text-danger">*</span>
-                </label>
-                <input
-                  id="contact"
-                  formControlName="contact"
-                  class="form-control ms-2"
-                  placeholder="Ingrese el contacto"
-                  [ngClass]="{
-                    'is-valid': providerForm.get('contact')?.valid && providerForm.get('contact')?.touched,
-                    'is-invalid': providerForm.get('contact')?.invalid && providerForm.get('contact')?.touched
-                  }"
-                />
-              </div>
-              <div class="error-container">
-                <small
-                  *ngIf="providerForm.get('contact')?.invalid && providerForm.get('contact')?.touched"
-                  class="text-danger"
-                >
-                  El contacto es requerido.
-                </small>
-              </div>
-            </div>
-          </div>
-        </div>
-
-        <!-- Tercera fila - Una columna -->
-        <div class="row mb-3">
-          <!-- Dirección -->
-          <div class="col-md-6">
-            <div class="form-group">
-              <div class="d-flex align-items-center mb-1">
-                <label for="address" class="form-label">
-                  Dirección <span class="text-danger">*</span>
-                </label>
-                <input
-                  id="address"
-                  formControlName="address"
-                  class="form-control ms-2"
-                  placeholder="Ingrese la dirección"
-                  [ngClass]="{
-                    'is-valid': providerForm.get('address')?.valid && providerForm.get('address')?.touched,
-                    'is-invalid': providerForm.get('address')?.invalid && providerForm.get('address')?.touched
-                  }"
-                />
-              </div>
-              <div class="error-container">
-                <small
-                  *ngIf="providerForm.get('address')?.invalid && providerForm.get('address')?.touched"
-                  class="text-danger"
-                >
-                  La dirección es requerida.
-                </small>
-              </div>
-            </div>
-          </div>
-        </div>
-
-        <!-- Cuarta fila - Una columna -->
-        <div class="row mb-4">
-          <!-- Detalles -->
-          <div class="col-md-12">
-            <div class="form-group">
-              <div class="d-flex align-items-start mb-1">
-                <label for="details" class="form-label-detail">
-                  Detalles <span class="text-danger">*</span>
-                </label>
-                <textarea
-                  id="details"
-                  formControlName="details"
-                  class="form-control ms-2"
-                  placeholder="Ingrese los detalles"
-                  style="height: 100px;"
-                  [ngClass]="{
-                    'is-valid': providerForm.get('details')?.valid && providerForm.get('details')?.touched,
-                    'is-invalid': providerForm.get('details')?.invalid && providerForm.get('details')?.touched
-                  }"
-                ></textarea>
-              </div>
-              <div class="error-container">
-                <small
-                  *ngIf="providerForm.get('details')?.invalid && providerForm.get('details')?.touched"
-                  class="text-danger"
-                >
-                  Los detalles son requeridos.
-                </small>
-              </div>
-            </div>
-          </div>
-        </div>
-
-        <!-- Botones -->
-        <div class="d-flex justify-content-end gap-2">
-          <button type="button" class="btn btn-danger" (click)="resetForm()">
-            Cancelar
-          </button>
-          <button type="submit" class="btn btn-primary" [disabled]="providerForm.invalid">
-            {{ isEditMode ? 'Actualizar' : 'Guardar' }}
-          </button>
-        </div>
-
-        <!-- Botón de información -->
-        <div class="d-flex justify-content-end mt-3">
-          <button class="custom-button" (click)="showInfo()">
-            <i class="bi bi-info-circle"></i>
-          </button>
-        </div>
-      </form>
+<app-main-container [title]="isEditMode ? 'Editar Proveedor' : 'Registrar Proveedor'" (infoButtonClick)="showInfo()">
+  <form [formGroup]="providerForm" (ngSubmit)="onSubmit()" class="row g-3 m-2">
+    
+    <!-- Nombre y CUIL -->
+    <div class="col-md-6">
+      <div class="flex-row d-flex align-items-center">
+        <label for="name" class="col-form-label col-md-2">Nombre<label class="text-danger">*</label></label>
+        <input type="text" class="form-control m-2" id="name" formControlName="name"
+          placeholder=""
+          [ngClass]="{'is-invalid': providerForm.get('name')?.invalid && providerForm.get('name')?.touched,
+                     'is-valid': providerForm.get('name')?.valid && providerForm.get('name')?.touched}">
+      </div>
+      <div>
+        @if (providerForm.get('name')?.invalid && providerForm.get('name')?.touched) {
+          <small class="text-danger ms-2">El nombre es requerido</small>
+        }
+      </div>
     </div>
-  </div>
-</div>
 
+    <div class="col-md-6">
+      <div class="flex-row d-flex align-items-center">
+        <label for="cuil" class="col-form-label col-md-2">CUIL<label class="text-danger">*</label></label>
+        <input type="text" class="form-control m-2" id="cuil" formControlName="cuil"
+          placeholder=""
+          [ngClass]="{'is-invalid': providerForm.get('cuil')?.invalid && providerForm.get('cuil')?.touched,
+                     'is-valid': providerForm.get('cuil')?.valid && providerForm.get('cuil')?.touched}">
+      </div>
+      <div>
+        @if (providerForm.get('cuil')?.invalid && providerForm.get('cuil')?.touched) {
+          <small class="text-danger ms-2">El CUIL debe tener 11 caracteres</small>
+        }
+      </div>
+    </div>
+
+    <!-- Servicio y Contacto -->
+    <div class="col-md-6">
+      <div class="flex-row d-flex align-items-center">
+        <label for="service" class="col-form-label col-md-2">Servicio<label class="text-danger">*</label></label>
+        <input type="text" class="form-control m-2" id="service" formControlName="service"
+          placeholder=""
+          [ngClass]="{'is-invalid': providerForm.get('service')?.invalid && providerForm.get('service')?.touched,
+                     'is-valid': providerForm.get('service')?.valid && providerForm.get('service')?.touched}">
+      </div>
+      <div>
+        @if (providerForm.get('service')?.invalid && providerForm.get('service')?.touched) {
+          <small class="text-danger ms-2">El servicio es requerido</small>
+        }
+      </div>
+    </div>
+
+    <div class="col-md-6">
+      <div class="flex-row d-flex align-items-center">
+        <label for="contact" class="col-form-label col-md-2">Contacto<label class="text-danger">*</label></label>
+        <input type="text" class="form-control m-2" id="contact" formControlName="contact"
+          placeholder=""
+          [ngClass]="{'is-invalid': providerForm.get('contact')?.invalid && providerForm.get('contact')?.touched,
+                     'is-valid': providerForm.get('contact')?.valid && providerForm.get('contact')?.touched}">
+      </div>
+      <div>
+        @if (providerForm.get('contact')?.invalid && providerForm.get('contact')?.touched) {
+          <small class="text-danger ms-2">El contacto es requerido</small>
+        }
+      </div>
+    </div>
+
+    <!-- Dirección -->
+    <div class="col-md-6">
+      <div class="flex-row d-flex align-items-center">
+        <label for="address" class="col-form-label col-md-2">Dirección<label class="text-danger">*</label></label>
+        <input type="text" class="form-control m-2" id="address" formControlName="address"
+          placeholder=""
+          [ngClass]="{'is-invalid': providerForm.get('address')?.invalid && providerForm.get('address')?.touched,
+                     'is-valid': providerForm.get('address')?.valid && providerForm.get('address')?.touched}">
+      </div>
+      <div>
+        @if (providerForm.get('address')?.invalid && providerForm.get('address')?.touched) {
+          <small class="text-danger ms-2">La dirección es requerida</small>
+        }
+      </div>
+    </div>
+
+    <div class="mb-3"></div>
+    <hr>
+
+    <!-- Detalles -->
+    <div class="col-12">
+      <div class="flex-row d-flex">
+        <label for="details" class="col-form-label col-md-1">Detalles<label class="text-danger">*</label></label>
+        <textarea class="form-control m-2" id="details" formControlName="details"
+          placeholder="" style="height: 100px;"
+          [ngClass]="{'is-invalid': providerForm.get('details')?.invalid && providerForm.get('details')?.touched,
+                     'is-valid': providerForm.get('details')?.valid && providerForm.get('details')?.touched}">
+        </textarea>
+      </div>
+      <div>
+        @if (providerForm.get('details')?.invalid && providerForm.get('details')?.touched) {
+          <small class="text-danger ms-2">Los detalles son requeridos</small>
+        }
+      </div>
+    </div>
+
+    <!-- Botones -->
+    <div class="col-12 d-flex justify-content-end">
+      <div class="mx-2">
+        <button type="button" class="btn btn-danger" (click)="resetForm()">Cancelar</button>
+      </div>
+      <div>
+        <button type="submit" class="btn btn-primary" [disabled]="providerForm.invalid">
+          {{ isEditMode ? 'Actualizar' : 'Guardar' }}
+        </button>
+      </div>
+    </div>
+
+    <!-- Botón de información -->
+    <!-- <div class="d-flex justify-content-end mt-3">
+      <button class="btn btn-outline-info" (click)="showInfo()">
+        <i class="bi bi-info-circle"></i>
+      </button>
+    </div> -->
+  </form>
+</app-main-container>
+
+<!-- Modal template sin cambios -->
 <ng-template #infoModal let-modal>
   <div class="modal-header fs-6 py-1">
     <h4 class="modal-title">Formulario de Proveedores</h4>
@@ -270,3 +179,273 @@
     <button type="button" class="btn btn-primary" (click)="modal.close()">Entendido</button>
   </div>
 </ng-template>
+<!-- <div class="card">
+  <div class="card-body">
+    <div class="container">
+      <form [formGroup]="providerForm" (ngSubmit)="onSubmit()" autocomplete="off">
+        <h2 class="h1 mb-4">{{ isEditMode ? 'Editar Proveedor' : 'Registrar Proveedor' }}</h2>
+
+
+        <div class="row mb-3">
+
+          <div class="col-md-6">
+            <div class="form-group">
+              <div class="d-flex align-items-center mb-1">
+                <label for="name" class="form-label">
+                  Nombre <span class="text-danger">*</span>
+                </label>
+                <input
+                  id="name"
+                  formControlName="name"
+                  class="form-control ms-2"
+                  placeholder="Ingrese el nombre"
+                  [ngClass]="{
+                    'is-valid': providerForm.get('name')?.valid && providerForm.get('name')?.touched,
+                    'is-invalid': providerForm.get('name')?.invalid && providerForm.get('name')?.touched
+                  }"
+                />
+              </div>
+              <div class="error-container">
+                <small
+                  *ngIf="providerForm.get('name')?.invalid && providerForm.get('name')?.touched"
+                  class="text-danger"
+                >
+                  El nombre es requerido.
+                </small>
+              </div>
+            </div>
+          </div>
+
+
+          <div class="col-md-6">
+            <div class="form-group">
+              <div class="d-flex align-items-center mb-1">
+                <label for="cuil" class="form-label">
+                  CUIL <span class="text-danger">*</span>
+                </label>
+                <input
+                  id="cuil"
+                  formControlName="cuil"
+                  class="form-control ms-2"
+                  placeholder="Ingrese el CUIL"
+                  [ngClass]="{
+                    'is-valid': providerForm.get('cuil')?.valid && providerForm.get('cuil')?.touched,
+                    'is-invalid': providerForm.get('cuil')?.invalid && providerForm.get('cuil')?.touched
+                  }"
+                />
+              </div>
+              <div class="error-container">
+                <small
+                  *ngIf="providerForm.get('cuil')?.invalid && providerForm.get('cuil')?.touched"
+                  class="text-danger"
+                >
+                  El CUIL debe tener 11 caracteres.
+                </small>
+              </div>
+            </div>
+          </div>
+        </div>
+
+
+        <div class="row mb-3">
+
+          <div class="col-md-6">
+            <div class="form-group">
+              <div class="d-flex align-items-center mb-1">
+                <label for="service" class="form-label">
+                  Servicio <span class="text-danger">*</span>
+                </label>
+                <input
+                  id="service"
+                  formControlName="service"
+                  class="form-control ms-2"
+                  placeholder="Ingrese el servicio"
+                  [ngClass]="{
+                    'is-valid': providerForm.get('service')?.valid && providerForm.get('service')?.touched,
+                    'is-invalid': providerForm.get('service')?.invalid && providerForm.get('service')?.touched
+                  }"
+                />
+              </div>
+              <div class="error-container">
+                <small
+                  *ngIf="providerForm.get('service')?.invalid && providerForm.get('service')?.touched"
+                  class="text-danger"
+                >
+                  El servicio es requerido.
+                </small>
+              </div>
+            </div>
+          </div>
+
+          <div class="col-md-6">
+            <div class="form-group">
+              <div class="d-flex align-items-center mb-1">
+                <label for="contact" class="form-label">
+                  Contacto <span class="text-danger">*</span>
+                </label>
+                <input
+                  id="contact"
+                  formControlName="contact"
+                  class="form-control ms-2"
+                  placeholder="Ingrese el contacto"
+                  [ngClass]="{
+                    'is-valid': providerForm.get('contact')?.valid && providerForm.get('contact')?.touched,
+                    'is-invalid': providerForm.get('contact')?.invalid && providerForm.get('contact')?.touched
+                  }"
+                />
+              </div>
+              <div class="error-container">
+                <small
+                  *ngIf="providerForm.get('contact')?.invalid && providerForm.get('contact')?.touched"
+                  class="text-danger"
+                >
+                  El contacto es requerido.
+                </small>
+              </div>
+            </div>
+          </div>
+        </div>
+
+
+        <div class="row mb-3">
+
+          <div class="col-md-6">
+            <div class="form-group">
+              <div class="d-flex align-items-center mb-1">
+                <label for="address" class="form-label">
+                  Dirección <span class="text-danger">*</span>
+                </label>
+                <input
+                  id="address"
+                  formControlName="address"
+                  class="form-control ms-2"
+                  placeholder="Ingrese la dirección"
+                  [ngClass]="{
+                    'is-valid': providerForm.get('address')?.valid && providerForm.get('address')?.touched,
+                    'is-invalid': providerForm.get('address')?.invalid && providerForm.get('address')?.touched
+                  }"
+                />
+              </div>
+              <div class="error-container">
+                <small
+                  *ngIf="providerForm.get('address')?.invalid && providerForm.get('address')?.touched"
+                  class="text-danger"
+                >
+                  La dirección es requerida.
+                </small>
+              </div>
+            </div>
+          </div>
+        </div>
+
+
+        <div class="row mb-4">
+
+          <div class="col-md-12">
+            <div class="form-group">
+              <div class="d-flex align-items-start mb-1">
+                <label for="details" class="form-label-detail">
+                  Detalles <span class="text-danger">*</span>
+                </label>
+                <textarea
+                  id="details"
+                  formControlName="details"
+                  class="form-control ms-2"
+                  placeholder="Ingrese los detalles"
+                  style="height: 100px;"
+                  [ngClass]="{
+                    'is-valid': providerForm.get('details')?.valid && providerForm.get('details')?.touched,
+                    'is-invalid': providerForm.get('details')?.invalid && providerForm.get('details')?.touched
+                  }"
+                ></textarea>
+              </div>
+              <div class="error-container">
+                <small
+                  *ngIf="providerForm.get('details')?.invalid && providerForm.get('details')?.touched"
+                  class="text-danger"
+                >
+                  Los detalles son requeridos.
+                </small>
+              </div>
+            </div>
+          </div>
+        </div>
+
+  
+        <div class="d-flex justify-content-end gap-2">
+          <button type="button" class="btn btn-danger" (click)="resetForm()">
+            Cancelar
+          </button>
+          <button type="submit" class="btn btn-primary" [disabled]="providerForm.invalid">
+            {{ isEditMode ? 'Actualizar' : 'Guardar' }}
+          </button>
+        </div>
+
+
+        <div class="d-flex justify-content-end mt-3">
+          <button class="custom-button" (click)="showInfo()">
+            <i class="bi bi-info-circle"></i>
+          </button>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>
+
+<ng-template #infoModal let-modal>
+  <div class="modal-header fs-6 py-1">
+    <h4 class="modal-title">Formulario de Proveedores</h4>
+    <button type="button" class="btn-close" aria-label="Close" (click)="modal.dismiss()"></button>
+  </div>
+  <div class="modal-body fs-6 py-2">
+    <div class="container-fluid">
+
+      <div class="alert alert-info mb-2 py-2">
+        <h5 class="alert-heading">¿Qué es esta pantalla?</h5>
+        <p class="mb-0 small">Esta pantalla te permite registrar un proveedor.</p>
+      </div>
+
+
+      <div class="card mb-2">
+        <div class="card-header py-1">
+          <h5 class="mb-0">Datos de Proveedores</h5>
+        </div>
+        <div class="card-body py-2">
+          <ul class="list-group list-group-flush">
+            <li class="list-group-item py-1">
+              <strong>Campos a ingresar:</strong> Se solicitarán: Nombre, CUIL, Servicio, Contacto, Dirección y Detalles.
+            </li>
+            <li class="list-group-item py-1">
+              <strong>ATENCIÓN:</strong> La opción de GUARDAR solo se habilitará si todos los campos se encuentran correctamente completados.
+            </li>
+          </ul>
+        </div>
+      </div>
+
+
+      <div class="card mb-2">
+        <div class="card-header py-1">
+          <h5 class="mb-0">Acciones Disponibles</h5>
+        </div>
+        <div class="card-body py-2">
+          <ul class="list-group list-group-flush">
+            <li class="list-group-item py-1">
+              <strong>Guardar:</strong> En caso de que todos los campos se encuentren correctamente completados se guardará el nuevo proveedor.
+            </li>
+            <li class="list-group-item py-1">
+              <strong>Cancelar:</strong> Se cancela el registro o la actualización del proveedor.
+            </li>
+          </ul>
+        </div>
+      </div>
+
+      <div class="alert alert-warning py-2 mb-0">
+        <h5 class="alert-heading">Nota:</h5>
+        <p class="mb-0 small">Asegúrate de verificar la información antes de dar el alta de un proveedor.</p>
+      </div>
+    </div>
+  </div>
+  <div class="modal-footer py-2">
+    <button type="button" class="btn btn-primary" (click)="modal.close()">Entendido</button>
+  </div>
+</ng-template> -->

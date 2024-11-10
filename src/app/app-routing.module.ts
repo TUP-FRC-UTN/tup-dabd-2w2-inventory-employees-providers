@@ -10,8 +10,10 @@ import { InventoryTableComponent } from './components/inventory/inventory_invent
 import { InventoryArticleCategoryListComponent } from './components/inventory/inventory_config/inventory-article-category-list/inventory-article-category-list.component';
 import { ServiceFormComponent } from './components/provider/service-form/service-form.component';
 import { ServiceListComponent } from './components/provider/service-list/service-list.component';
+import { ProviderDashboardComponent } from './components/provider/provider-dashboard/provider-dashboard.component';
 import { ProvideConfigComponent } from './components/provider/provide-config/provide-config.component';
 import { ProviderTypeUpdateComponent } from './components/provider/provider-type-update/provider-type-update.component';
+
 
 
 
@@ -20,6 +22,7 @@ export const routes: Routes = [
   { path: 'employees/form', component: EmployeeFormComponent },
   { path: 'employees/form/:id', component: EmployeeFormComponent },
   { path: 'providers/list', component: ProviderListComponent },
+  { path: 'providers/dashboard', component: ProviderDashboardComponent },
   { path: 'providers/form', component: ProviderFormComponent },
   { path: 'providers/form/:id', component: ProviderFormComponent },
   { path: 'services/list', component: ServiceListComponent },
