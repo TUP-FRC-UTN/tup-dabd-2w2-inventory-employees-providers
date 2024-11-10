@@ -6,7 +6,7 @@
       <div class="flex-row d-flex align-items-center">
         <label for="name" class="col-form-label col-md-2">Nombre<label class="text-danger">*</label></label>
         <input type="text" class="form-control m-2" id="name" formControlName="name"
-          placeholder="Ingrese el nombre"
+          placeholder=""
           [ngClass]="{'is-invalid': providerForm.get('name')?.invalid && providerForm.get('name')?.touched,
                      'is-valid': providerForm.get('name')?.valid && providerForm.get('name')?.touched}">
       </div>
@@ -21,7 +21,7 @@
       <div class="flex-row d-flex align-items-center">
         <label for="cuil" class="col-form-label col-md-2">CUIL<label class="text-danger">*</label></label>
         <input type="text" class="form-control m-2" id="cuil" formControlName="cuil"
-          placeholder="Ingrese el CUIL"
+          placeholder=""
           [ngClass]="{'is-invalid': providerForm.get('cuil')?.invalid && providerForm.get('cuil')?.touched,
                      'is-valid': providerForm.get('cuil')?.valid && providerForm.get('cuil')?.touched}">
       </div>
@@ -37,7 +37,7 @@
       <div class="flex-row d-flex align-items-center">
         <label for="service" class="col-form-label col-md-2">Servicio<label class="text-danger">*</label></label>
         <input type="text" class="form-control m-2" id="service" formControlName="service"
-          placeholder="Ingrese el servicio"
+          placeholder=""
           [ngClass]="{'is-invalid': providerForm.get('service')?.invalid && providerForm.get('service')?.touched,
                      'is-valid': providerForm.get('service')?.valid && providerForm.get('service')?.touched}">
       </div>
@@ -52,7 +52,7 @@
       <div class="flex-row d-flex align-items-center">
         <label for="contact" class="col-form-label col-md-2">Contacto<label class="text-danger">*</label></label>
         <input type="text" class="form-control m-2" id="contact" formControlName="contact"
-          placeholder="Ingrese el contacto"
+          placeholder=""
           [ngClass]="{'is-invalid': providerForm.get('contact')?.invalid && providerForm.get('contact')?.touched,
                      'is-valid': providerForm.get('contact')?.valid && providerForm.get('contact')?.touched}">
       </div>
@@ -68,7 +68,7 @@
       <div class="flex-row d-flex align-items-center">
         <label for="address" class="col-form-label col-md-2">Dirección<label class="text-danger">*</label></label>
         <input type="text" class="form-control m-2" id="address" formControlName="address"
-          placeholder="Ingrese la dirección"
+          placeholder=""
           [ngClass]="{'is-invalid': providerForm.get('address')?.invalid && providerForm.get('address')?.touched,
                      'is-valid': providerForm.get('address')?.valid && providerForm.get('address')?.touched}">
       </div>
@@ -87,7 +87,7 @@
       <div class="flex-row d-flex">
         <label for="details" class="col-form-label col-md-1">Detalles<label class="text-danger">*</label></label>
         <textarea class="form-control m-2" id="details" formControlName="details"
-          placeholder="Ingrese los detalles" style="height: 100px;"
+          placeholder="" style="height: 100px;"
           [ngClass]="{'is-invalid': providerForm.get('details')?.invalid && providerForm.get('details')?.touched,
                      'is-valid': providerForm.get('details')?.valid && providerForm.get('details')?.touched}">
         </textarea>
