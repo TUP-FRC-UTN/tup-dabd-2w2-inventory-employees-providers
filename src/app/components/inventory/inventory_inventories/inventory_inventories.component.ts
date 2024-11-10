@@ -15,7 +15,7 @@ import jsPDF from 'jspdf';
 import 'jspdf-autotable';
 import * as XLSX from 'xlsx';
 import autoTable from 'jspdf-autotable';
-import { ToastService } from 'ngx-dabd-grupo01';
+import { MainContainerComponent, ToastService } from 'ngx-dabd-grupo01';
 import { NgbModal } from '@ng-bootstrap/ng-bootstrap';
 
 
@@ -31,6 +31,7 @@ import { NgbModal } from '@ng-bootstrap/ng-bootstrap';
     TransactionComponentForm,
     InventoryTransactionTableComponent,
     InventoryInventoriesUpdateComponent,
+    MainContainerComponent
   ],
   templateUrl: './inventory_inventories.component.html',
   styleUrls: ['./inventory_inventories.component.css']

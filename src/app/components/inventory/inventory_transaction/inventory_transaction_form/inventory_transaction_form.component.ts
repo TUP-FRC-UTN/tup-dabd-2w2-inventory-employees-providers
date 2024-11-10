@@ -43,7 +43,7 @@ isModalOpen : boolean = true;
       transactionType: [TransactionType.ENTRY, Validators.required],
       quantity: [0, Validators.required],
       price: [0],
-      transactionDate: [{ value: new Date().toISOString().split('T')[0] }]
+      transactionDate: [new Date().toISOString().split('T')[0]]
     });
   }
 
