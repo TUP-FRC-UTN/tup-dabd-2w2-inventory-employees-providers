@@ -6,12 +6,12 @@ import { CommonModule } from '@angular/common';
 import { ActivatedRoute, Router } from '@angular/router';
 import {  Supplier } from '../../../models/supplier.model';
 import { NgbModal } from '@ng-bootstrap/ng-bootstrap';
-import { ToastService } from 'ngx-dabd-grupo01';
+import { ToastService, MainContainerComponent } from 'ngx-dabd-grupo01';
 
 @Component({
   selector: 'app-provider-form',
   standalone: true,
-  imports: [ReactiveFormsModule, CommonModule],
+  imports: [ReactiveFormsModule, CommonModule, MainContainerComponent],
   templateUrl: './provider-form.component.html',
   styleUrl: './provider-form.component.css'
 })
@@ -25,8 +25,9 @@ export class ProviderFormComponent implements OnInit{
   private route = inject(ActivatedRoute);
   private router = inject(Router);
   private modalService = inject(NgbModal);
+  private toastService = inject(ToastService);
 
-  constructor(private toastService: ToastService) {
+  constructor() {
     this.providerForm = this.fb.group({
       name: ['', Validators.required],
       cuil: ['', Validators.required],
