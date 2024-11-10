@@ -182,27 +182,6 @@
     </div>
   </div>
 
-  <!-- Metricas -->
-  <div class="container mt-5">
-    <h3>Métricas de Empleados</h3>
-    <div class="row">
-      <div class="col-md-3">
-        <!-- Gráfico de torta para estados de empleados -->
-        <canvas #pieChart></canvas>
-      </div>
-      <div class="col-md-3">
-        <p><strong>Total Empleados:</strong> {{ employeeList.length }}</p>
-        <p><strong>Empleados en Servicio:</strong> {{ inServiceCount }}</p>
-        <p><strong>Empleados Inactivos:</strong> {{ inactiveCount }}</p>
-      </div>
-      <div class="col-md-6">
-        <!-- Canvas para el gráfico de barras -->
-        <h5>Empleados por Tipo</h5>
-        <canvas id="barChart"></canvas>
-      </div>
-    </div>
-  </div>
-
 </app-main-container>
 
 <ng-template #detailModal let-modal>
