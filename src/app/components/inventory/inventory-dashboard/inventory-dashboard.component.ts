@@ -86,8 +86,11 @@ export class InventoryDashboardComponent implements OnInit {
 
       // Verificación de las transacciones para calcular rotación de inventario
       inventory.transactions?.forEach(transaction => {
-        if (transaction.transactionDate) { // Verificamos si transactionDate está definido
-          const month = new Date(transaction.transactionDate).toLocaleString('default', { month: 'long' });
+        // Convertir la transacción a camelCase
+        const mappedTransaction = this.mapperService.toCamelCase(transaction); // Convierte transaction a camelCase
+
+        if (mappedTransaction.transactionDate) { // Verificamos si transactionDate está definido
+          const month = new Date(mappedTransaction.transactionDate).toLocaleString('default', { month: 'long' });
           this.rotationData[month] = (this.rotationData[month] || 0) + 1;
         }
       });
@@ -102,6 +105,7 @@ export class InventoryDashboardComponent implements OnInit {
           this.criticalStockData.adequate += 1;
         }
       }
+
       // Cálculo de Nivel de Stock por Categoría
       const category = article?.articleCategory?.denomination || 'Sin Categoría'; // Usamos article convertido
       this.categoryStockData[category] = (this.categoryStockData[category] || 0) + (stock || 0);
