@@ -1,0 +1,88 @@
+<app-main-container title="Dashboard de Empleados">
+
+    <!-- Header con búsqueda y filtros -->
+    <div class="d-flex justify-content-between align-items-center mb-3">
+      <div class="input-group w-25">
+        <span class="input-group-text"><i class="bi bi-search"></i></span>
+        <input type="text" class="form-control" placeholder="Buscar empleado..." [formControl]="searchFilter" />
+        <button type="button" class="btn btn-outline-info" (click)="openModalFilters()">
+          <i class="bi bi-funnel-fill"></i>
+        </button>
+      </div>
+    </div>
+  
+    <!-- Modal de Filtros -->
+    <div *ngIf="showModalFilters" class="modal fade show" tabindex="-1" role="dialog" style="display: block;">
+      <div class="modal-dialog modal-lg" role="document">
+        <div class="modal-content">
+          <div class="modal-header">
+            <h5 class="modal-title">Filtrar Empleados</h5>
+            <button type="button" class="btn-close" aria-label="Close" (click)="closeModalFilters()"></button>
+          </div>
+          <div class="modal-body">
+            <form [formGroup]="filterForm">
+              <div class="row">
+                <div class="col-md-4">
+                  <label>Nombre</label>
+                  <input type="text" class="form-control" placeholder="Nombre" formControlName="firstName">
+                </div>
+                <div class="col-md-4">
+                  <label>Apellido</label>
+                  <input type="text" class="form-control" placeholder="Apellido" formControlName="lastName">
+                </div>
+                <div class="col-md-4">
+                  <label>Tipo de Empleado</label>
+                  <select class="form-select" formControlName="employeeType">
+                    <option value="">Seleccionar</option>
+                    <option *ngFor="let type of employeeTypes" [value]="type">{{ type }}</option>
+                  </select>
+                </div>
+              </div>
+              <div class="row mt-3">
+                <div class="col-md-4">
+                  <label>Número de Documento</label>
+                  <input type="text" class="form-control" placeholder="Número de Documento" formControlName="docNumber">
+                </div>
+                <div class="col-md-4">
+                  <label>Estado</label>
+                  <select class="form-select" formControlName="state">
+                    <option value="">Seleccionar</option>
+                    <option *ngFor="let status of statusTypes" [value]="status">{{ status }}</option>
+                  </select>
+                </div>
+              </div>
+            </form>
+          </div>
+          <div class="modal-footer">
+            <button type="button" class="btn btn-outline-danger" (click)="clearFilters()">
+              <i class="bi bi-trash"></i>
+            </button>
+            <button type="button" class="btn btn-primary" (click)="applyFilters()">Aplicar Filtros</button>
+          </div>
+        </div>
+      </div>
+    </div>
+  
+    <!-- Métricas -->
+    <div class="container mt-5">
+      <h3>Métricas de Empleados</h3>
+      <div class="row">
+        <div class="col-md-3">
+          <!-- Gráfico de torta para estados de empleados -->
+          <canvas #pieChart></canvas>
+        </div>
+        <div class="col-md-3">
+          <p><strong>Total Empleados:</strong> {{ employeeList.length }}</p>
+          <p><strong>Empleados en Servicio:</strong> {{ inServiceCount }}</p>
+          <p><strong>Empleados Inactivos:</strong> {{ inactiveCount }}</p>
+        </div>
+        <div class="col-md-6">
+          <!-- Canvas para el gráfico de barras -->
+          <h5>Empleados por Tipo</h5>
+          <canvas id="barChart"></canvas>
+        </div>
+      </div>
+    </div>
+  
+  </app-main-container>
+  
