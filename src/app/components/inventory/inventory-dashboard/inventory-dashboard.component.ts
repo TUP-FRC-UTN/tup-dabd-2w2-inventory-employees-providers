@@ -1,7 +1,7 @@
 import { Component, ElementRef, inject, OnInit, ViewChild } from '@angular/core';
 import { FormBuilder, FormControl, FormGroup, ReactiveFormsModule } from '@angular/forms';
 import { InventoryService } from '../../../services/inventory.service';
-import { Inventory } from '../../../models/inventory.model';
+import { Inventory, Transaction } from '../../../models/inventory.model';
 import { Chart, ChartType, registerables } from 'chart.js';
 import { CommonModule } from '@angular/common';
 import { MainContainerComponent } from 'ngx-dabd-grupo01';
@@ -81,13 +81,16 @@ export class InventoryDashboardComponent implements OnInit {
 
     // Iteramos sobre la lista de inventarios
     this.inventories.forEach((inventory) => {
-      // Convertir el objeto article a camelCase
-      const article = this.mapperService.toCamelCase(inventory.article); // Convierte article a camelCase
+      // Convertir el inventario completo a camelCase
+      const mappedInventory = this.mapperService.toCamelCase(inventory); // Convierte el inventario a camelCase
+
+      // Convertir el artículo dentro del inventario a camelCase
+      const article = mappedInventory.article;
 
       // Verificación de las transacciones para calcular rotación de inventario
-      inventory.transactions?.forEach(transaction => {
+      mappedInventory.transactions?.forEach((transaction: Transaction) => {
         // Convertir la transacción a camelCase
-        const mappedTransaction = this.mapperService.toCamelCase(transaction); // Convierte transaction a camelCase
+        const mappedTransaction = this.mapperService.toCamelCase(transaction); // Convierte la transacción a camelCase
 
         if (mappedTransaction.transactionDate) { // Verificamos si transactionDate está definido
           const month = new Date(mappedTransaction.transactionDate).toLocaleString('default', { month: 'long' });
@@ -96,8 +99,9 @@ export class InventoryDashboardComponent implements OnInit {
       });
 
       // Cálculo de Nivel de Stock Crítico
-      const stock = inventory.stock;
-      const minStock = inventory.minStock;
+      const stock = mappedInventory.stock;
+      const minStock = mappedInventory.minStock;
+      console.log(minStock);
       if (stock !== undefined && minStock !== undefined) {
         if (stock <= minStock) {
           this.criticalStockData.critical += 1;
@@ -107,7 +111,7 @@ export class InventoryDashboardComponent implements OnInit {
       }
 
       // Cálculo de Nivel de Stock por Categoría
-      const category = article?.articleCategory?.denomination || 'Sin Categoría'; // Usamos article convertido
+      const category = article?.articleCategory?.denomination || 'Sin Categoría'; // Usamos el artículo convertido
       this.categoryStockData[category] = (this.categoryStockData[category] || 0) + (stock || 0);
     });
 
@@ -116,8 +120,6 @@ export class InventoryDashboardComponent implements OnInit {
     this.createStockLevelChart();
     this.createStockByCategoryChart();
   }
-
-
 
 
   createCharts(): void {
