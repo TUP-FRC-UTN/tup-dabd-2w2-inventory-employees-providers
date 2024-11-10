@@ -12,6 +12,7 @@ import { ServiceFormComponent } from './components/provider/service-form/service
 import { ServiceListComponent } from './components/provider/service-list/service-list.component';
 import { ProviderDashboardComponent } from './components/provider/provider-dashboard/provider-dashboard.component';
 import { EmployeeDashboardComponent } from './components/employee/employee-dashboard/employee-dashboard.component';
+import { InventoryDashboardComponent } from './components/inventory/inventory-dashboard/inventory-dashboard.component';
 
 
 
@@ -30,6 +31,7 @@ export const routes: Routes = [
   { path: 'articles/article', component: ArticleFormComponent},
   { path: 'articles/article/:id', component: ArticleFormComponent },
   { path: 'inventories', component: InventoryTableComponent },
+  { path: 'inventory/dashboard', component: InventoryDashboardComponent },
   { path: 'transactions/:id', component: TransactionComponentForm },
   { path: 'inventories/transactions/:inventoryId', component: InventoryTransactionTableComponent },
   { path: 'inventories/config/category', component: InventoryArticleCategoryListComponent},
