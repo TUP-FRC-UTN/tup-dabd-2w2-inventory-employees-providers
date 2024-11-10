@@ -1,12 +1,132 @@
-<div class="card">
+<app-main-container [title]="isEditMode ? 'Editar Empresa' : 'Registrar Empresa'" (infoButtonClick)="showInfo()">
+  <form [formGroup]="serviceForm" (ngSubmit)="onSubmit()" class="row g-3 m-2">
+    
+    <!-- Nombre y CUIT -->
+    <div class="col-md-6">
+      <div class="flex-row d-flex align-items-center">
+        <label for="name" class="col-form-label col-md-2">Nombre<label class="text-danger">*</label></label>
+        <input type="text" class="form-control m-2" id="name" formControlName="name"
+          placeholder="Ingrese el nombre"
+          [ngClass]="{'is-invalid': serviceForm.get('name')?.invalid && serviceForm.get('name')?.touched,
+                     'is-valid': serviceForm.get('name')?.valid && serviceForm.get('name')?.touched}">
+      </div>
+      <div>
+        @if (serviceForm.get('name')?.hasError('required') && serviceForm.get('name')?.touched) {
+          <small class="text-danger ms-2">El nombre es requerido</small>
+        }
+        @if (serviceForm.get('name')?.hasError('minlength') && serviceForm.get('name')?.touched) {
+          <small class="text-danger ms-2">El nombre debe tener al menos 3 caracteres</small>
+        }
+      </div>
+    </div>
+
+    <div class="col-md-6">
+      <div class="flex-row d-flex align-items-center">
+        <label for="cuit" class="col-form-label col-md-2">CUIT<label class="text-danger">*</label></label>
+        <input type="text" class="form-control m-2" id="cuit" formControlName="cuit"
+          placeholder="Ingrese el CUIT"
+          [ngClass]="{'is-invalid': serviceForm.get('cuit')?.invalid && serviceForm.get('cuit')?.touched,
+                     'is-valid': serviceForm.get('cuit')?.valid && serviceForm.get('cuit')?.touched}">
+      </div>
+      <div>
+        @if (serviceForm.get('cuit')?.hasError('required') && serviceForm.get('cuit')?.touched) {
+          <small class="text-danger ms-2">El CUIT es requerido</small>
+        }
+        @if (serviceForm.get('cuit')?.hasError('maxlength') && serviceForm.get('cuit')?.touched) {
+          <small class="text-danger ms-2">El CUIT no puede tener más de 11 caracteres</small>
+        }
+      </div>
+    </div>
+
+    <!-- Tipo de Servicio y Contacto -->
+    <div class="col-md-6">
+      <div class="flex-row d-flex align-items-center">
+        <label for="type" class="col-form-label col-md-2">Tipo de Servicio<label class="text-danger">*</label></label>
+        <input type="text" class="form-control m-2" id="type" formControlName="type"
+          placeholder="Ingrese el tipo de servicio"
+          [ngClass]="{'is-invalid': serviceForm.get('type')?.invalid && serviceForm.get('type')?.touched,
+                     'is-valid': serviceForm.get('type')?.valid && serviceForm.get('type')?.touched}">
+      </div>
+      <div>
+        @if (serviceForm.get('type')?.invalid && serviceForm.get('type')?.touched) {
+          <small class="text-danger ms-2">El tipo de servicio es requerido</small>
+        }
+      </div>
+    </div>
+
+    <div class="col-md-6">
+      <div class="flex-row d-flex align-items-center">
+        <label for="contact" class="col-form-label col-md-2">Contacto<label class="text-danger">*</label></label>
+        <input type="text" class="form-control m-2" id="contact" formControlName="contact"
+          placeholder="Ingrese el contacto"
+          [ngClass]="{'is-invalid': serviceForm.get('contact')?.invalid && serviceForm.get('contact')?.touched,
+                     'is-valid': serviceForm.get('contact')?.valid && serviceForm.get('contact')?.touched}">
+      </div>
+      <div>
+        @if (serviceForm.get('contact')?.invalid && serviceForm.get('contact')?.touched) {
+          <small class="text-danger ms-2">El contacto es requerido</small>
+        }
+      </div>
+    </div>
+
+    <!-- Dirección -->
+    <div class="col-md-6">
+      <div class="flex-row d-flex align-items-center">
+        <label for="address" class="col-form-label col-md-2">Dirección<label class="text-danger">*</label></label>
+        <input type="text" class="form-control m-2" id="address" formControlName="address"
+          placeholder="Ingrese la dirección"
+          [ngClass]="{'is-invalid': serviceForm.get('address')?.invalid && serviceForm.get('address')?.touched,
+                     'is-valid': serviceForm.get('address')?.valid && serviceForm.get('address')?.touched}">
+      </div>
+      <div>
+        @if (serviceForm.get('address')?.invalid && serviceForm.get('address')?.touched) {
+          <small class="text-danger ms-2">La dirección es requerida</small>
+        }
+      </div>
+    </div>
+
+    <div class="mb-3"></div>
+    <hr>
+
+    <!-- Detalles -->
+    <div class="col-12">
+      <div class="flex-row d-flex">
+        <label for="details" class="col-form-label col-md-1">Detalles<label class="text-danger">*</label></label>
+        <textarea class="form-control m-2" id="details" formControlName="details"
+          placeholder="Ingrese los detalles" style="height: 100px;"
+          [ngClass]="{'is-invalid': serviceForm.get('details')?.invalid && serviceForm.get('details')?.touched,
+                     'is-valid': serviceForm.get('details')?.valid && serviceForm.get('details')?.touched}">
+        </textarea>
+      </div>
+      <div>
+        @if (serviceForm.get('details')?.invalid && serviceForm.get('details')?.touched) {
+          <small class="text-danger ms-2">Los detalles son requeridos</small>
+        }
+      </div>
+    </div>
+
+    <!-- Botones -->
+    <div class="col-12 d-flex justify-content-end">
+      <div class="mx-2">
+        <button type="button" class="btn btn-danger" (click)="resetForm()">Cancelar</button>
+      </div>
+      <div>
+        <button type="submit" class="btn btn-primary" [disabled]="serviceForm.invalid">
+          {{ isEditMode ? 'Actualizar' : 'Guardar' }}
+        </button>
+      </div>
+    </div>
+  </form>
+</app-main-container>
+<!-- <div class="card">
   <div class="card-body">
     <div class="container">
       <form [formGroup]="serviceForm" (ngSubmit)="onSubmit()" autocomplete="off">
         <h2 class="h1 mb-4">{{ isEditMode ? 'Editar Empresa' : 'Registrar Empresa' }}</h2>
 
-        <!-- Primera fila - Dos columnas -->
+
          <div class="row mb-3">
-            <!-- Nombre -->
+
            <div class="col-md-6">
             <div class="form-group">
               <div class="d-flex align-items-center mb-1">
@@ -41,7 +161,7 @@
             </div>
           </div>
           
-          <!-- CUIT -->
+
           <div class="col-md-6">
             <div class="form-group">
               <div class="d-flex align-items-center mb-1">
@@ -77,9 +197,9 @@
           </div>
       </div>
 
-        <!-- Segunda fila - Dos columnas -->
+        
         <div class="row mb-3">
-          <!-- Tipo de Servicio -->
+          
           <div class="col-md-6">
             <div class="form-group">
               <div class="d-flex align-items-center mb-1">
@@ -108,7 +228,7 @@
             </div>
           </div>
 
-          <!-- Contacto -->
+          
           <div class="col-md-6">
             <div class="form-group">
               <div class="d-flex align-items-center mb-1">
@@ -138,9 +258,9 @@
           </div>
         </div>
 
-        <!-- Tercera fila - Una columna -->
+        
         <div class="row mb-3">
-          <!-- Dirección -->
+          
           <div class="col-md-6">
             <div class="form-group">
               <div class="d-flex align-items-center mb-1">
@@ -170,9 +290,9 @@
           </div>
         </div>
 
-        <!-- Cuarta fila - Una columna -->
+        
         <div class="row mb-4">
-          <!-- Detalles -->
+          
           <div class="col-md-12">
             <div class="form-group">
               <div class="d-flex align-items-start mb-1">
@@ -203,7 +323,7 @@
           </div>
         </div>
 
-        <!-- Botones -->
+        
         <div class="d-flex justify-content-end gap-2">
           <button type="button" class="btn btn-danger" (click)="resetForm()">
             Cancelar
@@ -213,7 +333,7 @@
           </button>
         </div>
 
-        <!-- Botón de información -->
+        
         <div class="d-flex justify-content-end mt-3">
           <button class="custom-button" (click)="showInfo()">
             <i class="bi bi-info-circle"></i>
@@ -222,4 +342,4 @@
       </form>
     </div>
   </div>
-</div>
+</div> -->

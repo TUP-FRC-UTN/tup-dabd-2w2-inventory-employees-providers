@@ -5,13 +5,13 @@ import { Service } from '../../../models/service.model';
 import Swal from 'sweetalert2';
 import { ActivatedRoute, Router } from '@angular/router';
 import { NgbModal } from '@ng-bootstrap/ng-bootstrap';
-import { ToastService } from 'ngx-dabd-grupo01';
+import { MainContainerComponent, ToastService } from 'ngx-dabd-grupo01';
 import { CommonModule } from '@angular/common';
 
 @Component({
   selector: 'app-service-form',
   standalone: true,
-  imports: [ReactiveFormsModule, CommonModule],
+  imports: [ReactiveFormsModule, CommonModule, MainContainerComponent],
   templateUrl: './service-form.component.html',
   styleUrl: './service-form.component.css'
 })
@@ -25,8 +25,9 @@ export class ServiceFormComponent implements OnInit {
   private route = inject(ActivatedRoute);
   private router = inject(Router);
   private modalService = inject(NgbModal);
+  private toastService = inject(ToastService);
 
-  constructor(private toastService: ToastService) {
+  constructor() {
     this.serviceForm = this.fb.group({
       name: ['', [Validators.required, Validators.minLength(3)]],
       cuit: ['', [Validators.required, Validators.maxLength(11)]],
