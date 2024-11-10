@@ -1,4 +1,4 @@
-import { Component, OnInit, ViewChild, TemplateRef, CUSTOM_ELEMENTS_SCHEMA } from '@angular/core';
+import { Component, OnInit, ViewChild, TemplateRef, CUSTOM_ELEMENTS_SCHEMA, inject } from '@angular/core';
 import { FormBuilder, FormGroup, FormControl, FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { NgbModal } from '@ng-bootstrap/ng-bootstrap';
 import { MainContainerComponent, ConfirmAlertComponent, ToastService } from 'ngx-dabd-grupo01';
@@ -46,10 +46,12 @@ export class InventoryArticleCategoryListComponent implements OnInit {
   filterForm: FormGroup;
   selectedStatusFilter: string = ''; // Filtro de estado
 
+  private modalService = inject(NgbModal);
+
+
   constructor(
     private inventoryService: InventoryService,
     private toastService: ToastService,
-    private modalService: NgbModal,
     private fb: FormBuilder
   ) {
     this.filterForm = this.fb.group({
@@ -161,5 +163,9 @@ export class InventoryArticleCategoryListComponent implements OnInit {
     this.showCategoryUpdate = false;
     this.selectedCategory = null;
     this.getCategories();
+  }
+
+  showInfo(){
+    this.modalService.open(this.infoModal, { centered: true });
   }
 }

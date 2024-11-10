@@ -11,6 +11,9 @@ import { InventoryArticleCategoryListComponent } from './components/inventory/in
 import { ServiceFormComponent } from './components/provider/service-form/service-form.component';
 import { ServiceListComponent } from './components/provider/service-list/service-list.component';
 import { ProviderDashboardComponent } from './components/provider/provider-dashboard/provider-dashboard.component';
+import { ProvideConfigComponent } from './components/provider/provide-config/provide-config.component';
+import { ProviderTypeUpdateComponent } from './components/provider/provider-type-update/provider-type-update.component';
+
 
 
 
@@ -31,6 +34,8 @@ export const routes: Routes = [
   { path: 'transactions/:id', component: TransactionComponentForm },
   { path: 'inventories/transactions/:inventoryId', component: InventoryTransactionTableComponent },
   { path: 'inventories/config/category', component: InventoryArticleCategoryListComponent},
+  { path: 'providers/config/provider', component: ProvideConfigComponent},
+  { path: 'providers/config/provider/update', component: ProviderTypeUpdateComponent},
   { path: '', redirectTo: '/employees', pathMatch: 'full' }
 ];
 
