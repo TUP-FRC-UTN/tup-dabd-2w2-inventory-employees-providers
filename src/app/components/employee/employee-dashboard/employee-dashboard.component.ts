@@ -10,6 +10,8 @@ import { debounceTime, distinctUntilChanged } from 'rxjs';
 import { Chart, ChartType, registerables } from 'chart.js';
 import { CommonModule } from '@angular/common';
 import { MapperService } from '../../../services/MapperCamelToSnake/mapper.service';
+import { NgbModal } from '@ng-bootstrap/ng-bootstrap';
+import { EmployeeDashboardInfoComponent } from './employe-dashboard-info/employee-dashboard-info.component';
 
 Chart.register(...registerables);
 
@@ -27,6 +29,8 @@ export class EmployeeDashboardComponent implements OnInit {
   @ViewChild('pieChart') pieChartRef!: ElementRef;
 
   showModalFilters: boolean = false;
+  private modalService = inject(NgbModal);
+
 
   // Metrics
   inServiceCount = 0;
@@ -170,7 +174,15 @@ export class EmployeeDashboardComponent implements OnInit {
       }
     });
   }
-
+  showInfo(): void {
+    this.modalService.open(EmployeeDashboardInfoComponent, {
+      size: 'lg',
+      backdrop: 'static',
+      keyboard: false,
+      centered: true,
+      scrollable: true
+    });
+  }
   openModalFilters(): void {
     this.showModalFilters = true;
   }

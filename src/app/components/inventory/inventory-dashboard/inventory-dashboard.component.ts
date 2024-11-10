@@ -6,6 +6,8 @@ import { Chart, ChartType, registerables } from 'chart.js';
 import { CommonModule } from '@angular/common';
 import { MainContainerComponent } from 'ngx-dabd-grupo01';
 import { MapperService } from '../../../services/MapperCamelToSnake/mapper.service';
+import { NgbModal } from '@ng-bootstrap/ng-bootstrap';
+import { InventoryDashboardInfoComponent } from './inventory-dashboard-info/inventory-dashboard-info.component';
 
 Chart.register(...registerables);
 
@@ -25,6 +27,7 @@ export class InventoryDashboardComponent implements OnInit {
 
   searchInput = new FormControl('');
   filterForm: FormGroup;
+  private modalService = inject(NgbModal);
 
   inventories: Inventory[] = [];
   rotationData: { [key: string]: number } = {}; // Datos para rotación de inventario por mes
@@ -177,7 +180,15 @@ export class InventoryDashboardComponent implements OnInit {
       options: { responsive: true }
     });
   }
-
+  showInfo(): void {
+    this.modalService.open(InventoryDashboardInfoComponent, {
+      size: 'lg',
+      backdrop: 'static',
+      keyboard: false,
+      centered: true,
+      scrollable: true
+    });
+  }
 
   openModalFilters(): void {
     // Abre el modal de filtros
