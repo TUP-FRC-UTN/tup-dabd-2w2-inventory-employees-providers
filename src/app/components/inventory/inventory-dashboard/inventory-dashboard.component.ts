@@ -1,10 +1,11 @@
-import { Component, ElementRef, OnInit, ViewChild } from '@angular/core';
+import { Component, ElementRef, inject, OnInit, ViewChild } from '@angular/core';
 import { FormBuilder, FormControl, FormGroup, ReactiveFormsModule } from '@angular/forms';
 import { InventoryService } from '../../../services/inventory.service';
 import { Inventory } from '../../../models/inventory.model';
 import { Chart, ChartType, registerables } from 'chart.js';
 import { CommonModule } from '@angular/common';
 import { MainContainerComponent } from 'ngx-dabd-grupo01';
+import { MapperService } from '../../../services/MapperCamelToSnake/mapper.service';
 
 Chart.register(...registerables);
 
@@ -16,6 +17,8 @@ Chart.register(...registerables);
   styleUrls: ['./inventory-dashboard.component.css']
 })
 export class InventoryDashboardComponent implements OnInit {
+
+  mapperService: MapperService =  inject(MapperService);
   @ViewChild('rotationInventoryChart') rotationInventoryChartRef!: ElementRef;
   @ViewChild('stockLevelChart') stockLevelChartRef!: ElementRef;
   @ViewChild('stockByCategoryChart') stockByCategoryChartRef!: ElementRef;
@@ -78,35 +81,38 @@ export class InventoryDashboardComponent implements OnInit {
 
     // Iteramos sobre la lista de inventarios
     this.inventories.forEach((inventory) => {
-        // Verificación de las transacciones para calcular rotación de inventario
-        inventory.transactions?.forEach(transaction => {
-            if (transaction.transactionDate) { // Verificamos si transactionDate está definido
-                const month = new Date(transaction.transactionDate).toLocaleString('default', { month: 'long' });
-                this.rotationData[month] = (this.rotationData[month] || 0) + 1;
-            }
-        });
+      // Convertir el objeto article a camelCase
+      const article = this.mapperService.toCamelCase(inventory.article); // Convierte article a camelCase
 
-        // Cálculo de Nivel de Stock Crítico
-        const stock = inventory.stock;
-        const minStock = inventory.minStock;
-        if (stock !== undefined && minStock !== undefined) {
-            if (stock <= minStock) {
-                this.criticalStockData.critical += 1;
-            } else {
-                this.criticalStockData.adequate += 1;
-            }
+      // Verificación de las transacciones para calcular rotación de inventario
+      inventory.transactions?.forEach(transaction => {
+        if (transaction.transactionDate) { // Verificamos si transactionDate está definido
+          const month = new Date(transaction.transactionDate).toLocaleString('default', { month: 'long' });
+          this.rotationData[month] = (this.rotationData[month] || 0) + 1;
         }
+      });
 
-        // Cálculo de Nivel de Stock por Categoría
-        const category = inventory.article?.articleCategory?.denomination || 'Sin Categoría';
-        this.categoryStockData[category] = (this.categoryStockData[category] || 0) + (stock || 0);
+      // Cálculo de Nivel de Stock Crítico
+      const stock = inventory.stock;
+      const minStock = inventory.minStock;
+      if (stock !== undefined && minStock !== undefined) {
+        if (stock <= minStock) {
+          this.criticalStockData.critical += 1;
+        } else {
+          this.criticalStockData.adequate += 1;
+        }
+      }
+      // Cálculo de Nivel de Stock por Categoría
+      const category = article?.articleCategory?.denomination || 'Sin Categoría'; // Usamos article convertido
+      this.categoryStockData[category] = (this.categoryStockData[category] || 0) + (stock || 0);
     });
 
     // Llama a los métodos para crear gráficos
     this.createRotationInventoryChart();
     this.createStockLevelChart();
     this.createStockByCategoryChart();
-}
+  }
+
 
 
 
@@ -152,9 +158,7 @@ export class InventoryDashboardComponent implements OnInit {
   createStockByCategoryChart(): void {
     const labels = Object.keys(this.categoryStockData);
     const data = Object.values(this.categoryStockData);
-    console.log('Categorías:', labels); // Verifica que las categorías sean correctas
-    console.log('Valores de stock:', data); // Verifica que los valores sean los esperados
-  
+
     new Chart(this.stockByCategoryChartRef.nativeElement, {
       type: 'pie' as ChartType,
       data: {
@@ -167,7 +171,7 @@ export class InventoryDashboardComponent implements OnInit {
       options: { responsive: true }
     });
   }
-  
+
 
   openModalFilters(): void {
     // Abre el modal de filtros
