@@ -11,11 +11,13 @@ import { InventoryArticleCategoryListComponent } from './components/inventory/in
 import { ServiceFormComponent } from './components/provider/service-form/service-form.component';
 import { ServiceListComponent } from './components/provider/service-list/service-list.component';
 import { ProviderDashboardComponent } from './components/provider/provider-dashboard/provider-dashboard.component';
+import { EmployeeDashboardComponent } from './components/employee/employee-dashboard/employee-dashboard.component';
 
 
 
 export const routes: Routes = [
   { path: 'employees/list', component: EmployeeListComponent },
+  { path: 'employees/dashboard', component: EmployeeDashboardComponent },
   { path: 'employees/form', component: EmployeeFormComponent },
   { path: 'employees/form/:id', component: EmployeeFormComponent },
   { path: 'providers/list', component: ProviderListComponent },
