@@ -17,13 +17,25 @@ interface DayOfWeek {
   templateUrl: './employee-access.component.html',
   styleUrl: './employee-access.component.css'
 })
-export class EmployeeAccessComponent implements OnInit{
+export class EmployeeAccessComponent implements OnInit {
+  // Inputs y Outputs
   @Input() employeeId?: number;
   @Output() schedulesSaved = new EventEmitter<void>();
 
+  // Services
   private scheduleService = inject(EmployeesService);
   private toast = inject(ToastService);
-  
+
+  // Variables de fecha
+  today = new Date().toISOString().split('T')[0];
+  oneYearFromNow = new Date(new Date().setFullYear(new Date().getFullYear() + 1)).toISOString().split('T')[0];
+
+  // Variables de estado
+  selectedDays: string[] = [];
+  selectedShift: ShiftType = ShiftType.MORNING;
+  showDaysError = false;
+
+  // Datos estáticos
   daysOfWeek: DayOfWeek[] = [
     { id: 'MONDAY', label: 'Lunes' },
     { id: 'TUESDAY', label: 'Martes' },
@@ -35,16 +47,21 @@ export class EmployeeAccessComponent implements OnInit{
   ];
 
   shiftTypes = Object.values(ShiftType);
+
   shiftTypeLabels: { [key in ShiftType]: string } = {
     [ShiftType.MORNING]: 'Mañana',
     [ShiftType.AFTERNOON]: 'Tarde',
     [ShiftType.NIGHT]: 'Noche'
   };
 
-  selectedDays: string[] = [];
-  selectedShift: ShiftType = ShiftType.MORNING;
-  showDaysError = false;
+  predefinedShifts = {
+    [ShiftType.MORNING]: { entry: '08:00', exit: '16:00' },
+    [ShiftType.AFTERNOON]: { entry: '16:00', exit: '00:00' },
+    [ShiftType.NIGHT]: { entry: '00:00', exit: '08:00' }
+  };
 
+  // Formulario anterior (comentado)
+  /*
   accessForm = new FormGroup({
     dateFrom: new FormControl('', [Validators.required]),
     dateTo: new FormControl('', [Validators.required]),
@@ -52,11 +69,53 @@ export class EmployeeAccessComponent implements OnInit{
     entryTime: new FormControl('', [Validators.required]),
     exitTime: new FormControl('', [Validators.required])
   });
+  */
+
+  // Nuevo formulario con validaciones
+  accessForm = new FormGroup({
+    dateFrom: new FormControl<string>(this.today, {
+      validators: [Validators.required, this.dateValidator()],
+      nonNullable: true,
+    }),
+    dateTo: new FormControl<string>(this.oneYearFromNow, {
+      validators: [Validators.required, this.dateValidator()],
+      nonNullable: true,
+    }),
+    shiftType: new FormControl<ShiftType>(ShiftType.MORNING, {
+      validators: [Validators.required],
+      nonNullable: true,
+    }),
+    entryTime: new FormControl<string>(this.predefinedShifts[ShiftType.MORNING].entry, {
+      validators: [Validators.required, this.timeValidator()],
+      nonNullable: true,
+    }),
+    exitTime: new FormControl<string>(this.predefinedShifts[ShiftType.MORNING].exit, {
+      validators: [Validators.required, this.timeValidator()],
+      nonNullable: true,
+    })
+  });
 
   constructor() {}
 
-  ngOnInit(): void {}
+  // Método OnInit anterior (comentado)
+  // ngOnInit(): void {}
 
+  // Nuevo método OnInit con inicialización
+  ngOnInit(): void {
+    this.selectedDays = ['MONDAY', 'TUESDAY', 'WEDNESDAY', 'THURSDAY', 'FRIDAY'];
+    
+    this.accessForm.get('shiftType')?.valueChanges.subscribe(shiftType => {
+      if (shiftType) {
+        const shift = this.predefinedShifts[shiftType as ShiftType];
+        this.accessForm.patchValue({
+          entryTime: shift.entry,
+          exitTime: shift.exit
+        });
+      }
+    });
+  }
+
+  // Métodos de manipulación de días y turnos
   toggleDay(dayId: string): void {
     const index = this.selectedDays.indexOf(dayId);
     if (index === -1) {
@@ -67,11 +126,27 @@ export class EmployeeAccessComponent implements OnInit{
     this.showDaysError = false;
   }
 
+  // Método toggleShift anterior (comentado)
+  /*
   toggleShift(shift: ShiftType): void {
     this.selectedShift = shift;
     this.accessForm.get('shiftType')?.setValue(shift);
   }
+  */
 
+  // Nuevo método toggleShift con horarios predefinidos
+  toggleShift(shift: ShiftType): void {
+    this.selectedShift = shift;
+    this.accessForm.get('shiftType')?.setValue(shift);
+    
+    const predefinedShift = this.predefinedShifts[shift];
+    this.accessForm.patchValue({
+      entryTime: predefinedShift.entry,
+      exitTime: predefinedShift.exit
+    });
+  }
+
+  // Métodos de utilidad
   getSelectedDaysLabels(): string[] {
     return this.selectedDays.map(dayId => 
       this.daysOfWeek.find(day => day.id === dayId)?.label || dayId
@@ -82,6 +157,7 @@ export class EmployeeAccessComponent implements OnInit{
     return this.accessForm.valid && this.selectedDays.length > 0;
   }
 
+  // Métodos de guardado y validación
   saveSchedule(): void {
     if (!this.isFormValid() || !this.employeeId) {
       if (this.selectedDays.length === 0) {
@@ -104,7 +180,7 @@ export class EmployeeAccessComponent implements OnInit{
       employee_id: this.employeeId,
       start_date: new Date(formValue.dateFrom!).toISOString(),
       finish_date: new Date(formValue.dateTo!).toISOString(),
-      shift_type: formValue.shiftType as ShiftType,
+      shift_type: formValue.shiftType!,
       day_schedules: daySchedules
     };
 
@@ -115,12 +191,14 @@ export class EmployeeAccessComponent implements OnInit{
         this.resetForm();
       },
       error: (error) => {
-        console.error('Error al guardar el horario', error);
+        console.log('Error al guardar el horario', error);
         this.toast.sendError('Error al guardar el horario');
       }
     });
   }
 
+  // Método resetForm anterior (comentado)
+  /*
   resetForm(): void{
     this.accessForm.reset({
       dateFrom: '',
@@ -133,9 +211,63 @@ export class EmployeeAccessComponent implements OnInit{
     this.selectedShift = ShiftType.MORNING;
     this.showDaysError = false;
   }
+  */
 
-  newEmployee(){
+  // Nuevo método resetForm con valores predefinidos
+  resetForm(): void {
+    this.accessForm.reset({
+      dateFrom: this.today,
+      dateTo: this.oneYearFromNow,
+      shiftType: ShiftType.MORNING,
+      entryTime: this.predefinedShifts[ShiftType.MORNING].entry,
+      exitTime: this.predefinedShifts[ShiftType.MORNING].exit
+    });
+    this.selectedDays = ['MONDAY', 'TUESDAY', 'WEDNESDAY', 'THURSDAY', 'FRIDAY'];
+    this.selectedShift = ShiftType.MORNING;
+    this.showDaysError = false;
+  }
+
+  // Métodos adicionales
+  newEmployee() {
     this.employeeId = undefined;
     this.schedulesSaved.emit();
+  }
+
+  // Validadores
+  dateValidator() {
+    return (control: FormControl): {[key: string]: any} | null => {
+      const selectedDate = new Date(control.value);
+      const today = new Date();
+      today.setHours(0, 0, 0, 0);
+      
+      if (selectedDate < today) {
+        return { 'pastDate': true };
+      }
+      return null;
+    };
+  }
+
+  timeValidator() {
+    return (control: FormControl): {[key: string]: any} | null => {
+      if (!control.value) return null;
+
+      const [hours, minutes] = control.value.split(':').map(Number);
+      const selectedTime = new Date();
+      selectedTime.setHours(hours, minutes, 0, 0);
+
+      const dateFromValue = this.accessForm?.get('dateFrom')?.value;
+      if (!dateFromValue) return null;
+
+      const dateFrom = new Date(dateFromValue);
+      const now = new Date();
+
+      if (dateFrom.getDate() === now.getDate() && 
+          dateFrom.getMonth() === now.getMonth() && 
+          dateFrom.getFullYear() === now.getFullYear() && 
+          selectedTime < now) {
+        return { 'pastTime': true };
+      }
+      return null;
+    };
   }
 }

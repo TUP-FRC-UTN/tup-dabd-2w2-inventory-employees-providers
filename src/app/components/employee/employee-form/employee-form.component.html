@@ -121,14 +121,14 @@
  
     <!-- Contactos -->
     <div class="col-12">
-      <div class="card">
-        <div class="card-header d-flex justify-content-between align-items-center">
+      <div class="">
+        <div class=" d-flex justify-content-between align-items-center">
           <h5 class="card-title mb-0">Contactos</h5>
           <button type="button" class="btn btn-primary btn-sm" (click)="addContact()">
             <i class="bi bi-plus"></i>
           </button>
         </div>
-        <div class="card-body">
+        <div class="">
           <div formArrayName="contacts">
             <div *ngFor="let contact of contacts.controls; let i=index" [formGroupName]="i" class="row mb-2">
               <div class="col-md-5">
@@ -158,11 +158,11 @@
  
     <!-- Dirección -->
     <div class="col-12">
-      <div class="card">
-        <div class="card-header">
-          <h5 class="card-title mb-0">Dirección</h5>
+      <div class="">
+        <div class="">
+          <h5 class=" mb-0">Dirección</h5>
         </div>
-        <div class="card-body">
+        <div class="">
           <div formGroupName="address" class="row">
             <!-- Calle y Número -->
             <div class="col-md-6">
@@ -353,16 +353,32 @@
 <div class="modal-footer py-2">
   <button type="button" class="btn btn-primary" (click)="modal.close()">Entendido</button>
 </div>
-</ng-template>
 
-@if (currentEmployeeId) {
-<div class="mt-4">
-  <app-employee-access
-    [employeeId]="currentEmployeeId"
-    (schedulesSaved)="startNewEmployee()"
-  ></app-employee-access>
-</div>
-}
+</ng-template>
+<!-- Metodo Viejo que llama a accesos -->
+<!-- @if (currentEmployeeId) {
+  <div class="mt-0">
+    <app-employee-access
+      [employeeId]="currentEmployeeId"
+      (schedulesSaved)="startNewEmployee()"
+    ></app-employee-access>
+  </div>
+  } -->
+  <!-- Template del Modal de Accesos Nuevo-->
+  <ng-template #accessModal let-modal>
+    <div class="modal-header">
+      <h4 class="modal-title">Configuración de Accesos</h4>
+      <button type="button" class="btn-close" aria-label="Close" (click)="modal.dismiss()"></button>
+    </div>
+    <div class="modal-body">
+      <app-employee-access
+        [employeeId]="currentEmployeeId"
+        (schedulesSaved)="onAccessSaved()"
+      ></app-employee-access>
+    </div>
+  </ng-template>
+
+
 <!-- <div class="card">
   <div class="card-body">
     <div class="form-container">

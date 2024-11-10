@@ -24,7 +24,8 @@ export class EmployeeFormComponent implements OnInit {
     firstName: new FormControl('', [Validators.required, Validators.minLength(3), Validators.maxLength(100)]),
     lastName: new FormControl('', [Validators.required, Validators.minLength(3), Validators.maxLength(100)]),
     employeeType: new FormControl(EmployeeType.ADMINTRATIVO, Validators.required),
-    hiringDate: new FormControl(new Date().toISOString().split('T')[0], [Validators.required]), // Default to today
+    //hiringDate: new FormControl(new Date().toISOString().split('T')[0], [Validators.required]), // Default to today
+    hiringDate: new FormControl(new Date().toISOString().slice(0, 19), [Validators.required]),
     documentType: new FormControl(DocumentType.DNI, Validators.required),
     docNumber: new FormControl('', [Validators.required, Validators.pattern(/^[0-9.-]*$/)]),
     salary: new FormControl(0, [Validators.required, Validators.min(0)]),
@@ -42,6 +43,7 @@ export class EmployeeFormComponent implements OnInit {
     })
   });
 
+  @ViewChild('accessModal') accessModal!: TemplateRef<any>;
   contactTypes = ['PHONE', 'EMAIL'];
   private toastService = inject(ToastService);
   
@@ -177,7 +179,10 @@ export class EmployeeFormComponent implements OnInit {
   } */
     prepareEmployeeData(): any {
       const formValue = this.employeeForm.value;
-      
+      const hiringDate = formValue.hiringDate 
+      ? new Date(formValue.hiringDate).toISOString()
+      : new Date().toISOString();
+      //const hiringDate = formValue.hiringDate + (formValue.hiringDate?.includes('T') ? '' : 'T00:00:00');
       // Crear el objeto base del empleado
       const employeeData = {
         id: formValue.id,
@@ -186,7 +191,7 @@ export class EmployeeFormComponent implements OnInit {
         employee_type: formValue.employeeType,
         document_type: formValue.documentType,
         doc_number: formValue.docNumber,
-        hiring_date: formValue.hiringDate,
+        hiring_date: hiringDate,
         salary: formValue.salary,
         state: formValue.state,
         contact: this.contacts.length > 0 ? this.contacts.at(0).value : null,
@@ -211,6 +216,7 @@ export class EmployeeFormComponent implements OnInit {
           this.employeeRegistered = true;
           this.disableForm();
           console.log('id enviado', this.currentEmployeeId);
+          this.openAccessModal();
         }
         this.toastService.sendSuccess("Cargue los dato de acceso.");
         this.resetForm(); // Limpia el formulario
@@ -262,6 +268,19 @@ export class EmployeeFormComponent implements OnInit {
 
 onCancel(){
   this.resetForm();
+  this.router.navigate(['/employees/list']);
+}
+openAccessModal() {
+  const modalRef = this.modalService.open(this.accessModal, {
+    size: 'lg',
+    backdrop: 'static',
+    keyboard: false
+  });
+}
+
+onAccessSaved() {
+  this.modalService.dismissAll();
+  this.startNewEmployee();
   this.router.navigate(['/employees/list']);
 }
 }
