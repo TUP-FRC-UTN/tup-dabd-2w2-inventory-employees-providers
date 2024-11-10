@@ -1,11 +1,12 @@
 import { CommonModule } from '@angular/common';
 import { Component } from '@angular/core';
 import { FormArray, FormControl, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
+import { MainContainerComponent } from 'ngx-dabd-grupo01';
 
 @Component({
   selector: 'app-employee-contact',
   standalone: true,
-  imports: [ReactiveFormsModule, CommonModule],
+  imports: [ReactiveFormsModule, CommonModule, MainContainerComponent],
   templateUrl: './employee-contact.component.html',
   styleUrl: './employee-contact.component.css'
 })

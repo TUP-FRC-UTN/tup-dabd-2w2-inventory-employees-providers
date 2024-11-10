@@ -5,7 +5,7 @@ import { ActivatedRoute, Router } from '@angular/router';
 import { EmployeesService } from '../../../services/employees.service';
 import { debounceTime, map, switchMap } from 'rxjs';
 import { MapperService } from '../../../services/MapperCamelToSnake/mapper.service';
-import { ToastService } from 'ngx-dabd-grupo01';
+import { MainContainerComponent, ToastService } from 'ngx-dabd-grupo01';
 import { NgbModal } from '@ng-bootstrap/ng-bootstrap';
 import { CommonModule } from '@angular/common';
 import { EmployeeAccessComponent } from "../employee-access/employee-access.component";
@@ -14,7 +14,7 @@ import { EmployeeContactComponent } from "../employee-contact/employee-contact.c
 @Component({
   selector: 'app-employee-form',
   standalone: true,
-  imports: [ReactiveFormsModule, CommonModule, EmployeeAccessComponent, EmployeeContactComponent],
+  imports: [ReactiveFormsModule, CommonModule, EmployeeAccessComponent, EmployeeContactComponent, MainContainerComponent],
   templateUrl: './employee-form.component.html',
   styleUrls: ['./employee-form.component.scss'],
 })
@@ -43,6 +43,7 @@ export class EmployeeFormComponent implements OnInit {
   });
 
   contactTypes = ['PHONE', 'EMAIL'];
+  private toastService = inject(ToastService);
   
   get contacts() {
     return this.employeeForm.get('contacts') as FormArray;
@@ -62,7 +63,7 @@ export class EmployeeFormComponent implements OnInit {
   
  currentEmployeeId!: number;
 
-  constructor(private toastService: ToastService) {}
+  constructor() {}
 
   @ViewChild('infoModal') infoModal!: TemplateRef<any>;
 
