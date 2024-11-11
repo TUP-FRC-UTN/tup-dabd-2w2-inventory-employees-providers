@@ -1,1 +1,69 @@
-<p>provider-company works!</p>
+<div class="d-flex justify-content-between align-items-center mb-3">
+    <div class="input-group w-25">
+      <span class="input-group-text">&nbsp;</span>
+      <select class="form-select" [(ngModel)]="selectedStatusFilter" (change)="filterByStatus($event.target.value)">
+        <option value="">Todos</option>
+        <option value="Activo">Activo</option>
+        <option value="Inactivo">Inactivo</option>
+      </select>
+    </div>
+    <div class="d-flex">
+      <button type="button" class="btn btn-primary me-2" (click)="onCompanyUpdate()">Agregar</button>
+      <button type="button" class="btn btn-outline-primary" (click)="openModalFilter()">
+        <i class="bi bi-filter"></i> Filtrar
+      </button>
+    </div>
+  </div>
+  
+  <div class="table-container mt-3" style="max-height: 400px; overflow-y: auto;">
+    <table class="table table-hover">
+      <thead>
+        <tr>
+          <th>Nombre</th>
+          <th>Estado</th>
+          <th>Acciones</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr *ngIf="companies.length === 0">
+          <td colspan="3" class="text-center">No se encontraron compañías</td>
+        </tr>
+        <tr *ngFor="let company of companies">
+          <td>{{ company.name }}</td>
+          <td>{{ company.enabled ? 'Activo' : 'Inactivo' }}</td>
+          <td class="d-flex justify-content-end gap-2">
+            <button type="button" class="btn btn-primary btn-sm" (click)="onCompanyUpdate(company)">
+              <i class="bi bi-pencil"></i> Editar
+            </button>
+            <button type="button" class="btn btn-danger btn-sm" (click)="deleteCompany(company.id)">
+              <i class="bi bi-trash"></i> Eliminar
+            </button>
+          </td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+  
+  <ng-template #infoModal let-modal>
+    <div class="modal-header">
+      <h5 class="modal-title">Compañías de Proveedores</h5>
+      <button type="button" class="btn-close" aria-label="Close" (click)="closeModalFilter()"></button>
+    </div>
+    <div class="modal-body">
+      <p>Esta pantalla te permite gestionar las compañías asociadas a los proveedores.</p>
+      <ul>
+        <li>Puedes agregar, editar y eliminar compañías.</li>
+        <li>Las compañías activas podrán ser asignadas a los proveedores.</li>
+        <li>También puedes filtrar y exportar la lista de compañías.</li>
+      </ul>
+    </div>
+    <div class="modal-footer">
+      <button type="button" class="btn btn-primary" (click)="closeModalFilter()">Entendido</button>
+    </div>
+  </ng-template>
+  
+  <app-provider-company-update
+  *ngIf="showCompanyUpdate"
+  [company]="selectedCompany"
+  (closeModal)="onCompanyUpdateClose()"
+></app-provider-company-update>

@@ -1,16 +1,21 @@
 import { Component, OnInit, ViewChild, TemplateRef, inject } from '@angular/core';
-import { FormBuilder, FormGroup, FormControl, ReactiveFormsModule } from '@angular/forms';
+import { FormBuilder, FormGroup, FormControl, ReactiveFormsModule, FormsModule } from '@angular/forms';
 import { NgbModal } from '@ng-bootstrap/ng-bootstrap';
 import { MainContainerComponent, ToastService } from 'ngx-dabd-grupo01';
 import { Company } from '../../../models/suppliers/company.model';
 import { CompanyService } from '../../../services/suppliers/company.service';
+import { CommonModule } from '@angular/common';
+import { ProviderCompanyUpdateComponent } from './provider-company-update/provider-company-update.component';
 
 @Component({
   selector: 'app-provider-company',
   standalone: true,
   imports: [
     ReactiveFormsModule,
-    MainContainerComponent
+    MainContainerComponent,
+    CommonModule,
+    ProviderCompanyUpdateComponent,
+    FormsModule
   ],
   templateUrl: './provider-company.component.html',
   styleUrls: ['./provider-company.component.css']
