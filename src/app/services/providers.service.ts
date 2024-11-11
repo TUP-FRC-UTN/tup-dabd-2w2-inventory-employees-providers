@@ -22,22 +22,32 @@ export class ProvidersService {
     enabled?: boolean,
     'company.name'?: string,
     'service.name'?: string,
-    start?: string,    // Fecha de inicio para filtrar
-    end?: string    
-  }): Observable<PaginatedResponse<Supplier>> {
+    start?: string,
+    end?: string
+}): Observable<PaginatedResponse<Supplier>> {
     let params = new HttpParams();
   
     if (filters) {
       Object.keys(filters).forEach(key => {
         const value = filters[key as keyof typeof filters];
-        if (value !== undefined && value !== '') {
+        // Verificación especial para fechas
+        if (value !== undefined && value !== '' && value !== null) {
+          // Para fechas, asegurarse de que sean fechas válidas
+          if ((key === 'start' || key === 'end') && !this.isValidDate(value as string)) {
+            return;
+          }
           params = params.append(key, value.toString());
         }
       });
     }
     return this.http.get<PaginatedResponse<Supplier>>(`${this.apiUrl}/pageable`, { params });
-  }
-  
+}
+
+// Método auxiliar para validar fechas
+private isValidDate(dateString: string): boolean {
+  const date = new Date(dateString);
+  return date instanceof Date && !isNaN(date.getTime());
+}
 
   getProviderById(id: number): Observable<Supplier> {
     return this.http.get<Supplier>(`${this.apiUrl}/${id}`);

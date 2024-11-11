@@ -145,11 +145,23 @@ export class ProviderListComponent implements OnInit {
   }
 
   applyFilters(): void {
-    this.currentPage = 1; // Reset to first page when applying filters
-    this.getProviders(0, this.pageSize); // Get first page with new filters
+    const filters = this.filterForm.value;
+    
+    // Solo incluir fechas si ambas están presentes y son válidas
+    if (filters.start && filters.end) {
+        const startDate = new Date(filters.start);
+        const endDate = new Date(filters.end);
+        
+        if (endDate < startDate) {
+            this.toastService.sendError('La fecha final no puede ser anterior a la fecha inicial');
+            return;
+        }
+    }
+    
+    this.currentPage = 1;
+    this.getProviders(0, this.pageSize);
     this.closeModalFilter();
-  }
-
+}
   clearFilters(): void {
     this.filterForm.reset();
     this.currentPage = 1;
