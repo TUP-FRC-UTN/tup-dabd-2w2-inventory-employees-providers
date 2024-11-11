@@ -9,8 +9,8 @@ import { InventoryTransactionTableComponent } from '../inventory_transaction/inv
 import { InventoryInventoriesUpdateComponent } from './inventory-inventories-update/inventory-inventories-update.component';
 import { MapperService } from '../../../services/MapperCamelToSnake/mapper.service';
 import { Inventory, StatusType, } from '../../../models/inventory.model';
-import { Article, MeasurementUnit, Status } from '../../../models/article.model';
-import { InventoryService } from '../../../services/inventory.service';
+import { Article, ArticleType, MeasurementUnit, Status } from '../../../models/article.model';
+import { InventoryService, Page } from '../../../services/inventory.service';
 import Swal from 'sweetalert2';
 import jsPDF from 'jspdf';
 import 'jspdf-autotable';
@@ -18,6 +18,7 @@ import * as XLSX from 'xlsx';
 import autoTable from 'jspdf-autotable';
 import { ToastService } from 'ngx-dabd-grupo01';
 import { NgbModal } from '@ng-bootstrap/ng-bootstrap';
+import { debounceTime, distinctUntilChanged } from 'rxjs';
 
 
 @Component({
@@ -43,7 +44,7 @@ export class InventoryTableComponent implements OnInit {
   private toastService = inject(ToastService);
   private modalService = inject(NgbModal);
 
-  searchInput = new FormControl('');
+  searchInput:FormControl = new FormControl('');
 
   @ViewChild('infoModal') infoModal!: TemplateRef<any>;
 
@@ -57,6 +58,7 @@ export class InventoryTableComponent implements OnInit {
   showInventoryUpdate: boolean = false;
 
   inventoryForm: FormGroup;
+  articleTypes = ArticleType;
   inventories: Inventory[] = [];
   articles: Article[] = [];
   activeArticles: Article[] = []; // Solo los ítems activos
@@ -83,28 +85,44 @@ export class InventoryTableComponent implements OnInit {
       measure: [this.measurementUnits[2]],
     });
 
-      this.filterForm = this.fb.group({
-        articleNameFilter: [''],
-        stockFilter: [''],
-        locationFilter: [''],
-        measure: [null]  // Agrega 'measure' si necesitas este filtro en particular.
-      });
-
-    
+    this.filterForm = this.fb.group({
+      article: [''],
+      description: [''],
+      status: [null],
+      articleType: [null],
+      articleCondition: [null],
+      location: ['']
+    });
   }
 
   ngOnInit(): void {
-    this.getInventories();
+    this.loadInventories();
+    this.searchInput.valueChanges.subscribe(() => {
+      this.inventories = this.filterInventories();
+    });
   }
 
-getInventories(): void {
+  filterInventories(){
+    if (!this.searchInput.value|| this.searchInput.value == null) {
+      this.loadInventories();
+   }
+
+   return this.inventories.filter(inv =>
+     inv.article.name.toLowerCase().includes(this.searchInput.value.toLowerCase() ?? '')
+     || inv.location?.toLowerCase().includes(this.searchInput.value.toLowerCase() ?? '')
+     || inv.article.articleCategory.denomination.toLowerCase().includes(this.searchInput.value.toLowerCase() ?? '')
+     || inv.article.articleType.toLowerCase().includes(this.searchInput.value.toLowerCase() ?? '')
+   );
+  }
+  /*getInventories(): void {
   this.isLoading = true;
   this.searchInput.valueChanges.subscribe( data => {
     if(data === null || data === ''){
-      this.getInventories();
+      this.loadInventories();
     }
     this.inventories = this.inventories.filter(
       x => x.article.name.toLowerCase().includes(data!.toLowerCase())
+      || x.location?.toLowerCase().includes(data!.toLowerCase())
     )
   })
 
@@ -122,7 +140,7 @@ getInventories(): void {
       }));
   });
   console.log(this.inventories)
-  })};
+  })};*/
 
  // Método para convertir la unidad de medida a una representación amigable
 getDisplayUnit(unit: MeasurementUnit): string {
@@ -151,27 +169,15 @@ getDisplayUnit(unit: MeasurementUnit): string {
     }).then(result => {
       if (result.isConfirmed) {
         this.inventoryService.deleteInventory(id).subscribe(() => {
-          this.getInventories();
+          this.loadInventories();
           this.toastService.sendSuccess('El inventario ha sido eliminado con éxito.');
         });
       }
     });
   }
-  clearFilters(): void {
-    this.filterForm.reset();  // Reinicia todos los filtros
-    this.applyFilters();      // Aplica los filtros después de limpiar para actualizar la lista
-  }
+
   applyFilters(): void {
-    const filters = this.filterForm.value;
-  
-    this.inventoryService.getFilteredInventories(filters).subscribe({
-      next: (filteredInventories) => {
-        this.inventories = filteredInventories;  // Actualiza la lista con los inventarios filtrados
-      },
-      error: () => {
-        alert('Hubo un problema al aplicar los filtros');
-      }
-    });
+    this.loadInventories();
   }
   
   resetForm(): void {
@@ -198,7 +204,7 @@ getDisplayUnit(unit: MeasurementUnit): string {
     debugger
     this.showRegisterTransactionForm = this.showRegisterTransactionForm;
     this.selectedInventoryId = "";
-    this.getInventories();
+    this.loadInventories();
 
   }
   onTransactionsClose(){
@@ -209,7 +215,7 @@ getDisplayUnit(unit: MeasurementUnit): string {
     debugger
     this.showInventoryUpdate = false;
     this.selectedInventory = null;
-    this.getInventories();
+    this.loadInventories();
   }
 
   onNewArticle(){
@@ -246,24 +252,6 @@ getDisplayUnit(unit: MeasurementUnit): string {
   selectedInventory: Inventory | null = null;
   showModalFilter: boolean = false;
 
-loadInventories(): void {
-  this.inventoryService.getInventoriesPageable(this.currentPage, this.itemsPerPage)
-    .subscribe({
-      next: (page) => {
-        console.log(page)
-        page = this.mapperService.toCamelCase(page);
-        console.log(page);
-        this.inventories = this.mapperService.toCamelCase(page.content)
-        this.totalPages = page.totalPages;
-        this.totalElements = page.totalElements;
-        this.currentPage = page.number;
-      },
-      error: (error) => {
-        console.error('Error loading inventories:', error);
-        // Handle error appropriately
-      }
-    });
-}
 filterActiveInventories(): void {
   this.currentFilter = 'active';
   this.inventories = this.originalInventories.filter(inventory => inventory.status === StatusType.ACTIVE);
@@ -294,11 +282,6 @@ goToPreviousPage(): void {
   }
 }
 
-onPageSizeChange(event: any): void {
-  this.itemsPerPage = event.target.value;
-  this.currentPage = 0; // Reset to first page
-  this.loadInventories();
-}
 exportToPDF(): void {
   const doc = new jsPDF({
     orientation: 'portrait',
@@ -390,5 +373,46 @@ sort(column: string) : void {
       // if (valueA > valueB) return this.sortDirection === 'asc' ? 1 : -1;
       return 0;
     });
-}
+  }
+
+  loadInventories(): void {
+    this.isLoading = true;
+    const filters = this.filterForm.value;
+
+    this.inventoryService.getInventoriesPagedFiltered(
+      this.currentPage,
+      this.itemsPerPage,
+      filters
+    ).subscribe({
+      next: (page: Page<Inventory>) => {
+        page = this.mapperService.toCamelCase(page);
+        this.inventories = this.mapperService.toCamelCase(page.content);
+        this.totalPages = page.totalPages;
+        this.totalElements = page.totalElements;
+        this.isLoading = false;
+      },
+      error: (error) => {
+        console.error('Error loading inventories:', error);
+        this.isLoading = false;
+      }
+    });
+  }
+
+  onPageChange(page: number): void {
+    this.currentPage = page;
+    this.loadInventories();
+  }
+
+  onPageSizeChange(event: any): void {
+    this.itemsPerPage = parseInt(event.target.value);
+    this.currentPage = 0;
+    this.loadInventories();
+  }
+
+  clearFilters(): void {
+    this.filterForm.reset();
+    this.currentPage = 0;
+    this.loadInventories();
+  }
+
 }

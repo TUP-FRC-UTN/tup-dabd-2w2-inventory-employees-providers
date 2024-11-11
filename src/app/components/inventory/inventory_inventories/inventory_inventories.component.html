@@ -115,32 +115,44 @@
       <div class="modal-body">
         <form [formGroup]="filterForm">
           <div class="row">
-            <div class="col-md-3 mb-3">
-              <input type="text" class="form-control" placeholder="Artículo" formControlName="articleNameFilter">
+            <div class="col-md-6 mb-3">
+              <label class="form-label">Artículo</label>
+              <input type="text" class="form-control" formControlName="article">
             </div>
-            <div class="col-md-3 mb-3">
-              <input type="text" class="form-control" placeholder="Stock" formControlName="stockFilter">
+            <div class="col-md-6 mb-3">
+              <label class="form-label">Descripción</label>
+              <input type="text" class="form-control" formControlName="description">
             </div>
-            <div class="col-md-3 mb-3">
-              <input type="text" class="form-control" placeholder="Ubicación" formControlName="locationFilter">
-            </div>
-            <div class="col-md-3 mb-3">
-              <select class="form-select" formControlName="measure">
-                <option value="UNITS">Unidades</option>
-                <option value="LITERS">Litros</option>
-                <option value="KILOS">Kilogramos</option>
+            <div class="col-md-4 mb-3">
+              <label class="form-label">Estado</label>
+              <select class="form-select" formControlName="status">
+                <option [ngValue]="null">Todos</option>
+                <option value="ACTIVE">Activo</option>
+                <option value="INACTIVE">Inactivo</option>
               </select>
+            </div>
+            <div class="col-md-4 mb-3">
+              <label class="form-label">Tipo de Artículo</label>
+              <select class="form-select" formControlName="articleType">
+                <option [ngValue]="null">Todos</option>
+                <option value="{{articleTypes.REGISTRABLE}}">Registrable</option>
+                <option value="{{articleTypes.NON_REGISTRABLE}}">No Registrable</option>
+              </select>
+            </div>
+            <div class="col-md-4 mb-3">
+              <label class="form-label">Ubicación</label>
+              <input type="text" class="form-control" formControlName="location">
             </div>
           </div>
         </form>
       </div>
       <div class="modal-footer">
-        <!-- Botón de Limpiar con Icono de Basurero -->
         <button type="button" class="btn btn-outline-danger" (click)="clearFilters()">
-          <i class="bi bi-trash"></i>
+          <i class="bi bi-trash"></i> Limpiar
         </button>
-        <!-- Botón de Aplicar Filtros -->
-        <button type="button" class="btn btn-primary" (click)="applyFilters()">Aplicar Filtros</button>
+        <button type="button" class="btn btn-primary" (click)="applyFilters()" data-bs-dismiss="modal">
+          Aplicar
+        </button>
       </div>
     </div>
   </div>
