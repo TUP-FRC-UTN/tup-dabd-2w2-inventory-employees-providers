@@ -6,6 +6,48 @@
 
   <!-- Navegación con Menús Desplegables -->
   <nav class="nav flex-column">
+    <!-- Dashboard -->
+    <div class="nav-item">
+    <a class="nav-link dropdown-toggle text-white"
+    data-bs-toggle="collapse"
+    href="#estadisticasMenu"
+    role="button"
+    aria-expanded="false"
+    aria-controls="estadisticasMenu" >
+      Estadisticas
+    </a>
+    <div class="collapse" id="estadisticasMenu">
+      <ul class="nav flex-column ms-3">
+        <li>
+          <a
+            class="nav-link text-white"
+            routerLink="/employees/dashboard"
+            routerLinkActive="active"
+            >Graficos de Empleados</a
+          >
+        </li>
+        <li>
+          <a
+            class="nav-link text-white"
+            routerLink="/providers/dashboard"
+            routerLinkActive="active"
+          >
+            Graficos de Proveedores
+          </a>
+        </li>
+        <li>
+          <a
+            class="nav-link text-white"
+            routerLink="/inventory/dashboard"
+            routerLinkActive="active"
+            >Graficos de Inventario
+            </a
+          >
+        </li>
+      </ul>
+    </div>
+    </div>
+
     <!-- Empleados -->
     <div class="nav-item">
       <a
@@ -28,14 +70,7 @@
               >Lista de Empleados</a
             >
           </li>
-          <li>
-            <a
-              class="nav-link text-white"
-              routerLink="/employees/dashboard"
-              routerLinkActive="active"
-              >Graficos</a
-            >
-          </li>
+
           <li>
             <a
               class="nav-link text-white"
@@ -70,15 +105,7 @@
               >Lista de Proveedores</a
             >
           </li>
-          <li>
-            <a
-              class="nav-link text-white"
-              routerLink="/providers/dashboard"
-              routerLinkActive="active"
-            >
-              Graficos
-            </a>
-          </li>
+
           <li>
             <a
               class="nav-link text-white"
@@ -145,14 +172,7 @@
               routerLinkActive="active"
               >Lista de Inventario</a
             >
-          </li>          <li>
-            <a
-              class="nav-link text-white"
-              routerLink="/inventory/dashboard"
-              routerLinkActive="active"
-              >Graficos</a
-            >
-          </li>
+          </li>          
           <li>
             <a
               class="nav-link text-white"
