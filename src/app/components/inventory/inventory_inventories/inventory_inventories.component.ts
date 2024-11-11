@@ -1,5 +1,5 @@
 import { CommonModule,DatePipe } from '@angular/common';
-import { Component, inject, OnInit, TemplateRef, ViewChild } from '@angular/core';
+import { Component, inject, OnInit, TemplateRef, viewChild, ViewChild } from '@angular/core';
 import { FormBuilder, FormControl, FormGroup, FormsModule, ReactiveFormsModule, Validators } from '@angular/forms';
 import { ArticleFormComponent } from '../inventory_articles/inventory_articles_form/inventory_articles_form.component';
 import { RouterModule } from '@angular/router';
@@ -260,7 +260,7 @@ export class InventoryTableComponent implements OnInit {
     console.log('onRegisterTransactionClose');
     debugger
     this.showRegisterTransactionForm = this.showRegisterTransactionForm;
-    this.selectedInventoryId = "";
+    this.selectedInventory = null;
     this.loadInventories();
   }
   onTransactionsClose() {
@@ -343,6 +343,7 @@ filterActiveInventories(): void {
     this.currentPage = 0; // Reset to first page
     this.loadInventories();
   }
+
   exportToPDF(): void {
     const doc = new jsPDF({
       orientation: 'portrait',
@@ -369,42 +370,14 @@ filterActiveInventories(): void {
       ];
       tableRows.push(inventoryData);
     });
+      autoTable(doc, {
+      head: [tableColumn],
+      body: tableRows,
+      startY: 25,
+    });
 
-exportToPDF(): void {
-  const doc = new jsPDF({
-    orientation: 'portrait',
-    unit: 'mm',
-    format: 'a4',
-  });
-  const title = 'Listado de Inventario';
-  doc.setFontSize(20);
-  doc.setTextColor(40, 40, 40);
-  doc.text(title, doc.internal.pageSize.getWidth() / 2, 20, { align: 'center' });
-
-  const tableColumn = ['Identificador','Artículo', 'Descripcion','Stock','Medida', 'Stock Mínimo', 'Ubicación'];
-  const tableRows: any[][] = [];
-
-  this.inventories.forEach(inventory => {
-    const inventoryData = [
-      inventory.article.identifier,
-      inventory.article.name,
-      inventory.article.description,
-      inventory.stock,
-      this.getDisplayUnit(inventory.article.measurementUnit),
-      inventory.minStock,
-      inventory.location
-    ];
-    tableRows.push(inventoryData);
-  });
-
-  autoTable(doc, {
-    head: [tableColumn],
-    body: tableRows,
-    startY: 25,
-  });
-
-  doc.save('inventario.pdf');
-}
+    doc.save('inventario.pdf');
+  }
 
   exportToExcel(): void {
     try {
@@ -491,11 +464,6 @@ exportToPDF(): void {
     this.loadInventories();
   }
 
-  onPageSizeChange(event: any): void {
-    this.itemsPerPage = parseInt(event.target.value);
-    this.currentPage = 0;
-    this.loadInventories();
-  }
 
   clearFilters(): void {
     this.filterForm.reset();
