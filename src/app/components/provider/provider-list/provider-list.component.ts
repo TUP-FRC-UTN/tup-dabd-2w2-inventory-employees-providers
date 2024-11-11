@@ -139,7 +139,7 @@ export class ProviderListComponent implements OnInit {
    this.providerList = this.providerList.filter(p =>
      p.name.toLowerCase().includes(searchTerm.toLowerCase() ?? '')
      ||p.details?.toLowerCase().includes(searchTerm.toLowerCase() ?? '')
-     ||p.service.toLowerCase().includes(searchTerm.toLowerCase() ?? '')
+     ||p.service.name.toLowerCase().includes(searchTerm.toLowerCase() ?? '')
    );  }
 
   // Nuevo método para filtrado local
@@ -162,7 +162,7 @@ private filterProviders(searchTerm: string): void {
 
   // Actualizar métricas y gráficos con los datos filtrados
   this.calculateMetrics();
-  this.createPieChart();
+  // this.createPieChart();
   this.createBarChart();
 }
 
@@ -189,7 +189,7 @@ getProviders(page: number = 0, size: number = this.pageSize): void {
           this.isLoading = false;
           
           this.calculateMetrics();
-          this.createPieChart();
+          // this.createPieChart();
           this.createBarChart();
       },
       error: (error) => {
