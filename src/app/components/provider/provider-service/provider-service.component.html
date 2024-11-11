@@ -138,10 +138,10 @@
 
     <!-- Componente de Alta/Edición -->
     @if (showServiceTypeUpdate) {
-      <app-provider-type-update 
+      <app-provider-service-update 
         [service]="selectedService" 
         (closeModal)="onServiceTypeUpdateClose()">
-      </app-provider-type-update>
+      </app-provider-service-update>
     }
 
     <ng-template #infoModal let-modal>

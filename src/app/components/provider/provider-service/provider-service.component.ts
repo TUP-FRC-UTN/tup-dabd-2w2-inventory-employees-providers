@@ -1,7 +1,7 @@
 import { Component, inject, OnInit, TemplateRef, ViewChild } from '@angular/core';
 import { FormControl, FormGroup, ReactiveFormsModule } from '@angular/forms';
 import { MainContainerComponent } from 'ngx-dabd-grupo01';
-import { ProviderTypeUpdateComponent } from "../provider-type-update/provider-type-update.component";
+import { ProviderServiceUpdateComponent } from "../provider-service-update/provider-service-update.component";
 import { ServiceService } from '../../../services/suppliers/service.service';
 import { Service } from '../../../models/suppliers/service.model';
 import jsPDF from 'jspdf';
@@ -12,7 +12,7 @@ import { NgbModal } from '@ng-bootstrap/ng-bootstrap';
 @Component({
   selector: 'app-provider-service',
   standalone: true,
-  imports: [MainContainerComponent, ReactiveFormsModule, ProviderTypeUpdateComponent],
+  imports: [MainContainerComponent, ReactiveFormsModule, ProviderServiceUpdateComponent],
   templateUrl: './provider-service.component.html',
   styleUrl: './provider-service.component.css'
 })
