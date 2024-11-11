@@ -8,7 +8,7 @@ import { Company } from '../../models/suppliers/company.model';
 })
 export class CompanyService {
 
-  private apiCompanyUrl = 'http://localhost:8009/companies';
+  private apiCompanyUrl = 'http://localhost:8009/suppliers/companies';
 
   constructor(private http: HttpClient) { }
 
