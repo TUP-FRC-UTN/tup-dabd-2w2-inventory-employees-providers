@@ -13,5 +13,4 @@
     ITALIA = 'Italia',
     EEUU = 'Estados Unidos',
     MEXICO = 'México',
-    OTHER = 'Otro',
   }

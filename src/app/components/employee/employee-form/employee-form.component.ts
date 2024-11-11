@@ -120,6 +120,23 @@ export class EmployeeFormComponent implements OnInit {
       console.log(value);
       this.employeeForm.patchValue({ hiringDate: value });
     })
+
+    this.loadCountries();
+    this.loadProvinces();
+  }
+
+  loadCountries() {
+    this.countryOptions = Object.keys(Countries).map(key => ({
+      value: Countries[key as keyof typeof Countries],
+      display: Countries[key as keyof typeof Countries]
+    }));
+  }
+  
+  loadProvinces() {
+    this.provinceOptions = Object.keys(Provinces).map(key => ({
+      value: Provinces[key as keyof typeof Provinces],
+      display: Provinces[key as keyof typeof Provinces]
+    }));
   }
 
   getById(id: number) {

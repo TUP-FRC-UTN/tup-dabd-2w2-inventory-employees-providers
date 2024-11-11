@@ -179,7 +179,38 @@
               </div>
             </div>
  
-            <!-- Ciudad y Provincia -->
+            <!-- País y Provincia -->
+            <div class="col-md-6">
+              <div class="flex-row d-flex align-items-center mb-3">
+                <label for="country" class="col-form-label col-md-2">País<label class="text-danger">*</label></label>
+                <select id="country" type="select" class="form-control m-2" id="country" formControlName="country"
+                  placeholder="Ingrese el país"
+                  [ngClass]="{'is-invalid': employeeForm.get('address.country')?.invalid && employeeForm.get('address.country')?.touched,
+                  'is-valid': employeeForm.get('address.country')?.valid}">
+                  <option *ngFor="let country of countryOptions" [value]="country.value">{{ country.display }}</option>
+                </select>
+              </div>
+              <div>
+                <small class="text-danger ms-2" *ngIf="employeeForm.get('address.country')?.invalid && employeeForm.get('address.country')?.touched">El país es requerido</small>
+              </div>
+            </div>
+            
+            <div class="col-md-6">
+              <div class="flex-row d-flex align-items-center mb-3">
+                <label for="province" class="col-form-label col-md-2">Provincia<label class="text-danger">*</label></label>
+                <select id="province" type="select" class="form-control m-2" formControlName="province"
+                  placeholder="Ingrese la provincia"
+                  [ngClass]="{'is-invalid': employeeForm.get('address.province')?.invalid && employeeForm.get('address.province')?.touched,
+                  'is-valid': employeeForm.get('address.province')?.valid}">
+                  <option *ngFor="let province of provinceOptions" [value]="province.value">{{ province.display }}</option>
+                </select>
+              </div>
+              <div>
+                <small class="text-danger ms-2" *ngIf="employeeForm.get('address.province')?.invalid && employeeForm.get('address.province')?.touched">La provincia es requerida</small>
+              </div>
+            </div>
+ 
+            <!-- Ciudad y Código Postal -->
             <div class="col-md-6">
               <div class="flex-row d-flex align-items-center mb-3">
                 <label for="city" class="col-form-label col-md-2">Ciudad<label class="text-danger">*</label></label>
@@ -194,41 +225,6 @@
                 }
               </div>
             </div>
- 
-            <div class="col-md-6">
-              <div class="flex-row d-flex align-items-center mb-3">
-                <label for="province" class="col-form-label col-md-2">Provincia<label class="text-danger">*</label></label>
-                <input type="text" class="form-control m-2" id="province" formControlName="province"
-                  placeholder="Ingrese la provincia"
-                  [ngClass]="{'is-invalid': employeeForm.get('address.province')?.invalid && employeeForm.get('address.province')?.touched,
-                             'is-valid': employeeForm.get('address.province')?.valid}">
-              </div>
-              <div>
-                @if (employeeForm.get('address.province')?.invalid && employeeForm.get('address.province')?.touched) {
-                  <small class="text-danger ms-2">La provincia es requerida</small>
-                }
-              </div>
-            </div>
- 
-            <!-- País y Código Postal -->
-           <div class="col-md-6">
-            <div class="flex-row d-flex align-items-center mb-3">
-              <label for="country" class="col-form-label col-md-2">País<label class="text-danger">*</label></label>
-              <select id="country" type="select" class="form-control m-2" id="country" formControlName="country"
-                placeholder="Ingrese el país"
-                [ngClass]="{'is-invalid': employeeForm.get('address.country')?.invalid && employeeForm.get('address.country')?.touched,
-                           'is-valid': employeeForm.get('address.country')?.valid}">
-                @for(country of countryOptions; track $index) {
-                <option [value]="country.value">{{ country.display }}</option>
-                }
-              </select>
-            </div>
-            <div>
-              @if (employeeForm.get('address.country')?.invalid && employeeForm.get('address.country')?.touched) {
-                <small class="text-danger ms-2">El país es requerido</small>
-              }
-            </div>
-          </div>
 
           <div class="col-md-6">
             <div class="flex-row d-flex align-items-center mb-3">
