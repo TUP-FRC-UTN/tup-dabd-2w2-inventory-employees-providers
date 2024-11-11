@@ -8,13 +8,13 @@ import { MapperService } from '../../../../services/MapperCamelToSnake/mapper.se
 import { ActivatedRoute, Router, RouterModule } from '@angular/router';
 import { Inventory, StatusType } from '../../../../models/inventory.model';
 import { NgbModal } from '@ng-bootstrap/ng-bootstrap';
-import { ToastService } from 'ngx-dabd-grupo01';
+import { MainContainerComponent, ToastService } from 'ngx-dabd-grupo01';
 
 
 @Component({
   selector: 'app-article',
   standalone: true,
-  imports: [CommonModule, ReactiveFormsModule,RouterModule], // Agrega ReactiveFormsModule aquí
+  imports: [CommonModule, ReactiveFormsModule,RouterModule, MainContainerComponent], // Agrega ReactiveFormsModule aquí
   templateUrl: './inventory_articles_form.component.html',
   styleUrls: ['./inventory_articles_form.component.css']
 })
@@ -190,11 +190,11 @@ export class ArticleFormComponent implements OnInit {
           console.log(data);
           this.resetForm(); // Limpia el formulario después de crear exitosamente
           this.router.navigate(['/inventories']);
-          this.toast.sendSuccess('Articulo creado exitosamente');
+          this.toast.sendSuccess('Artículo creado exitosamente');
         })
       }
       else {
-        this.toast.sendError('Articulo no creado');
+        this.toast.sendError('Error al crear Artículo.');
       }
        if (this.currentArticleId!= undefined){
         this.inventoryService.updateArticle(this.currentArticleId,articleInventoryFormatted.article as Article).subscribe((data)=> console.log(data));

@@ -1,4 +1,3 @@
-
 import { CommonModule,DatePipe } from '@angular/common';
 import { Component, inject, OnInit, TemplateRef, ViewChild } from '@angular/core';
 import { FormBuilder, FormControl, FormGroup, FormsModule, ReactiveFormsModule, Validators } from '@angular/forms';
@@ -16,7 +15,7 @@ import jsPDF from 'jspdf';
 import 'jspdf-autotable';
 import * as XLSX from 'xlsx';
 import autoTable from 'jspdf-autotable';
-import { ToastService } from 'ngx-dabd-grupo01';
+import { MainContainerComponent, ToastService } from 'ngx-dabd-grupo01';
 import { NgbModal } from '@ng-bootstrap/ng-bootstrap';
 import { TableFiltersComponent, Filter, FilterConfigBuilder } from 'ngx-dabd-grupo01';
 import { debounceTime, distinctUntilChanged } from 'rxjs';
@@ -33,7 +32,8 @@ import { debounceTime, distinctUntilChanged } from 'rxjs';
          InventoryTransactionTableComponent,
           InventoryInventoriesUpdateComponent,
           FormsModule,
-          TableFiltersComponent
+          TableFiltersComponent,
+          MainContainerComponent
         ],
         providers:[DatePipe],
   templateUrl: './inventory_inventories.component.html',
@@ -106,10 +106,10 @@ export class InventoryTableComponent implements OnInit {
   
   searchInput:FormControl = new FormControl('');
 
-  @ViewChild('infoModal') infoModal!: TemplateRef<any>;
+  readonly infoModal = viewChild.required<TemplateRef<any>>('infoModal');
 
   showInfo(): void {
-    this.modalService.open(this.infoModal, { centered: true });
+    this.modalService.open(this.infoModal(), { centered: true });
   }
   // Modals
   showRegisterForm: boolean = false;
@@ -126,15 +126,12 @@ export class InventoryTableComponent implements OnInit {
   isEditing: boolean = false;
   editingInventoryId: any | null = null; // Para guardar el ID del inventario en edición
 
-  selectedInventoryId: string | null = null;
-
-
   //sorts
   sortedList: Inventory[] = [];
   sortColumn: string = '';
   sortDirection: 'asc' | 'desc' = 'asc';
 
-  constructor(private fb: FormBuilder, ) {
+  constructor(private fb: FormBuilder,) {
     this.inventoryForm = this.fb.group({
       article_id: ['', Validators.required],
       stock: [1, Validators.required], // Stock inicial es 1
@@ -153,6 +150,7 @@ export class InventoryTableComponent implements OnInit {
       articleCondition: [null],
       location: ['']
     });
+
   }
 
   ngOnInit(): void {
@@ -194,27 +192,26 @@ export class InventoryTableComponent implements OnInit {
     this.filteredInventories = inventories;
     this.isLoading = false;
     this.inventoryService.getInventories().subscribe((inventories: any[]) => {
+
       this.inventories = inventories.map(inventory => ({
-        ...this.mapperService.toCamelCase(inventory), // Convertir todo el inventario a camelCase
-        article: this.mapperService.toCamelCase(inventory.article) // Convertir el artículo a camelCase
+        ...this.mapperService.toCamelCase(inventory),
       }));
-  });
   console.log(this.inventories)
   })};*/
 
- // Método para convertir la unidad de medida a una representación amigable
-getDisplayUnit(unit: MeasurementUnit): string {
-  switch (unit) {
+  // Método para convertir la unidad de medida a una representación amigable
+  getDisplayUnit(unit: MeasurementUnit): string {
+    switch (unit) {
       case MeasurementUnit.LITERS:
-          return 'Lts.';
+        return 'Lts.';
       case MeasurementUnit.KILOS:
-          return 'Kg.';
+        return 'Kg.';
       case MeasurementUnit.UNITS:
-          return 'Ud.';
+        return 'Ud.';
       default:
-          return unit; // Retorna el valor original si no coincide
+        return unit; // Retorna el valor original si no coincide
+    }
   }
-}
 
   deleteInventory(id: number): void {
     Swal.fire({
@@ -239,18 +236,18 @@ getDisplayUnit(unit: MeasurementUnit): string {
   applyFilters(): void {
     this.loadInventories();
   }
-  
+
   resetForm(): void {
     this.isEditing = false; // Desactivar el modo edición
     this.editingInventoryId = null; // Limpiar el ID del inventario en edición
     this.inventoryForm.reset({ stock: 1, min_stock: 1, inventory_status: 'Active' });
   }
 
-  onNewTransaction(id:any){
-    this.selectedInventoryId = id;
+  onNewTransaction(inventory: Inventory) {
+    this.selectedInventory = inventory;
     this.showRegisterTransactionForm = !this.showRegisterTransactionForm;
   }
-  onTransactions(inventory:Inventory){
+  onTransactions(inventory: Inventory) {
     this.selectedInventory = inventory;
     this.showTransactions = !this.showTransactions;
   }
@@ -259,15 +256,14 @@ getDisplayUnit(unit: MeasurementUnit): string {
     this.showInventoryUpdate = true;
   }
 
-  onRegisterTransactionClose(){
+  onRegisterTransactionClose() {
     console.log('onRegisterTransactionClose');
     debugger
     this.showRegisterTransactionForm = this.showRegisterTransactionForm;
     this.selectedInventoryId = "";
     this.loadInventories();
-
   }
-  onTransactionsClose(){
+  onTransactionsClose() {
     this.showTransactions = this.showTransactions;
     this.selectedInventory = null;
   }
@@ -278,10 +274,10 @@ getDisplayUnit(unit: MeasurementUnit): string {
     this.loadInventories();
   }
 
-  onNewArticle(){
+  onNewArticle() {
     this.showRegisterForm = !this.showRegisterForm;
   }
-  onRegisterClose(){
+  onRegisterClose() {
     this.showRegisterForm = this.showRegisterForm;
   }
 
@@ -291,7 +287,7 @@ getDisplayUnit(unit: MeasurementUnit): string {
   totalElements: number = 0;
 
   //Filtros
- showFilterModal: boolean = false;
+  showFilterModal: boolean = false;
   filteredInventories: Inventory[] = [];
   isLoading = false;
   originalInventories: Inventory[] = []; // Lista completa de inventarios (sin filtrar)
@@ -305,7 +301,7 @@ getDisplayUnit(unit: MeasurementUnit): string {
   measurementUnits: MeasurementUnit[] = [MeasurementUnit.LITERS, MeasurementUnit.KILOS, MeasurementUnit.UNITS];
 
 
-   // Formulario para filtros que requieren llamada al servidor
+  // Formulario para filtros que requieren llamada al servidor
   filterForm: FormGroup;
   readonly MeasurementUnit = MeasurementUnit;
 
@@ -317,30 +313,62 @@ filterActiveInventories(): void {
   this.inventories = this.originalInventories.filter(inventory => inventory.status === StatusType.ACTIVE);
 }
 
-filterInactiveInventories(): void {
-  this.currentFilter = 'inactive';
-  this.inventories = this.originalInventories.filter(inventory => inventory.status !== StatusType.ACTIVE);
-}
+  filterInactiveInventories(): void {
+    this.currentFilter = 'inactive';
+    this.inventories = this.originalInventories.filter(inventory => inventory.status !== StatusType.ACTIVE);
+  }
 
-showAllInventories(): void {
-  this.currentFilter = 'all';
-  this.inventories = [...this.originalInventories];
-}
+  showAllInventories(): void {
+    this.currentFilter = 'all';
+    this.inventories = [...this.originalInventories];
+  }
 
 
-goToNextPage(): void {
-  if (this.currentPage < this.totalPages - 1) {
-    this.currentPage++;
+  goToNextPage(): void {
+    if (this.currentPage < this.totalPages - 1) {
+      this.currentPage++;
+      this.loadInventories();
+    }
+  }
+
+  goToPreviousPage(): void {
+    if (this.currentPage > 0) {
+      this.currentPage--;
+      this.loadInventories();
+    }
+  }
+
+  onPageSizeChange(event: any): void {
+    this.itemsPerPage = event.target.value;
+    this.currentPage = 0; // Reset to first page
     this.loadInventories();
   }
-}
+  exportToPDF(): void {
+    const doc = new jsPDF({
+      orientation: 'portrait',
+      unit: 'mm',
+      format: 'a4',
+    });
+    const title = 'Listado de Inventario';
+    doc.setFontSize(20);
+    doc.setTextColor(40, 40, 40);
+    doc.text(title, doc.internal.pageSize.getWidth() / 2, 20, { align: 'center' });
 
-goToPreviousPage(): void {
-  if (this.currentPage > 0) {
-    this.currentPage--;
-    this.loadInventories();
-  }
-}
+    const tableColumn = ['Identificador', 'Artículo', 'Descripcion', 'Stock', 'Medida', 'Stock Mínimo', 'Ubicación'];
+    const tableRows: any[][] = [];
+
+    this.inventories.forEach(inventory => {
+      const inventoryData = [
+        inventory.article.identifier,
+        inventory.article.name,
+        inventory.article.description,
+        inventory.stock,
+        this.getDisplayUnit(inventory.article.measurementUnit),
+        inventory.minStock,
+        inventory.location
+      ];
+      tableRows.push(inventoryData);
+    });
 
 exportToPDF(): void {
   const doc = new jsPDF({
@@ -378,48 +406,48 @@ exportToPDF(): void {
   doc.save('inventario.pdf');
 }
 
-exportToExcel(): void {
-  try{
-    let element = document.getElementById('inventoryTable');
-    if(!element){
-      console.warn('No se encontró el elemento con el ID "inventoryTable"');
-      element = this.createTableFromData();
+  exportToExcel(): void {
+    try {
+      let element = document.getElementById('inventoryTable');
+      if (!element) {
+        console.warn('No se encontró el elemento con el ID "inventoryTable"');
+        element = this.createTableFromData();
+      }
+      const ws: XLSX.WorkSheet = XLSX.utils.table_to_sheet(element);
+      const wb: XLSX.WorkBook = XLSX.utils.book_new();
+      XLSX.utils.book_append_sheet(wb, ws, 'Inventario');
+      XLSX.writeFile(wb, 'inventario.xlsx');
+    } catch (error) {
+      console.error('Error al exportar a Excel:', error);
     }
-    const ws: XLSX.WorkSheet = XLSX.utils.table_to_sheet(element);
-    const wb: XLSX.WorkBook = XLSX.utils.book_new();
-    XLSX.utils.book_append_sheet(wb, ws, 'Inventario');
-    XLSX.writeFile(wb, 'inventario.xlsx');
-  } catch( error ){
-    console.error('Error al exportar a Excel:', error);
   }
-}
 
-private createTableFromData(): HTMLTableElement {
-  const table = document.createElement('table');
-  const thead = table.createTHead();
-  const tbody = table.createTBody();
+  private createTableFromData(): HTMLTableElement {
+    const table = document.createElement('table');
+    const thead = table.createTHead();
+    const tbody = table.createTBody();
 
-  const headerRow = thead.insertRow();
-  const headers = ['Identificador','Artículo', 'Descripcion','Stock','Medida', 'Stock Mínimo', 'Ubicación'].forEach(text => {
-    const th = document.createElement('th');
-    th.textContent = text;
-    headerRow.appendChild(th);
-  });
-
-  this.inventories.forEach(inventory => {
-    const unid = this.getDisplayUnit(inventory.article.measurementUnit);
-    const row = tbody.insertRow();
-    [inventory.article.identifier, inventory.article.name, inventory.article.description, inventory.stock, unid, inventory.minStock, inventory.location].forEach(text => {
-      const cell = row.insertCell();
-      cell.textContent = text !== undefined && text !== null ? text.toString() : null;
+    const headerRow = thead.insertRow();
+    const headers = ['Identificador', 'Artículo', 'Descripcion', 'Stock', 'Medida', 'Stock Mínimo', 'Ubicación'].forEach(text => {
+      const th = document.createElement('th');
+      th.textContent = text;
+      headerRow.appendChild(th);
     });
-  });
 
-  return table;
-}
+    this.inventories.forEach(inventory => {
+      const unid = this.getDisplayUnit(inventory.article.measurementUnit);
+      const row = tbody.insertRow();
+      [inventory.article.identifier, inventory.article.name, inventory.article.description, inventory.stock, unid, inventory.minStock, inventory.location].forEach(text => {
+        const cell = row.insertCell();
+        cell.textContent = text !== undefined && text !== null ? text.toString() : null;
+      });
+    });
 
-sort(column: string) : void {
-  this.sortDirection = this.sortColumn === column ? (this.sortDirection === 'asc' ? 'desc' : 'asc') : 'asc';
+    return table;
+  }
+
+  sort(column: string): void {
+    this.sortDirection = this.sortColumn === column ? (this.sortDirection === 'asc' ? 'desc' : 'asc') : 'asc';
     this.sortColumn = column;
 
     // Ordena la lista
@@ -474,5 +502,4 @@ sort(column: string) : void {
     this.currentPage = 0;
     this.loadInventories();
   }
-
 }

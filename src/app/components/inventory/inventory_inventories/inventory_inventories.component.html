@@ -1,105 +1,116 @@
-<h3 class="h3">Lista de Inventarios</h3>
-
-<!-- Barra de búsqueda y botones de acción -->
-<div class="d-flex justify-content-between align-items-center mb-3">
-  <!-- Barra de búsqueda -->
-  <div class="input-group w-25">
-    <span class="input-group-text">
-      <i class="bi bi-search"></i>
-    </span>
-    <input type="text" class="form-control" placeholder="Buscar Artículos" [formControl]="searchInput" />
+<app-main-container title="Lista de Inventarios" (infoButtonClick)="showInfo()">
+  <!-- Barra de búsqueda y botones de acción -->
+  <div class="d-flex justify-content-between align-items-center mb-3">
+    <!-- Barra de búsqueda -->
+    <div class="input-group w-25">
+      <span class="input-group-text">
+        <i class="bi bi-search"></i>
+      </span>
+      <input type="text" class="form-control" placeholder="Buscar Artículos" [formControl]="searchInput" />
     <app-table-filters style="z-index: 1;" [filters]="filterConfig" (filterValueChange)="filterChange($event)"></app-table-filters>
+    </div>
+
+    <!-- Botones de acción -->
+    <div class="d-flex align-items-center">
+      <button type="button" class="btn btn-outline-primary me-2" [routerLink]="['/articles/article']"
+        title="Agregar artículo">
+        <i class="bi bi-plus"></i>
+      </button>
+      <button type="button" class="btn btn-success me-2" (click)="exportToExcel()" title="Exportar a Excel">
+        <i class="bi bi-file-earmark-excel"></i>
+      </button>
+      <button type="button" class="btn btn-danger me-2" (click)="exportToPDF()" title="Exportar a PDF">
+        <i class="bi bi-file-earmark-pdf"></i>
+      </button>
+    </div>
   </div>
 
-  <!-- Botones de acción -->
-  <div class="d-flex align-items-center">
-    <button type="button" class="btn btn-outline-primary me-2" [routerLink]="['/articles/article']" title="Agregar artículo">
-      <i class="bi bi-plus"></i>
-    </button>
-    <button type="button" class="btn btn-success me-2" (click)="exportToExcel()" title="Exportar a Excel">
-      <i class="bi bi-file-earmark-excel"></i>
-    </button>
-    <button type="button" class="btn btn-danger me-2" (click)="exportToPDF()" title="Exportar a PDF">
-      <i class="bi bi-file-earmark-pdf"></i>
-    </button>
-    <button class="btn btn-secondary" (click)="showInfo()" title="Información">
-      <i class="bi bi-info-circle"></i>
-    </button>
+  <!-- Tabla de inventarios -->
+  <div class="table-container mt-3">
+    <table class="table table-striped">
+      <thead *ngIf="inventories.length > 0">
+        <tr>
+          <th (click)="sort('identifier')">Identificador</th>
+          <th (click)="sort('article')">Artículo</th>
+          <th (click)="sort('type')">Tipo</th>
+          <th (click)="sort('stock')">Stock</th>
+          <th (click)="sort('measure')">Medida</th>
+          <th (click)="sort('minStock')">Stock Mínimo</th>
+          <th (click)="sort('location')">Ubicación</th>
+          <th (click)="sort('status')">Estado</th>
+          <th>Acciones</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr *ngIf="inventories.length === 0">
+          <td colspan="9" class="text-center">
+            <div class="alert alert-secondary">
+              No hay elementos para mostrar
+            </div>
+          </td>
+        </tr>
+        <tr *ngFor="let inventory of inventories">
+          <td>{{ inventory.article.identifier || "-" }}</td>
+          <td>{{ inventory.article.name }}</td>
+          <td>{{ inventory.article.articleCategory.denomination || "-" }}</td>
+          <td>{{ inventory.stock }}</td>
+          <td>{{ getDisplayUnit(inventory.article.measurementUnit) }}</td>
+          <td>{{ inventory.minStock || "-" }}</td>
+          <td>{{ inventory.location || "-" }}</td>
+          <td>
+            <i *ngIf="inventory.status.toString() === 'ACTIVE'" class="bi bi-check2-circle text-success"
+              style="font-size: 1.5rem"></i>
+            <i *ngIf="inventory.status.toString() !== 'ACTIVE'" class="bi bi-x-circle text-danger"
+              style="font-size: 1.5rem"></i>
+          </td>
+          <td>
+            <div class="btn-group" role="group">
+              <button type="button" class="btn btn-sm btn-secondary dropdown-toggle" data-bs-toggle="dropdown"
+                aria-expanded="false">
+                <i class="bi bi-three-dots-vertical"></i>
+              </button>
+              <ul class="dropdown-menu">
+                <li>
+                  <a class="dropdown-item" (click)="onTransactions(inventory)">Ver Movimientos</a>
+                </li>
+                <li *ngIf="inventory.status.toString() === 'ACTIVE'">
+                  <a class="dropdown-item" (click)="onNewTransaction(inventory)">Realizar Movimiento</a>
+                </li>
+                <li *ngIf="inventory.status.toString() === 'ACTIVE'">
+                  <a class="dropdown-item" (click)="onInventoryUpdate(inventory)">Editar</a>
+                </li>
+                <li *ngIf="inventory.status.toString() === 'ACTIVE'">
+                  <a class="dropdown-item text-danger" (click)="deleteInventory(inventory.id!)">Eliminar</a>
+                </li>
+              </ul>
+            </div>
+          </td>
+        </tr>
+      </tbody>
+    </table>
   </div>
-</div>
 
-<!-- Tabla de inventarios -->
-<div class="table-container mt-3">
-  <table class="table table-striped">
-    <thead *ngIf="inventories.length > 0">
-      <tr>
-        <th (click)="sort('identifier')">Identificador</th>
-        <th (click)="sort('article')">Artículo</th>
-        <th (click)="sort('type')">Tipo</th>
-        <th (click)="sort('stock')">Stock</th>
-        <th (click)="sort('measure')">Medida</th>
-        <th (click)="sort('minStock')">Stock Mínimo</th>
-        <th (click)="sort('location')">Ubicación</th>
-        <th (click)="sort('status')">Estado</th>
-        <th>Acciones</th>
-      </tr>
-    </thead>
-    <tbody>
-      <tr *ngIf="inventories.length === 0">
-        <td colspan="9" class="text-center">
-          <div class="alert alert-secondary">No hay elementos para mostrar</div>
-        </td>
-      </tr>
-      <tr *ngFor="let inventory of inventories">
-        <td>{{ inventory.article.identifier || "-" }}</td>
-        <td>{{ inventory.article.name }}</td>
-        <td>{{ inventory.article.articleCategory?.denomination || '-' }}</td>
-        <td>{{ inventory.stock }}</td>
-        <td>{{ getDisplayUnit(inventory.article.measurementUnit) }}</td>
-        <td>{{ inventory.minStock || "-" }}</td>
-        <td>{{ inventory.location || "-" }}</td>
-        <td>
-          <i *ngIf="inventory.status.toString() === 'ACTIVE'" class="bi bi-check2-circle text-success" style="font-size: 1.5rem;"></i>
-          <i *ngIf="inventory.status.toString() !== 'ACTIVE'" class="bi bi-x-circle text-danger" style="font-size: 1.5rem;"></i>
-        </td>
-        <td>
-          <div class="btn-group" role="group">
-            <button type="button" class="btn btn-sm btn-secondary dropdown-toggle" data-bs-toggle="dropdown" aria-expanded="false">
-              <i class="bi bi-three-dots-vertical"></i>
-            </button>
-            <ul class="dropdown-menu">
-              <li><a class="dropdown-item" (click)="onTransactions(inventory)">Ver Movimientos</a></li>
-              <li *ngIf="inventory.status.toString() === 'ACTIVE'"><a class="dropdown-item" (click)="onNewTransaction(inventory.id)">Realizar Movimiento</a></li>
-              <li *ngIf="inventory.status.toString() === 'ACTIVE'"><a class="dropdown-item" (click)="onInventoryUpdate(inventory)">Editar</a></li>
-              <li *ngIf="inventory.status.toString() === 'ACTIVE'"><a class="dropdown-item text-danger" (click)="deleteInventory(inventory.id!)">Eliminar</a></li>
-            </ul>
-          </div>
-        </td>
-        
-      </tr>
-    </tbody>
-  </table>
-</div>
-
-<!-- Paginación -->
-<div class="d-flex justify-content-between align-items-center p-3 border-top">
-  <div class="d-flex align-items-center">
-    <span class="me-2">Elementos por página:</span>
-    <select class="form-select form-select-sm" style="width: auto;" [(ngModel)]="itemsPerPage" (change)="onPageSizeChange($event)">
-      <option value="5">5</option>
-      <option value="10">10</option>
-      <option value="20">20</option>
-      <option value="50">50</option>
+  <!-- Paginación -->
+  <div class="d-flex justify-content-between align-items-center p-3 border-top">
+    <!-- Left side - Items per page dropdown -->
+    <div class="d-flex align-items-center">
+    <select class="form-select form-select-sm" style="width: auto" [(ngModel)]="itemsPerPage"
+      (change)="onPageSizeChange($event)">
+      <option value="5">5 Elementos</option>
+      <option value="10">10 Elementos</option>
+      <option value="20">20 Elementos</option>
+      <option value="50">50 Elementos</option>
     </select>
   </div>
   <div class="d-flex justify-content-end">
     <button class="btn btn-outline-secondary btn-sm ms-2" [disabled]="currentPage === 0" (click)="goToPreviousPage()">
         <i class="bi bi-chevron-left"></i>
     </button>
-    <button class="btn btn-outline-secondary btn-sm ms-1" [disabled]="currentPage === totalPages" (click)="goToNextPage()">
-        <i class="bi bi-chevron-right"></i>
+    <button class="btn btn-outline-secondary btn-sm ms-1" [disabled]="currentPage === totalPages"
+      (click)="goToNextPage()">
+      <i class="bi bi-chevron-right"></i>
     </button>
-</div>  
+  </div>
 </div>
 
 <!-- Modal de Filtros -->
@@ -156,6 +167,8 @@
   </div>
 </div>
 
+</app-main-container>
+
 <!-- Modal de Información -->
 <ng-template #infoModal let-modal>
   <div class="modal-header fs-6 py-1">
@@ -166,7 +179,11 @@
     <div class="container-fluid">
       <div class="alert alert-info mb-2 py-2">
         <h5 class="alert-heading">¿Qué es esta pantalla?</h5>
-        <p class="mb-0 small">Esta pantalla te permite visualizar los inventarios registrados e ingresar nuevos. Cada sección está diseñada para ofrecer acceso a la información necesaria de manera sencilla.</p>
+        <p class="mb-0 small">
+          Esta pantalla te permite visualizar los inventarios registrados e
+          ingresar nuevos. Cada sección está diseñada para ofrecer acceso a la
+          información necesaria de manera sencilla.
+        </p>
       </div>
 
       <div class="card mb-2">
@@ -175,12 +192,30 @@
         </div>
         <div class="card-body py-2">
           <ul class="list-group list-group-flush">
-            <li class="list-group-item py-1"><strong>Lista de Inventarios:</strong> Detalles de cada inventario: Identificador, Artículo, Tipo, Stock, Medida, Stock mínimo, Ubicación y Estado.</li>
-            <li class="list-group-item py-1"><strong>Búsqueda:</strong> Filtro de lista por inventarios activos/inactivos u otros filtros de búsqueda.</li>
-            <li class="list-group-item py-1"><strong>Limpiar:</strong> Limpia los filtros seleccionados para la búsqueda.</li>
-            <li class="list-group-item py-1"><strong>Paginación:</strong> Navega entre múltiples páginas de inventarios.</li>
-            <li class="list-group-item py-1"><strong>Nuevo:</strong> Permite agregar un inventario, redirige a un formulario para completarlo.</li>
-            <li class="list-group-item py-1"><strong>Exportar:</strong> Exporta la lista a PDF o Excel.</li>
+            <li class="list-group-item py-1">
+              <strong>Lista de Inventarios:</strong> Detalles de cada
+              inventario: Identificador, Artículo, Tipo, Stock, Medida, Stock
+              mínimo, Ubicación y Estado.
+            </li>
+            <li class="list-group-item py-1">
+              <strong>Búsqueda:</strong> Filtro de lista por inventarios
+              activos/inactivos u otros filtros de búsqueda.
+            </li>
+            <li class="list-group-item py-1">
+              <strong>Limpiar:</strong> Limpia los filtros seleccionados para la
+              búsqueda.
+            </li>
+            <li class="list-group-item py-1">
+              <strong>Paginación:</strong> Navega entre múltiples páginas de
+              inventarios.
+            </li>
+            <li class="list-group-item py-1">
+              <strong>Nuevo:</strong> Permite agregar un inventario, redirige a
+              un formulario para completarlo.
+            </li>
+            <li class="list-group-item py-1">
+              <strong>Exportar:</strong> Exporta la lista a PDF o Excel.
+            </li>
           </ul>
         </div>
       </div>
@@ -191,18 +226,37 @@
         </div>
         <div class="card-body py-2">
           <ul class="list-group list-group-flush">
-            <li class="list-group-item py-1"><strong>Ver movimientos:</strong> Muestra los movimientos de cada inventario.</li>
+            <li class="list-group-item py-1">
+              <strong>Ver movimientos:</strong> Muestra los movimientos de cada
+              inventario.
+            </li>
           </ul>
         </div>
       </div>
 
       <div class="alert alert-warning py-2 mb-0">
         <h5 class="alert-heading">Nota:</h5>
-        <p class="mb-0 small">Asegúrate de verificar la información antes de agregar un nuevo inventario.</p>
+        <p class="mb-0 small">
+          Asegúrate de verificar la información antes de agregar un nuevo
+          inventario.
+        </p>
       </div>
     </div>
   </div>
   <div class="modal-footer py-2">
-    <button type="button" class="btn btn-primary" (click)="modal.close()">Entendido</button>
+    <button type="button" class="btn btn-primary" (click)="modal.close()">
+      Entendido
+    </button>
   </div>
 </ng-template>
+
+<app-article *ngIf="showRegisterForm" (closeRegister)="onRegisterClose()" />
+
+<app-transaction *ngIf="showRegisterTransactionForm" [inventory]="selectedInventory"
+  (closeRegisterTransaction)="onRegisterTransactionClose()"></app-transaction>
+
+<app-inventory-transaction-table *ngIf="showTransactions" [inventory]="selectedInventory"
+  (closeTransactions)="onTransactionsClose()"></app-inventory-transaction-table>
+
+<app-inventory-inventories-update *ngIf="showInventoryUpdate" [inventory]="selectedInventory"
+  (closeModal)="onInventoryUpdateClose()"></app-inventory-inventories-update>

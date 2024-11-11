@@ -170,30 +170,4 @@
       </div>
     </div>
   </div>
-
-  <!-- Métricas -->
-  <div class="container mt-5">
-
-    <h3>Métricas de Proveedores</h3>
-    <div class="row">
-      <div class="col-md-3">
-
-        <!-- Gráfico de torta -->
-        <canvas #pieChart></canvas>
-      </div>
-      <div class="col-md-3">
-        <p><strong>Total Proveedores:</strong> {{ providerList.length }}</p>
-        <p><strong>Proveedores Activos:</strong> {{ activeCount }}</p>
-        <p><strong>Proveedores Inactivos:</strong> {{ inactiveCount }}</p>
-      </div>
-      <div class="col-md-6">
-
-        <!-- Canvas para el gráfico de barras -->
-        <h5>Proveedores por Tipo de Servicio</h5>
-        <canvas id="barChart"></canvas>
-
-      </div>
-    </div>
-  </div>
-
 </app-main-container>

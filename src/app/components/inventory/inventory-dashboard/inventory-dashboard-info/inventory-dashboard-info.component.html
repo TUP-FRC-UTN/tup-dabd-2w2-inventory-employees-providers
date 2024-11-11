@@ -1,0 +1,21 @@
+<!-- Modal de Información-->
+    <div class="modal-dialog modal-dialog-centered" (click)="activeModal.close()">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title" id="infoModalLabel">Información de la Pantalla</h5>
+          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+        </div>
+        <div class="modal-body">
+          <p>Esta pantalla ofrece un análisisdel <strong>inventario</strong> de la organización. A continuación se describen las métricas visualizadas en esta sección:</p>
+          <ul>
+            <li><strong>Nivel de Stock Crítico</strong>: Este gráfico de torta indica la proporción de artículos en stock crítico (por debajo del stock mínimo) frente a aquellos con stock adecuado.</li>
+            <li><strong>Nivel de Stock por Categoría</strong>: Muestra un desglose del inventario por categoría de artículo, lo que permite visualizar la cantidad de stock en cada una de las categorías definidas.</li>
+            <li><strong>Rotación de Inventario</strong>: Este gráfico de barras refleja la frecuencia de transacciones de entrada y salida en el inventario, lo que ayuda a entender la rotación de los artículos mes a mes.</li>
+          </ul>
+          <p>Utiliza los filtros para buscar artículos específicos o para segmentar el inventario según artículo, stock, ubicación y medida.</p>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" data-bs-dismiss="modal" (click)="activeModal.close()">Cerrar</button>
+        </div>
+      </div>
+    </div>

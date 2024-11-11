@@ -1,53 +1,178 @@
 <aside id="sidebar" class="bg-dark text-white p-3 vh-100 sticky-top">
-    <!-- Encabezado de la Sidebar -->
-    <header class="sidebar-header d-flex align-items-center text-center mb-4">
-      <a class="navbar-brand text-white fs-4" href="#">
+  <!-- Encabezado de la Sidebar -->
+  <header class="sidebar-header d-flex align-items-center text-center mb-4">
+    <a class="navbar-brand text-white fs-4" href="#"> </a>
+  </header>
+
+  <!-- Navegación con Menús Desplegables -->
+  <nav class="nav flex-column">
+    <!-- Empleados -->
+    <div class="nav-item">
+      <a
+        class="nav-link dropdown-toggle text-white"
+        data-bs-toggle="collapse"
+        href="#empleadosMenu"
+        role="button"
+        aria-expanded="false"
+        aria-controls="empleadosMenu"
+      >
+        Empleados
       </a>
-    </header>
-  
-    <!-- Navegación con Menús Desplegables -->
-    <nav class="nav flex-column">
-      <!-- Empleados -->
-      <div class="nav-item">
-        <a class="nav-link dropdown-toggle text-white" data-bs-toggle="collapse" href="#empleadosMenu" role="button" aria-expanded="false" aria-controls="empleadosMenu">
-          Empleados
-        </a>
-        <div class="collapse" id="empleadosMenu">
-          <ul class="nav flex-column ms-3">
-            <li><a class="nav-link text-white" routerLink="/employees/list" routerLinkActive="active">Lista de Empleados</a></li>
-            <li><a class="nav-link text-white" routerLink="/employees/form" routerLinkActive="active">Registrar Empleado</a></li>
-          </ul>
-        </div>
+      <div class="collapse" id="empleadosMenu">
+        <ul class="nav flex-column ms-3">
+          <li>
+            <a
+              class="nav-link text-white"
+              routerLink="/employees/list"
+              routerLinkActive="active"
+              >Lista de Empleados</a
+            >
+          </li>
+          <li>
+            <a
+              class="nav-link text-white"
+              routerLink="/employees/dashboard"
+              routerLinkActive="active"
+              >Graficos</a
+            >
+          </li>
+          <li>
+            <a
+              class="nav-link text-white"
+              routerLink="/employees/form"
+              routerLinkActive="active"
+              >Registrar Empleado</a
+            >
+          </li>
+        </ul>
       </div>
-  
-      <!-- Proveedores -->
-      <div class="nav-item">
-        <a class="nav-link dropdown-toggle text-white" data-bs-toggle="collapse" href="#proveedoresMenu" role="button" aria-expanded="false" aria-controls="proveedoresMenu">
-          Proveedores
-        </a>
-        <div class="collapse" id="proveedoresMenu">
-          <ul class="nav flex-column ms-3">
-            <li><a class="nav-link text-white" routerLink="/providers/list" routerLinkActive="active">Lista de Proveedores</a></li>
-            <li><a class="nav-link text-white" routerLink="/providers/form" routerLinkActive="active">Registrar Proveedor</a></li>
-            <li><a class="nav-link text-white" routerLink="/services/list" routerLinkActive="active">Lista de Empresas</a></li>
-            <li><a class="nav-link text-white" routerLink="/services/form" routerLinkActive="active">Registrar Empresa</a></li>
-          </ul>
-        </div>
+    </div>
+
+    <!-- Proveedores -->
+    <div class="nav-item">
+      <a
+        class="nav-link dropdown-toggle text-white"
+        data-bs-toggle="collapse"
+        href="#proveedoresMenu"
+        role="button"
+        aria-expanded="false"
+        aria-controls="proveedoresMenu"
+      >
+        Proveedores
+      </a>
+      <div class="collapse" id="proveedoresMenu">
+        <ul class="nav flex-column ms-3">
+          <li>
+            <a
+              class="nav-link text-white"
+              routerLink="/providers/list"
+              routerLinkActive="active"
+              >Lista de Proveedores</a
+            >
+          </li>
+          <li>
+            <a
+              class="nav-link text-white"
+              routerLink="/providers/dashboard"
+              routerLinkActive="active"
+            >
+              Graficos
+            </a>
+          </li>
+
+          <li>
+            <a
+              class="nav-link text-white"
+              routerLink="/providers/form"
+              routerLinkActive="active"
+              >Registrar Proveedor</a
+            >
+          </li>
+          <li>
+            <a
+              class="nav-link text-white"
+              routerLink="/services/list"
+              routerLinkActive="active"
+              >Lista de Empresas</a
+            >
+          </li>
+          <li>
+            <a
+              class="nav-link text-white"
+              routerLink="/services/form"
+              routerLinkActive="active"
+              >Registrar Empresa</a
+            >
+          </li>
+        </ul>
       </div>
-  
-      <!-- Inventario -->
-      <div class="nav-item">
-        <a class="nav-link dropdown-toggle text-white" data-bs-toggle="collapse" href="#inventarioMenu" role="button" aria-expanded="false" aria-controls="inventarioMenu">
-          Inventario
-        </a>
-        <div class="collapse" id="inventarioMenu">
-          <ul class="nav flex-column ms-3">
-            <li><a class="nav-link text-white" routerLink="/inventories" routerLinkActive="active">Lista de Inventario</a></li>
-            <li><a class="nav-link text-white" routerLink="/articles/article" routerLinkActive="active">Registrar Inventario</a></li>
-            <li><a class="nav-link text-white" routerLink="/inventories/config" routerLinkActive="active">Configuración</a></li>
-          </ul>
-        </div>
+    </div>
+
+    <!-- Inventario -->
+    <div class="nav-item">
+      <a
+        class="nav-link dropdown-toggle text-white"
+        data-bs-toggle="collapse"
+        href="#inventarioMenu"
+        role="button"
+        aria-expanded="false"
+        aria-controls="inventarioMenu"
+      >
+        Inventario
+      </a>
+      <div class="collapse" id="inventarioMenu">
+        <ul class="nav flex-column ms-3">
+          <li>
+            <a
+              class="nav-link text-white"
+              routerLink="/inventories"
+              routerLinkActive="active"
+              >Lista de Inventario</a
+            >
+          </li>          <li>
+            <a
+              class="nav-link text-white"
+              routerLink="/inventory/dashboard"
+              routerLinkActive="active"
+              >Graficos</a
+            >
+          </li>
+          <li>
+            <a
+              class="nav-link text-white"
+              routerLink="/articles/article"
+              routerLinkActive="active"
+              >Registrar Inventario</a
+            >
+          </li>
+
+          <!-- Configuración -->
+          <div class="nav-item">
+            <a
+              class="nav-link dropdown-toggle text-white"
+              data-bs-toggle="collapse"
+              href="#configuracionMenu"
+              role="button"
+              aria-expanded="false"
+              aria-controls="configuracionMenu"
+            >
+              Configuración
+            </a>
+            <div class="collapse" id="configuracionMenu">
+              <ul class="nav flex-column ms-3">
+                <li>
+                  <a
+                    class="nav-link text-white"
+                    routerLink="inventories/config/category"
+                    routerLinkActive="active"
+                    >Categorías</a
+                  >
+                </li>
+              </ul>
+            </div>
+          </div>
+        </ul>
       </div>
-    </nav>
-  </aside>
-  
+    </div>
+  </nav>
+</aside>

@@ -3,7 +3,7 @@ import { FormBuilder, FormGroup, ReactiveFormsModule, Validators } from '@angula
 import { InventoryService } from '../../../../services/inventory.service';
 import { Transaction, TransactionType, Inventory, TransactionPost } from '../../../../models/inventory.model';
 import { CommonModule } from '@angular/common';
-import { Article } from '../../../../models/article.model';
+import { Article, MeasurementUnit } from '../../../../models/article.model';
 import { ActivatedRoute } from '@angular/router';
 import { MapperService } from '../../../../services/MapperCamelToSnake/mapper.service';
 import { ToastService } from 'ngx-dabd-grupo01';
@@ -20,7 +20,7 @@ export class TransactionComponentForm implements OnInit {
   private mapperService = inject(MapperService);
   private toastService = inject(ToastService);
 
-@Input() inventoryId: string | null = null;
+@Input() inventory: Inventory | null = null;
 @Output() closeRegisterTransaction = new EventEmitter<void>();
 @Output() showRegisterTransactionForm = new EventEmitter<void>();
 isModalOpen : boolean = true;
@@ -28,6 +28,7 @@ isModalOpen : boolean = true;
 
   transactionForm: FormGroup;
 
+  measure: string = '';
   transactions: Transaction[] = [];
   inventories: Inventory[] = [];
   isEditing: boolean = false;
@@ -42,13 +43,13 @@ isModalOpen : boolean = true;
       transactionType: [TransactionType.ENTRY, Validators.required],
       quantity: [0, Validators.required],
       price: [0],
-      transactionDate: [{ value: new Date().toISOString().split('T')[0] }]
+      transactionDate: [new Date().toISOString().split('T')[0]]
     });
   }
 
   ngOnInit(): void {
-    if (this.inventoryId) {
-      console.log('ID de inventario recibido:', this.inventoryId);
+    if (this.inventory) {
+      console.log('ID de inventario recibido:', this.inventory);
     }
     // Escuchar cambios en el tipo de transacción para habilitar/deshabilitar el campo de precio
     this.transactionForm.get('transactionType')?.valueChanges.subscribe((type: TransactionType) => {
@@ -58,6 +59,7 @@ isModalOpen : boolean = true;
       this.transactionForm.get('price')?.enable();
     }
   });
+  this.getDisplayUnit(this.inventory?.article?.measurementUnit);
   }
 
   addTransaction(): void {
@@ -74,9 +76,10 @@ isModalOpen : boolean = true;
 
         const transactionFormatted = this.mapperService.toSnakeCase(newTransaction);
         console.log(transactionFormatted);
-        if (this.inventoryId) {
-            this.inventoryService.addTransaction(transactionFormatted, this.inventoryId).subscribe({
+        if (this.inventory?.id) {
+            this.inventoryService.addTransaction(transactionFormatted, this.inventory.id.toString()).subscribe({
                 next: () => {
+                    this.toastService.sendSuccess('Movimiento registrado con éxito.');
                     this.getTransactions();
                     this.onClose();
                 },
@@ -103,5 +106,26 @@ isModalOpen : boolean = true;
     debugger
     this.closeRegisterTransaction.emit();
     this.isModalOpen = false
+  }
+
+  getDisplayUnit(unit: MeasurementUnit | undefined): void {
+    if (!unit) {
+      this.measure= 'Ud.'; // Retorna un valor predeterminado
+    }
+
+    switch (unit) {
+      case MeasurementUnit.LITERS:
+        this.measure='Lts.';
+        break;
+      case MeasurementUnit.KILOS:
+        this.measure='Kg.';
+        break;
+      case MeasurementUnit.UNITS:
+        this.measure='Ud.';
+        break;
+      default:
+        this.measure='Ud.';
+        break;
+    }
   }
 }
