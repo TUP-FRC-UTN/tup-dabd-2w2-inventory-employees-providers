@@ -35,8 +35,11 @@ export class EmployeeDashboardComponent implements OnInit {
   employeeCategoryData: { [key: string]: number } = {};
   searchFilterAll = new FormControl('');
   typeCountMap: { [key: string]: number } = {};
-  employeeTypes = ['ADMINISTRATIVO', 'GUARDIA'];
+  //employeeTypes = ['ADMINISTRATIVO', 'GUARDIA'];
 
+  //Mapa para tipo de empleados
+  employeeTypesBar = Object.values(EmployeeType);
+  employeeTypeCountMap: { [key: string]: number } = {};
 
   // Chart Data
   pieChartEmployeeStatusLabels: string[] = ['En Servicio', 'Inactivo'];
@@ -98,13 +101,18 @@ export class EmployeeDashboardComponent implements OnInit {
 
     this.employeeService.getAllEmployeesPaged().subscribe({
       next: (response) => {
-        this.employeeList = response.content;
+        this.employeeList = this.mapperService.toCamelCase(response.content);
         this.calculateMetrics();
+        
+        // Asigna los datos del gráfico de pie
+        this.pieChartEmployeeStatusDatasets[0].data = [this.inServiceCount, this.inactiveCount];
+        
+        // Crear los gráficos después de tener los datos
         this.createPieChart();
         this.createBarChart();
       },
       error: () => {
-        this.toastService.sendError('Error al cargar proveedores.');
+        this.toastService.sendError('Error al cargar empleados.');
       }
     });
   }
@@ -128,10 +136,15 @@ export class EmployeeDashboardComponent implements OnInit {
       next: (response) => {
         this.employeeList = this.mapperService.toCamelCase(response.content);
         this.calculateMetrics();
-
-        // Asigna los datos del gráfico
+        
+        // Asigna los datos del gráfico de pie
         this.pieChartEmployeeStatusDatasets[0].data = [this.inServiceCount, this.inactiveCount];
-        // this.cdr.detectChanges();
+        
+        // Crear los gráficos después de tener los datos
+        this.createPieChart();
+        this.createBarChart();
+        
+        console.log('Datos cargados - Conteo por tipo:', this.employeeTypeCountMap);
       },
       error: (error) => {
         console.error('Error al cargar empleados:', error);
@@ -141,7 +154,6 @@ export class EmployeeDashboardComponent implements OnInit {
   }
 
   calculateMetrics(): void {
-    this.employeeCategoryData = {};
     const oneMonthAgo = new Date();
     oneMonthAgo.setMonth(oneMonthAgo.getMonth() - 1);
 
@@ -152,15 +164,28 @@ export class EmployeeDashboardComponent implements OnInit {
     this.inServiceCount = this.employeeList.filter(e => e.state === 'IN_SERVICE').length;
     this.inactiveCount = this.employeeList.filter(e => e.state === 'DOWN').length;
 
-    this.typeCountMap = this.employeeList.reduce((acc, employee) => {
-      const type = employee.employeeType;
-      if (type) {
-        acc[type] = (acc[type] || 0) + 1;
-      }
-      return acc;
-    }, {} as { [key: string]: number });
-  }
+    // Reiniciar el contador
+    this.employeeTypeCountMap = {};
 
+    // Inicializar todos los tipos posibles en 0
+    Object.values(EmployeeType).forEach(type => {
+      this.employeeTypeCountMap[type] = 0;
+    });
+  
+    // Contar empleados por tipo
+    this.employeeList.forEach(employee => {
+      if (employee.employeeType) {
+        this.employeeTypeCountMap[employee.employeeType] = 
+          (this.employeeTypeCountMap[employee.employeeType] || 0) + 1;
+      }
+    });
+  
+    console.log('Empleados cargados:', {
+      total: this.employeeList.length,
+      porTipo: this.employeeTypeCountMap,
+      primerEmpleado: this.employeeList[0] // Para verificar la estructura
+    });
+  }
   showInfo(): void {
     this.modalService.open(EmployeeDashboardInfoComponent, {
       size: 'lg',
@@ -195,32 +220,61 @@ export class EmployeeDashboardComponent implements OnInit {
   }
 
   createBarChart(): void {
+    const canvas = document.getElementById('barChart') as HTMLCanvasElement;
+    if (!canvas) {
+      console.error('No se encontró el elemento canvas para el gráfico de barras');
+      return;
+    }
+  
     if (this.barChart) {
       this.barChart.destroy();
     }
-
-    const ctx = document.getElementById('barChart') as HTMLCanvasElement;
-    const employeeTypes = Object.keys(this.typeCountMap);
-    const typeCounts = Object.values(this.typeCountMap);
-
-    this.barChart = new Chart(ctx, {
+  
+    const labels = Object.keys(this.employeeTypeCountMap);
+    const data = Object.values(this.employeeTypeCountMap);
+  
+    console.log('Datos para el gráfico de barras:', {
+      labels,
+      data
+    });
+  
+    this.barChart = new Chart(canvas, {
       type: 'bar',
       data: {
-        labels: employeeTypes,
+        labels: labels,
         datasets: [{
-          label: 'Cantidad de Empleados',
-          data: typeCounts,
-          backgroundColor: '#007bff'
+          label: 'Cantidad de Empleados por Tipo',
+          data: data,
+          backgroundColor: '#007bff',
+          borderColor: '#0056b3',
+          borderWidth: 1
         }]
       },
       options: {
         responsive: true,
         plugins: {
-          legend: { display: false }
+          legend: {
+            display: false
+          },
+          title: {
+            display: true,
+            text: 'Distribución de Empleados por Tipo'
+          }
         },
         scales: {
-          x: { title: { display: true, text: 'Tipo de Empleado' } },
-          y: { title: { display: true, text: 'Cantidad' }, beginAtZero: true }
+          y: {
+            beginAtZero: true,
+            title: {
+              display: true,
+              text: 'Cantidad de Empleados'
+            }
+          },
+          x: {
+            title: {
+              display: true,
+              text: 'Tipo de Empleado'
+            }
+          }
         }
       }
     });
