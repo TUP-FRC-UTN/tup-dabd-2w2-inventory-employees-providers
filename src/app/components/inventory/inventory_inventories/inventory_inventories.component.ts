@@ -1,15 +1,15 @@
 
-import { CommonModule } from '@angular/common';
+import { CommonModule,DatePipe } from '@angular/common';
 import { Component, inject, OnInit, TemplateRef, ViewChild } from '@angular/core';
 import { FormBuilder, FormControl, FormGroup, FormsModule, ReactiveFormsModule, Validators } from '@angular/forms';
 import { ArticleFormComponent } from '../inventory_articles/inventory_articles_form/inventory_articles_form.component';
-import { Router, RouterModule } from '@angular/router';
+import { RouterModule } from '@angular/router';
 import { TransactionComponentForm } from '../inventory_transaction/inventory_transaction_form/inventory_transaction_form.component';
 import { InventoryTransactionTableComponent } from '../inventory_transaction/inventory_transaction_table/inventory_transaction_table.component';
 import { InventoryInventoriesUpdateComponent } from './inventory-inventories-update/inventory-inventories-update.component';
 import { MapperService } from '../../../services/MapperCamelToSnake/mapper.service';
 import { Inventory, StatusType, } from '../../../models/inventory.model';
-import { Article, ArticleType, MeasurementUnit, Status } from '../../../models/article.model';
+import { Article, ArticleType, MeasurementUnit } from '../../../models/article.model';
 import { InventoryService, Page } from '../../../services/inventory.service';
 import Swal from 'sweetalert2';
 import jsPDF from 'jspdf';
@@ -18,6 +18,7 @@ import * as XLSX from 'xlsx';
 import autoTable from 'jspdf-autotable';
 import { ToastService } from 'ngx-dabd-grupo01';
 import { NgbModal } from '@ng-bootstrap/ng-bootstrap';
+import { TableFiltersComponent, Filter, FilterConfigBuilder } from 'ngx-dabd-grupo01';
 import { debounceTime, distinctUntilChanged } from 'rxjs';
 
 
@@ -31,12 +32,14 @@ import { debounceTime, distinctUntilChanged } from 'rxjs';
         TransactionComponentForm,
          InventoryTransactionTableComponent,
           InventoryInventoriesUpdateComponent,
-          FormsModule
+          FormsModule,
+          TableFiltersComponent
         ],
+        providers:[DatePipe],
   templateUrl: './inventory_inventories.component.html',
   styleUrls: ['./inventory_inventories.component.css']
-
 })
+
 export class InventoryTableComponent implements OnInit {
 
   private mapperService = inject(MapperService);
@@ -44,6 +47,63 @@ export class InventoryTableComponent implements OnInit {
   private toastService = inject(ToastService);
   private modalService = inject(NgbModal);
 
+  filterConfig: Filter[] = new FilterConfigBuilder()
+    .textFilter(
+     'Artículo',
+     'article',
+     '' 
+    )
+    .selectFilter(
+      'Estado',
+      'status',
+      'Seleccione un estado',
+      [
+        { value: '', label: 'Todos' },
+        { value: 'ACTIVE', label: 'Activo' },
+        { value: 'INACTIVE', label: 'Inactivo' },
+      ]
+    )
+    .selectFilter(
+      'Tipo de Artículo',
+      'articleType',
+      'Seleccione un tipo de articulo',
+      [
+        {value: 'REGISTRABLE' ,label:'Registrable'},
+        {value: 'NON_REGISTRABLE', label:'No Registrable'}
+      ]
+    )
+    .textFilter(
+      'Ubicación',
+      'location',
+      ''
+    )
+    .build();
+
+  currentFilters!: Record<string, any>;
+
+  filterChange($event: Record<string, any>) {
+    const filters = $event;
+    this.currentFilters = filters;
+
+    this.inventoryService.getInventoriesPagedFiltered(
+      this.currentPage,
+      this.itemsPerPage,
+      filters
+    ).subscribe({
+      next: (page: Page<Inventory>) => {
+        page = this.mapperService.toCamelCase(page);
+        this.inventories = this.mapperService.toCamelCase(page.content);
+        this.totalPages = page.totalPages;
+        this.totalElements = page.totalElements;
+        this.isLoading = false;
+      },
+      error: (error) => {
+        console.error('Error loading inventories:', error);
+        this.isLoading = false;
+      }
+    });    
+  }
+  
   searchInput:FormControl = new FormControl('');
 
   @ViewChild('infoModal') infoModal!: TemplateRef<any>;
@@ -377,8 +437,8 @@ sort(column: string) : void {
 
   loadInventories(): void {
     this.isLoading = true;
-    const filters = this.filterForm.value;
-
+    const filters = this.currentFilters;
+    
     this.inventoryService.getInventoriesPagedFiltered(
       this.currentPage,
       this.itemsPerPage,

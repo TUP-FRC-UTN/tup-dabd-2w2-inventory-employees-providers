@@ -27,7 +27,7 @@
     "json-server": "^1.0.0-beta.3",
     "jspdf": "^2.5.2",
     "jspdf-autotable": "^3.8.4",
-    "ngx-dabd-grupo01": "^4.6.0",
+    "ngx-dabd-grupo01": "^4.9.0",
     "rxjs": "~7.8.0",
     "sweetalert2": "^11.14.3",
     "xlsx": "^0.18.5",
