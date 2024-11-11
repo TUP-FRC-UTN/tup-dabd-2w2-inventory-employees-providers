@@ -1,38 +1,34 @@
 <app-main-container title="Lista de Compañías" (infoButtonClick)="showInfo()">
-  <!-- Barra de búsqueda y botones de acción -->
-  <div class="d-flex justify-content-between align-items-center mb-3">
-    <div class="input-group w-25">
-      <span class="input-group-text"><i class="bi bi-search"></i></span>
-      <input type="text" class="form-control" placeholder="Buscar..." [formControl]="searchFilter"
-        (input)="applyFilters()" />
-      <button type="button" class="btn btn-outline-info dropdown-toggle" data-bs-toggle="dropdown"
-        aria-expanded="false">
-        <i class="bi bi-funnel-fill"></i>
-      </button>
-      <ul class="dropdown-menu">
-        <li>
-          <button class="dropdown-item" (click)="filterByStatus('active')">Activo</button>
-        </li>
-        <li>
-          <button class="dropdown-item" (click)="filterByStatus('inactive')">Inactivo</button>
-        </li>
-        <li>
-          <button class="dropdown-item" (click)="filterByStatus('all')">Todos</button>
-        </li>
-      </ul>
-    </div>
-
-    <div class="d-flex">
-      <button class="btn btn-outline-primary me-2" (click)="onCompanyUpdate()">
-        <i class="bi bi-plus-lg"></i></button>
-      <button class="btn btn-success me-2" (click)="exportToExcel()">
-        <i class="bi bi-file-earmark-excel"></i>
-      </button>
-      <button class="btn btn-danger" (click)="exportToPDF()">
-        <i class="bi bi-file-earmark-pdf"></i>
-      </button>
-    </div>
+<!-- Header con búsqueda y botones de acción -->
+<div class="d-flex justify-content-between align-items-center mb-3">
+  <div class="input-group w-25">
+    <span class="input-group-text">
+      <i class="bi bi-search"></i>
+    </span>
+    <input 
+      type="text" 
+      class="form-control" 
+      placeholder="Buscar compañía..." 
+      [formControl]="searchFilter"
+    />
+    <button type="button" class="btn btn-outline-info" (click)="openModalFilter()">
+      <i class="bi bi-funnel-fill"></i>
+    </button>
   </div>
+  
+  <!-- Botones de acción -->
+  <div class="d-flex">
+    <button class="btn btn-outline-primary me-2" (click)="onCompanyUpdate()">
+      <i class="bi bi-plus-lg"></i>
+    </button>
+    <button class="btn btn-success me-2" (click)="exportToExcel()">
+      <i class="bi bi-file-earmark-excel"></i>
+    </button>
+    <button class="btn btn-danger" (click)="exportToPDF()">
+      <i class="bi bi-file-earmark-pdf"></i>
+    </button>
+  </div>
+</div>
 
   <!-- Contenedor con scroll para la tabla -->
   <div class="table-container mt-3" style="max-height: 400px; overflow-y: auto;">

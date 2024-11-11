@@ -8,6 +8,7 @@ import jsPDF from 'jspdf';
 import autoTable from 'jspdf-autotable';
 import * as XLSX from 'xlsx';
 import { NgbModal } from '@ng-bootstrap/ng-bootstrap';
+import { debounceTime, distinctUntilChanged } from 'rxjs';
 
 @Component({
   selector: 'app-provide-config',
@@ -23,6 +24,8 @@ export class ProvideConfigComponent implements OnInit {
   });
 
   searchFilter = new FormControl('');
+  originalCompanies: Company[] = []; 
+
   showModalFilter: boolean = false;
   showServiceTypeUpdate: boolean = false;
   companies: Company[] = [];
@@ -35,18 +38,52 @@ export class ProvideConfigComponent implements OnInit {
 
   ngOnInit(): void {
     this.loadCompanies();
+    this.setupSearchFilter();  // Nuevo método para configurar el filtro
+  }
+
+  private setupSearchFilter(): void {
+    this.searchFilter.valueChanges
+      .pipe(
+        debounceTime(300),
+        distinctUntilChanged()
+      )
+      .subscribe(searchTerm => {
+        this.filterCompanies(searchTerm || '');
+      });
+  }
+
+  private filterCompanies(searchTerm: string): void {
+    if (!searchTerm) {
+      this.companies = [...this.originalCompanies];
+      return;
+    }
+
+    const term = searchTerm.toLowerCase().trim();
+    this.companies = this.originalCompanies.filter(company => 
+      company.name.toLowerCase().includes(term)
+    );
   }
 
   loadCompanies() {
     this.companyService.getCompanies().subscribe({
       next: (response) => {
-        this.companies = response;
+        this.originalCompanies = response;  // Guardar copia original
+        this.companies = [...this.originalCompanies];  // Inicializar lista mostrada
       },
       error: (error) => {
         console.error('Error loading companies:', error);
       }
     });
   }
+
+    // Agregar este método
+    openModalFilter(): void {
+      this.showModalFilter = true;
+    }
+  
+    closeModalFilter(): void {
+      this.showModalFilter = false;
+    }
 
   applyFilters() {
     // Implementar filtrado basado en this.filterForm.value
@@ -91,10 +128,6 @@ export class ProvideConfigComponent implements OnInit {
         console.error('Error deleting company:', error);
       }
     });
-  }
-
-  closeModalFilter() {
-    this.showModalFilter = false;
   }
 
   clearFilters() {
