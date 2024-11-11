@@ -111,6 +111,15 @@ export class EmployeeFormComponent implements OnInit {
       console.log(id);
       if (id) {
         this.getById(id);
+      } else {
+        this.employeeForm.patchValue({
+          address:{
+            city: 'Córdoba',
+            province: Provinces.CORDOBA,
+            country: Countries.ARGENTINA,
+            postal_code: 5000
+          }
+        })
       }
     });
 
@@ -194,10 +203,10 @@ export class EmployeeFormComponent implements OnInit {
         number: 0,
         floor: 0,
         apartment: '',
-        city: '',
-        province: '',
-        country: '',
-        postal_code: 0
+        city: 'Córdoba',
+        province: Provinces.CORDOBA,
+        country: Countries.ARGENTINA,
+        postal_code: 5000  
       }
     });
     // this.contacts.clear();
