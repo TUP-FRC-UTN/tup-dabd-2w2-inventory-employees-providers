@@ -9,17 +9,18 @@ import * as XLSX from 'xlsx';
 import jsPDF from 'jspdf';
 import autoTable from 'jspdf-autotable';
 import { debounceTime, distinctUntilChanged } from 'rxjs';
-import { CommonModule } from '@angular/common';
+import { CommonModule, DatePipe } from '@angular/common';
 import { MapperService } from '../../../services/MapperCamelToSnake/mapper.service';
 import { Chart, ChartType } from 'chart.js';
 import { EmployeeListInfoComponent } from './employee-list-info/employee-list-info.component';
+import { TableFiltersComponent, Filter, FilterConfigBuilder } from 'ngx-dabd-grupo01';
 
 @Component({
   selector: 'app-employee-list',
   standalone: true,
   imports: [
     CommonModule, ReactiveFormsModule, FormsModule, RouterModule,
-    MainContainerComponent, ConfirmAlertComponent
+    MainContainerComponent, ConfirmAlertComponent, DatePipe, TableFiltersComponent
   ],
   templateUrl: './employee-list.component.html',
   styleUrls: ['./employee-list.component.css'],
@@ -42,6 +43,7 @@ export class EmployeeListComponent implements OnInit {
   employeeList: Employee[] = [];
   filteredEmployeeList: Employee[] = [];
   isLoading = false;
+  currentFilters! : Record<string,any>;
 
   // Forms and Filters
   filterForm!: FormGroup;
@@ -50,6 +52,51 @@ export class EmployeeListComponent implements OnInit {
   employeeTypes = Object.values(EmployeeType);
   documentTypes = Object.values(DocumentType);
 
+  filterConfig: Filter[] = new FilterConfigBuilder()
+    .textFilter(
+     'Nombre',
+     'firstName',
+     '' 
+    )
+    .textFilter(
+      'Apellido',
+      'lastName',
+      ''
+    )
+    .selectFilter(
+      'Tipo de Empleado',
+      'employeeType',
+      'Seleccione un Tipo',
+      [
+        { value: '', label: 'Todos' },
+        { value: 'ADMINISTRATIVO', label: 'Administrativo' },
+        { value: 'GUARDIA', label: 'Guardia' },
+        { value: 'CONTADOR', label: 'Contador'},
+        { value: 'MANTENIMIENTO', label: 'Mantenimiento'}
+      ]
+    )
+    .textFilter(
+      'Número de Documento',
+      'docNumber',
+      ''
+    )
+    .selectFilter(
+      'Estado',
+      'state',
+      'Seleccione un Estado',
+      [
+        { value: '', label: 'Todos' },
+        { value: 'IN_SERVICE', label: 'Activo' },
+        { value: 'DOWN', label: 'Inactivo' },
+      ]
+    )
+    .build();
+
+    filterChange($event: Record<string, any>) {
+      const filters = $event;
+      this.currentFilters = filters;
+      this.getEmployees();
+    }
   // Pagination
   currentPage: number = 0; // Changed to 0-based for backend compatibility
   totalItems: number = 0;
@@ -103,18 +150,7 @@ export class EmployeeListComponent implements OnInit {
 
   getEmployees(page: number = 0, size: number = this.pageSize, searchTerm?: string): void {
     this.isLoading = true;
-    const filters = {
-      page: this.currentPage,
-      size: this.pageSize,
-      firstName: this.filterForm.get('firstName')?.value || '',
-      lastName: this.filterForm.get('lastName')?.value || '',
-      type: this.filterForm.get('employeeType')?.value || '',
-      docType: this.filterForm.get('docType')?.value || '',
-      docNumber: this.filterForm.get('docNumber')?.value || '',
-      state: this.filterForm.get('state')?.value || '',
-      date: this.filterForm.get('hiringDate')?.value || '',
-      salary: this.filterForm.get('salary')?.value || ''
-    };
+    const filters = this.currentFilters;
 
     this.employeeService.getAllEmployeesPaged(filters).subscribe({
       next: (response) => {
