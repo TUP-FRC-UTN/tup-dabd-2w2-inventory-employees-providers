@@ -147,7 +147,7 @@
       <app-provider-type-update [serviceType]="selectedServiceType" (closeModal)="onServiceTypeUpdateClose()">
       </app-provider-type-update>
     }
-    <ng-template #infoModal let-modal>
+      <ng-template #infoModal let-modal>
         <div class="modal-header fs-6 py-1">
           <h4 class="modal-title">Tipos de Servicios</h4>
           <button type="button" class="btn-close" aria-label="Close" (click)="modal.dismiss()"></button>
@@ -230,5 +230,5 @@
           <button type="button" class="btn btn-primary" (click)="modal.close()">Entendido</button>
         </div>
       </ng-template>
-  </app-main-container>
+    </app-main-container>
 

@@ -1,0 +1,55 @@
+<div class="card">
+    <div class="card-header">
+      <h2>Inventory Rotation KPI</h2>
+      
+      <!-- Article Selector -->
+      <div class="form-group mt-3">
+        <label for="articleSelect">Select Article:</label>
+        <select 
+          id="articleSelect" 
+          class="form-control" 
+          [(ngModel)]="selectedArticleId"
+          (ngModelChange)="onArticleChange($event)">
+          <option [ngValue]="null">Select an article...</option>
+          <option *ngFor="let article of articles" [value]="article.id">
+            {{article.name}}
+          </option>
+        </select>
+      </div>
+  
+      <!-- Loading Indicator -->
+      <div *ngIf="loading" class="alert alert-info mt-2">
+        Loading data...
+      </div>
+  
+      <!-- Current Stock -->
+      <div *ngIf="selectedArticleId && !loading" class="alert alert-info mt-2">
+        Current Stock: {{currentStock}}
+      </div>
+  
+      <!-- Rotation Info -->
+      <div *ngIf="selectedArticleId && !loading" 
+           [ngClass]="{'alert-danger': isRotationCritical, 'alert-success': !isRotationCritical}" 
+           class="alert mt-2">
+        Current Rotation: {{ currentRotation | number:'1.2-2' }}
+        <span *ngIf="isRotationCritical">
+          (Critical: Below target of 0.25)
+        </span>
+      </div>
+    </div>
+  
+    <!-- Chart -->
+    <div class="card-body" *ngIf="selectedArticleId && !loading">
+      <canvas baseChart
+        [data]="chartData"
+        [options]="chartOptions"
+        [type]="'line'">
+      </canvas>
+    </div>
+  
+    <!-- No Data Message -->
+    <div *ngIf="!selectedArticleId" class="card-body text-center">
+      <p>Please select an article to view its rotation data.</p>
+    </div>
+  </div>
+  

@@ -81,7 +81,7 @@ export class EmployeeDashboardComponent implements OnInit {
       state: this.filterForm.get('state')?.value || ''
     };
 
-    this.employeeService.getAllEmployeesPaged(filters).subscribe({
+   /* this.employeeService.getAllEmployeesPaged(filters).subscribe({
       next: (response) => {
         this.employeeList = this.mapperService.toCamelCase(response.content);
         this.calculateMetrics();
@@ -92,7 +92,7 @@ export class EmployeeDashboardComponent implements OnInit {
         console.error('Error fetching employees:', error);
         this.toastService.sendError('Error al cargar empleados.');
       }
-    });
+    });*/
   }
 
   applyFilters(): void {

@@ -8,13 +8,14 @@ import { MainContainerComponent } from 'ngx-dabd-grupo01';
 import { MapperService } from '../../../services/MapperCamelToSnake/mapper.service';
 import { NgbModal } from '@ng-bootstrap/ng-bootstrap';
 import { InventoryDashboardInfoComponent } from './inventory-dashboard-info/inventory-dashboard-info.component';
+import { InventoryDashComponent } from "../../dashboard/inventory-dash/inventory-dash.component";
 
 Chart.register(...registerables);
 
 @Component({
   selector: 'app-inventory-dashboard',
   standalone: true,
-  imports: [CommonModule, ReactiveFormsModule,MainContainerComponent],
+  imports: [CommonModule, ReactiveFormsModule, MainContainerComponent, InventoryDashComponent],
   templateUrl: './inventory-dashboard.component.html',
   styleUrls: ['./inventory-dashboard.component.css']
 })
