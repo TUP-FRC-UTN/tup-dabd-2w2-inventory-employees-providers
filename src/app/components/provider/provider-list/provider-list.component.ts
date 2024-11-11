@@ -1,5 +1,5 @@
 import { Component, CUSTOM_ELEMENTS_SCHEMA, ElementRef, inject, OnInit, TemplateRef, ViewChild } from '@angular/core';
-import { CommonModule } from '@angular/common';
+import { CommonModule, DatePipe } from '@angular/common';
 import { ReactiveFormsModule, FormsModule, FormBuilder, FormControl, FormGroup } from '@angular/forms';
 import { NgbModal, NgbPaginationModule } from '@ng-bootstrap/ng-bootstrap';
 import { Router, RouterModule } from '@angular/router';
@@ -12,6 +12,7 @@ import jsPDF from 'jspdf';
 import autoTable from 'jspdf-autotable';
 import { Chart, ChartType, registerables } from 'chart.js';
 import { ProviderListInfoComponent } from './provider-list-info/provider-list-info.component';
+import { TableFiltersComponent, Filter, FilterConfigBuilder } from 'ngx-dabd-grupo01';
 
 Chart.register(...registerables);
 
@@ -25,8 +26,10 @@ Chart.register(...registerables);
     RouterModule,
     MainContainerComponent,
     ConfirmAlertComponent,
-    NgbPaginationModule
+    NgbPaginationModule,
+    TableFiltersComponent
   ],
+  providers:[DatePipe],
   templateUrl: './provider-list.component.html',
   styleUrls: ['./provider-list.component.css'],
   schemas: [CUSTOM_ELEMENTS_SCHEMA]
@@ -50,6 +53,7 @@ export class ProviderListComponent implements OnInit {
   totalPages:number = 1;
   totalItems: number = 0;
   pageSize: number = 10;
+  currentFilters! : Record<string,any>;
 
   activeCount: number = 0;
   inactiveCount: number = 0;
@@ -61,6 +65,45 @@ export class ProviderListComponent implements OnInit {
   private router = inject(Router);
   private modalService = inject(NgbModal);
   private toastService = inject(ToastService);
+
+  filterConfig: Filter[] = new FilterConfigBuilder()
+  .textFilter(
+    'Nombre',
+    'name',
+    ''
+  )
+  .textFilter(
+    'CUIL',
+    'cuil',
+    ''
+  )
+  .textFilter(
+    'Servicio',
+    'service',
+    ''
+  )
+  .textFilter(
+    'Número de Teléfono',
+    'phone',
+    ''
+  )
+  .selectFilter(
+    'Estado',
+    'enabled',
+    'Seleccione un Estado',
+    [
+      { value: '', label: 'Todos' },
+      { value: 'true', label: 'Activo' },
+      { value: 'false', label: 'Inactivo' }
+    ]
+  )
+  .build();
+
+  filterChange($event: Record<string, any>) {
+    const filters = $event;
+    this.currentFilters = filters;
+    this.getProviders();
+  }
 
   constructor(private fb: FormBuilder) {
     this.filterForm = this.fb.group({
@@ -102,18 +145,10 @@ export class ProviderListComponent implements OnInit {
     this.isLoading = true;
     
     const filters = {
-      ...this.getFilters(),
+      ...this.currentFilters,
       page,
       size
     };
-  
-    if (searchTerm) {
-      filters.name = searchTerm;
-      filters.cuil = searchTerm;
-      filters.service = searchTerm;
-      filters.contact = searchTerm;
-      filters.address = searchTerm;
-    }
   
     this.providerService.getProviders(filters).subscribe({
       next: (response) => {

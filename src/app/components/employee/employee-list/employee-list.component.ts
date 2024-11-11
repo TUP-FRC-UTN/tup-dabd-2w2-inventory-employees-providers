@@ -22,6 +22,7 @@ import { TableFiltersComponent, Filter, FilterConfigBuilder } from 'ngx-dabd-gru
     CommonModule, ReactiveFormsModule, FormsModule, RouterModule,
     MainContainerComponent, ConfirmAlertComponent, DatePipe, TableFiltersComponent
   ],
+  providers:[DatePipe],
   templateUrl: './employee-list.component.html',
   styleUrls: ['./employee-list.component.css'],
   schemas: [CUSTOM_ELEMENTS_SCHEMA]
@@ -97,6 +98,7 @@ export class EmployeeListComponent implements OnInit {
       this.currentFilters = filters;
       this.getEmployees();
     }
+  
   // Pagination
   currentPage: number = 0; // Changed to 0-based for backend compatibility
   totalItems: number = 0;
@@ -152,16 +154,13 @@ export class EmployeeListComponent implements OnInit {
     this.isLoading = true;
     const filters = this.currentFilters;
 
-    this.employeeService.getAllEmployeesPaged(filters).subscribe({
+    this.employeeService.getAllEmployeesPaged(this.currentPage,this.pageSize,filters).subscribe({
       next: (response) => {
         response = this.mapperService.toCamelCase(response);
         this.employeeList = this.mapperService.toCamelCase(response.content);
         this.filteredEmployeeList = [...this.employeeList];
         this.totalItems = response.totalElements;
         this.totalPages = response.totalPages;
-        this.calculateMetrics();
-        this.createPieChart();
-        this.createBarChart();
         this.isLoading = false;
       },
       error: (error) => {
