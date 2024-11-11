@@ -12,28 +12,6 @@ export class ProvidersService {
 
   constructor(private http: HttpClient) {}
 
-  // getProviders(filters?: {
-  //   name?: string,
-  //   cuil?: string,
-  //   service?: string,
-  //   addressId?: number,
-  //   enabled?: boolean,
-  //   phoneNumber?: string
-  // }): Observable<Supplier[]> {
-  //   let params = new HttpParams();
-    
-  //   if (filters) {
-  //     Object.keys(filters).forEach(key => {
-  //       const value = filters[key as keyof typeof filters];
-  //       if (value !== undefined && value !== '') {
-  //         params = params.append(key, value.toString());
-  //       }
-  //     });
-  //   }
-    
-  //   return this.http.get<Supplier[]>(this.apiUrl, { params });
-  // }
-
   getProviders(filters?: {
     name?: string,
     cuil?: string,
@@ -56,7 +34,6 @@ export class ProvidersService {
     }
     return this.http.get<PaginatedResponse<Supplier>>(`${this.apiUrl}/pageable`, { params });
   }
-  
   
 
   getProviderById(id: number): Observable<Supplier> {
