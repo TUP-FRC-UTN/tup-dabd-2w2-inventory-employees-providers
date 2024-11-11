@@ -54,7 +54,7 @@ export class EmployeeDashboardComponent implements OnInit {
   }
 
   loadEmployeeData(): void {
-    this.employeeService.getAllEmployeesPaged({}).subscribe({
+    this.employeeService.getAllEmployeesPaged().subscribe({
       next: (response) => {
         this.employeeList = this.mapperService.toCamelCase(response.content);
         this.calculateMetrics();
