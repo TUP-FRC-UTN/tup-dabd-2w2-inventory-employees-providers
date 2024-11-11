@@ -22,7 +22,8 @@ export class ProvidersService {
     enabled?: boolean,
     'company.name'?: string,
     'service.name'?: string,
-    registration?: string   
+    start?: string,    // Fecha de inicio para filtrar
+    end?: string    
   }): Observable<PaginatedResponse<Supplier>> {
     let params = new HttpParams();
   

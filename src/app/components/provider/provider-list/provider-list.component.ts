@@ -70,7 +70,9 @@ export class ProviderListComponent implements OnInit {
       'company.name': [''],
       contact: [''],
       address: [''],
-      enabled: ['']
+      enabled: [''],
+      start: [''],    // Nueva fecha de inicio
+      end: ['']       // Nueva fecha de fin
     });
 
     // Configure global search with debounce
