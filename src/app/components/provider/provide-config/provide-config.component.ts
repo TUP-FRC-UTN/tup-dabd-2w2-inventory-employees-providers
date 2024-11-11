@@ -1,8 +1,6 @@
 import { Component, inject, OnInit, TemplateRef, ViewChild } from '@angular/core';
 import { FormControl, FormGroup, ReactiveFormsModule } from '@angular/forms';
 import { MainContainerComponent } from 'ngx-dabd-grupo01';
-import { Service } from '../../../models/service.model';
-import { ServicesService } from '../../../services/services.service';
 import { ProviderTypeUpdateComponent } from "../provider-type-update/provider-type-update.component";
 import jsPDF from 'jspdf';
 import autoTable from 'jspdf-autotable';
@@ -33,19 +31,19 @@ export class ProvideConfigComponent implements OnInit{
 
   @ViewChild('infoModal') infoModal!: TemplateRef<any>;
 
-  constructor(private service : ServicesService) {}
+  //constructor(private service : ServicesService) {}
 
 
   ngOnInit(): void {}
   loadServiceTypes() {
-    this.service.getServices().subscribe({
-      next: (response) => {
-        //this.serviceTypes = response.content;
-      },
-      error: (error) => {
-        console.error(error);
-      }
-    });
+  //  this.service.getServices().subscribe({
+  //    next: (response) => {
+  //      //this.serviceTypes = response.content;
+  //    },
+  //    error: (error) => {
+  //      console.error(error);
+  //    }
+  //  });
   }
   applyFilters(){}
   filterByStatus(string : String){}
