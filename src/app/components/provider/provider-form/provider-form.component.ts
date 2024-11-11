@@ -4,7 +4,7 @@ import { ProvidersService } from '../../../services/providers.service';
 import Swal from 'sweetalert2';
 import { CommonModule } from '@angular/common';
 import { ActivatedRoute, Router } from '@angular/router';
-import {  Supplier } from '../../../models/supplier.model';
+import {  Supplier } from '../../../models/suppliers/supplier.model';
 import { NgbModal } from '@ng-bootstrap/ng-bootstrap';
 import { ToastService, MainContainerComponent } from 'ngx-dabd-grupo01';
 

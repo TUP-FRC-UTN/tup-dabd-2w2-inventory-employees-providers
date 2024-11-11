@@ -1,13 +1,14 @@
 import { Component, inject, OnInit, TemplateRef, ViewChild } from '@angular/core';
 import { FormControl, FormGroup, ReactiveFormsModule } from '@angular/forms';
 import { MainContainerComponent } from 'ngx-dabd-grupo01';
-import { Service } from '../../../models/service.model';
-import { ServicesService } from '../../../services/services.service';
 import { ProviderTypeUpdateComponent } from "../provider-type-update/provider-type-update.component";
+import { CompanyService } from '../../../services/suppliers/company.service';
+import { Company } from '../../../models/suppliers/company.model';
 import jsPDF from 'jspdf';
 import autoTable from 'jspdf-autotable';
 import * as XLSX from 'xlsx';
 import { NgbModal } from '@ng-bootstrap/ng-bootstrap';
+import { debounceTime, distinctUntilChanged } from 'rxjs';
 
 @Component({
   selector: 'app-provide-config',
@@ -16,74 +17,153 @@ import { NgbModal } from '@ng-bootstrap/ng-bootstrap';
   templateUrl: './provide-config.component.html',
   styleUrl: './provide-config.component.css'
 })
-export class ProvideConfigComponent implements OnInit{
+export class ProvideConfigComponent implements OnInit {
   filterForm = new FormGroup({
-    denomination : new FormControl(''),
-    description : new FormControl(''),
-    status : new FormControl('')
+    name: new FormControl(''),
+    enabled: new FormControl('')
   });
 
   searchFilter = new FormControl('');
+  originalCompanies: Company[] = []; 
+
   showModalFilter: boolean = false;
   showServiceTypeUpdate: boolean = false;
-  serviceTypes: ServiceType[] = [];
-  selectedServiceType: any;
+  companies: Company[] = [];
+  selectedCompany: Company | null = null;
 
   private modalService = inject(NgbModal);
+  private companyService = inject(CompanyService);
 
   @ViewChild('infoModal') infoModal!: TemplateRef<any>;
 
-  constructor(private service : ServicesService) {}
+  ngOnInit(): void {
+    this.loadCompanies();
+    this.setupSearchFilter();  // Nuevo método para configurar el filtro
+  }
 
+  private setupSearchFilter(): void {
+    this.searchFilter.valueChanges
+      .pipe(
+        debounceTime(300),
+        distinctUntilChanged()
+      )
+      .subscribe(searchTerm => {
+        this.filterCompanies(searchTerm || '');
+      });
+  }
 
-  ngOnInit(): void {}
-  loadServiceTypes() {
-    this.service.getServices().subscribe({
+  private filterCompanies(searchTerm: string): void {
+    if (!searchTerm) {
+      this.companies = [...this.originalCompanies];
+      return;
+    }
+
+    const term = searchTerm.toLowerCase().trim();
+    this.companies = this.originalCompanies.filter(company => 
+      company.name.toLowerCase().includes(term)
+    );
+  }
+
+  loadCompanies() {
+    this.companyService.getCompanies().subscribe({
       next: (response) => {
-        //this.serviceTypes = response.content;
+        this.originalCompanies = response;  // Guardar copia original
+        this.companies = [...this.originalCompanies];  // Inicializar lista mostrada
       },
       error: (error) => {
-        console.error(error);
+        console.error('Error loading companies:', error);
       }
     });
   }
-  applyFilters(){}
-  filterByStatus(string : String){}
-  onServiceTypeUpdate( service? : ServiceType | null){}
 
-  deleteServiceType(service : number){}
-  closeModalFilter(){}
-  clearFilters(){}
-  onServiceTypeUpdateClose(){}
-  showInfo(){
+    // Agregar este método
+    openModalFilter(): void {
+      this.showModalFilter = true;
+    }
+  
+    closeModalFilter(): void {
+      this.showModalFilter = false;
+    }
+
+  applyFilters() {
+    // Implementar filtrado basado en this.filterForm.value
+    const filters = this.filterForm.value;
+    this.loadCompanies(); // Recargar y luego filtrar localmente
+    
+    if (filters.name) {
+      this.companies = this.companies.filter(company => 
+        company.name.toLowerCase().includes(filters.name!.toLowerCase())
+      );
+    }
+    
+    if (filters.enabled !== null && filters.enabled !== '') {
+      this.companies = this.companies.filter(company => 
+        company.enabled === (filters.enabled === 'true')
+      );
+    }
+    
+    this.closeModalFilter();
+  }
+
+  filterByStatus(status: string) {
+    if (status === 'all') {
+      this.loadCompanies();
+    } else {
+      const isEnabled = status === 'active';
+      this.companies = this.companies.filter(company => company.enabled === isEnabled);
+    }
+  }
+
+  onCompanyUpdate(company?: Company | null) {
+    this.selectedCompany = company || null;
+    this.showServiceTypeUpdate = true;
+  }
+
+  deleteCompany(id: number) {
+    this.companyService.deleteCompany(id).subscribe({
+      next: () => {
+        this.loadCompanies();
+      },
+      error: (error) => {
+        console.error('Error deleting company:', error);
+      }
+    });
+  }
+
+  clearFilters() {
+    this.filterForm.reset();
+    this.loadCompanies();
+  }
+
+  onServiceTypeUpdateClose() {
+    this.showServiceTypeUpdate = false;
+    this.selectedCompany = null;
+    this.loadCompanies();
+  }
+
+  showInfo() {
     this.modalService.open(this.infoModal, { centered: true });
   }
+
   exportToPDF(): void {
     const doc = new jsPDF();
     autoTable(doc, {
-      head: [['Denominación', 'Estado']],
-      body: this.serviceTypes.map(service => [
-        service.denomination,
-        service.status.toString() === 'ACTIVE' ? 'Activo' : 'Inactivo'
+      head: [['Nombre', 'Estado']],
+      body: this.companies.map(company => [
+        company.name,
+        company.enabled ? 'Activo' : 'Inactivo'
       ])
     });
-    doc.save('categorias-de-servicios.pdf');
+    doc.save('companias.pdf');
   }
 
   exportToExcel(): void {
-    const worksheet = XLSX.utils.json_to_sheet(this.serviceTypes.map(service => ({
-      Denominación: service.denomination,
-      Estado: service.status.toString() === 'ACTIVE' ? 'Activo' : 'Inactivo'
+    const worksheet = XLSX.utils.json_to_sheet(this.companies.map(company => ({
+      Nombre: company.name,
+      Estado: company.enabled ? 'Activo' : 'Inactivo'
     })));
     const workbook = XLSX.utils.book_new();
-    XLSX.utils.book_append_sheet(workbook, worksheet, 'Categorías');
-    XLSX.writeFile(workbook, 'categorias-de-servicios.xlsx');
+    XLSX.utils.book_append_sheet(workbook, worksheet, 'Compañías');
+    XLSX.writeFile(workbook, 'companias.xlsx');
   }
-}
-
-export interface ServiceType {
-  id: number;
-  denomination: string;
-  description: string;
-  status: string;
 }
