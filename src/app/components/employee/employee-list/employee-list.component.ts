@@ -9,18 +9,21 @@ import * as XLSX from 'xlsx';
 import jsPDF from 'jspdf';
 import autoTable from 'jspdf-autotable';
 import { debounceTime, distinctUntilChanged } from 'rxjs';
-import { CommonModule } from '@angular/common';
+import { CommonModule, DatePipe } from '@angular/common';
 import { MapperService } from '../../../services/MapperCamelToSnake/mapper.service';
 import { Chart, ChartType } from 'chart.js';
 import { EmployeeListInfoComponent } from './employee-list-info/employee-list-info.component';
+import { TableFiltersComponent, Filter, FilterConfigBuilder } from 'ngx-dabd-grupo01';
+import { EmployeeViewAcessComponent } from '../employee-view-acess/employee-view-acess.component';
 
 @Component({
   selector: 'app-employee-list',
   standalone: true,
   imports: [
     CommonModule, ReactiveFormsModule, FormsModule, RouterModule,
-    MainContainerComponent, ConfirmAlertComponent
+    MainContainerComponent, ConfirmAlertComponent, DatePipe, TableFiltersComponent, EmployeeViewAcessComponent
   ],
+  providers:[DatePipe],
   templateUrl: './employee-list.component.html',
   styleUrls: ['./employee-list.component.css'],
   schemas: [CUSTOM_ELEMENTS_SCHEMA]
@@ -28,7 +31,7 @@ import { EmployeeListInfoComponent } from './employee-list-info/employee-list-in
 export class EmployeeListComponent implements OnInit {
   @ViewChild('infoModal') infoModal!: TemplateRef<any>;
   @ViewChild('pieChart') pieChartRef!: ElementRef;
-  
+  @ViewChild('employeeAccess') employeeAccess!: EmployeeViewAcessComponent;
   showModalFilters: boolean = false;
   
   // Metrics
@@ -42,14 +45,61 @@ export class EmployeeListComponent implements OnInit {
   employeeList: Employee[] = [];
   filteredEmployeeList: Employee[] = [];
   isLoading = false;
+  currentFilters! : Record<string,any>;
 
   // Forms and Filters
   filterForm!: FormGroup;
-  searchFilter = new FormControl('');
+  searchFilter:FormControl = new FormControl('');
   statusTypes = Object.values(StatusType);
   employeeTypes = Object.values(EmployeeType);
   documentTypes = Object.values(DocumentType);
 
+  filterConfig: Filter[] = new FilterConfigBuilder()
+    .textFilter(
+     'Nombre',
+     'firstName',
+     '' 
+    )
+    .textFilter(
+      'Apellido',
+      'lastName',
+      ''
+    )
+    .selectFilter(
+      'Tipo de Empleado',
+      'employeeType',
+      'Seleccione un Tipo',
+      [
+        { value: '', label: 'Todos' },
+        { value: 'ADMINISTRATIVO', label: 'Administrativo' },
+        { value: 'GUARDIA', label: 'Guardia' },
+        { value: 'CONTADOR', label: 'Contador'},
+        { value: 'MANTENIMIENTO', label: 'Mantenimiento'}
+      ]
+    )
+    .textFilter(
+      'Número de Documento',
+      'docNumber',
+      ''
+    )
+    .selectFilter(
+      'Estado',
+      'state',
+      'Seleccione un Estado',
+      [
+        { value: '', label: 'Todos' },
+        { value: 'IN_SERVICE', label: 'Activo' },
+        { value: 'DOWN', label: 'Inactivo' },
+      ]
+    )
+    .build();
+
+    filterChange($event: Record<string, any>) {
+      const filters = $event;
+      this.currentFilters = filters;
+      this.getEmployees();
+    }
+  
   // Pagination
   currentPage: number = 0; // Changed to 0-based for backend compatibility
   totalItems: number = 0;
@@ -80,19 +130,35 @@ export class EmployeeListComponent implements OnInit {
       state: ['']
     });
 
-    // Search filter with debounce
     this.searchFilter.valueChanges
       .pipe(debounceTime(300), distinctUntilChanged())
-      .subscribe(() => this.getEmployees());
+      .subscribe(() => this.searchEmployees());
   }
 
   ngOnInit(): void {
     this.getEmployees();
   }
 
+  searchEmployees(){
+    if (!this.searchFilter.value||this.searchFilter.value == null) {
+      this.getEmployees();
+   }
+
+   this.filteredEmployeeList= this.filteredEmployeeList.filter(emp =>
+     emp.firstName.toLowerCase().includes(this.searchFilter.value.toLowerCase() ?? '')
+     ||emp.lastName.toLowerCase().includes(this.searchFilter.value.toLowerCase() ?? '')
+     ||emp.docNumber.toLowerCase().includes(this.searchFilter.value.toLowerCase() ?? '')
+   );
+  }
+
   getEmployees(page: number = 0, size: number = this.pageSize, searchTerm?: string): void {
     this.isLoading = true;
-    const filters = {
+
+    const filters = this.currentFilters;
+
+    this.employeeService.getAllEmployeesPaged(this.currentPage,this.pageSize,filters).subscribe({
+
+    /*const filters = {
       page: this.currentPage,
       size: this.pageSize,
       firstName: this.filterForm.get('firstName')?.value || '',
@@ -101,20 +167,35 @@ export class EmployeeListComponent implements OnInit {
       docType: this.filterForm.get('docType')?.value || '',
       docNumber: this.filterForm.get('docNumber')?.value || '',
       state: this.filterForm.get('state')?.value || '',
-      date: this.filterForm.get('hiringDate')?.value || '',
+      //date: this.filterForm.get('hiringDate')?.value || '',
+      date: this.formatearFecha(this.filterForm.get('hiringDate')?.value) || '',
       salary: this.filterForm.get('salary')?.value || ''
     };
+    
 
-    this.employeeService.getAllEmployeesPaged(filters).subscribe({
+    this.employeeService.getAllEmployeesPaged(filters).subscribe({*/
+
       next: (response) => {
         response = this.mapperService.toCamelCase(response);
-        this.employeeList = this.mapperService.toCamelCase(response.content);
+        
+        //this.employeeList = this.mapperService.toCamelCase(response.content);
+        this.employeeList = response.content.map((empleado: any) => {
+          const hiringDate = empleado.hiringDate || empleado.hiring_date;
+          
+          return {
+            ...empleado,
+            hiringDate: hiringDate ? this.formatearFecha(hiringDate) : ''
+          };
+        });
+        console.log('Respuesta original:', response);
+        console.log('Respuesta después de mapeo:', response);
+        console.log('Primer empleado:', response.content[0]);
+        console.log('Fecha del primer empleado:', response.content[0].hiringDate);
+        console.log("empleado.hiringDate", this.employeeList[0].hiringDate)
+        
         this.filteredEmployeeList = [...this.employeeList];
         this.totalItems = response.totalElements;
         this.totalPages = response.totalPages;
-        this.calculateMetrics();
-        this.createPieChart();
-        this.createBarChart();
         this.isLoading = false;
       },
       error: (error) => {
@@ -164,6 +245,10 @@ export class EmployeeListComponent implements OnInit {
 
   // Chart methods remain the same...
   createPieChart(): void {
+    if (!this.pieChartRef?.nativeElement) {
+      console.warn('Elemento del gráfico circular no encontrado');
+      return;
+    }
     if (this.pieChart) {
       this.pieChart.destroy();
     }
@@ -333,6 +418,38 @@ export class EmployeeListComponent implements OnInit {
       centered: true,
       scrollable: true
     });
+  }
+
+  private formatearFecha(fecha: string | Date | null): string {
+    if (!fecha) return '';
+    
+    // Si ya es un objeto Date
+    if (fecha instanceof Date) {
+      return fecha.toISOString().split('T')[0];
+    }
+    
+    // Si es un string, manejar diferentes formatos
+    try {
+      // Manejar formato LocalDateTime (yyyy-MM-dd'T'HH:mm:ss)
+      if (fecha.includes('T')) {
+        return fecha.split('T')[0];
+      }
+      
+      // Si es solo un string de fecha (yyyy-MM-dd)
+      return fecha;
+    } catch (error) {
+      console.error('Error al formatear la fecha:', error);
+      return '';
+    }
+  }
+
+  showEmployeeAccess(employeeId: number) {
+    console.log('Showing access for employee:', employeeId);
+    if (this.employeeAccess) {
+      this.employeeAccess.showEmployeeSchedule(employeeId);
+    } else {
+      console.error('Employee access component not found');
+    }
   }
 }
 

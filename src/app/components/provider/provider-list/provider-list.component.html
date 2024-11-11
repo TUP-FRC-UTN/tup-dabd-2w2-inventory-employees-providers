@@ -8,9 +8,7 @@
         <i class="bi bi-search"></i>
       </span>
       <input type="text" class="form-control" placeholder="Buscar..." [formControl]="searchFilterAll" />
-      <button type="button" class="btn btn-outline-info" (click)="openModalFilter()">
-        <i class="bi bi-funnel-fill"></i>
-      </button>
+      <app-table-filters style="z-index: 1;" [filters]="filterConfig" (filterValueChange)="filterChange($event)"></app-table-filters>
     </div>
     <!-- Botón para abrir el modal -->
 

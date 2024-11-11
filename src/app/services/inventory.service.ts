@@ -1,8 +1,8 @@
 import { inject, Injectable } from '@angular/core';
 import { HttpClient, HttpParams } from '@angular/common/http';
 import { map, Observable } from 'rxjs';
-import { Article, ArticleCateg, ArticleCategory, ArticleCategPost, ArticleInventoryPost, ArticlePost } from '../models/article.model';
-import { Inventory, Transaction, TransactionPost } from '../models/inventory.model';
+import { Article, ArticleCateg, ArticleCategory, ArticleCategPost, ArticleCondition, ArticleInventoryPost, ArticlePost, ArticleType } from '../models/article.model';
+import { Inventory, StatusType, Transaction, TransactionPost } from '../models/inventory.model';
 
 @Injectable({
   providedIn: 'root'
@@ -140,6 +140,34 @@ export class InventoryService {
   createCategory(category: ArticleCategPost): Observable<ArticleCategPost> {
     console.log('creacion',category);
     return this.http.post<ArticleCategPost>(this.apiArticleCategoriesUrl, category);
+  }
+
+  getInventoriesPagedFiltered(
+    page: number = 0,
+    size: number = 10,
+    filters?: {
+      article?: string;
+      description?: string;
+      status?: StatusType;
+      articleType?: ArticleType;
+      articleCondition?: ArticleCondition;
+      location?: string;
+    }
+  ): Observable<Page<Inventory>> {
+    let params = new HttpParams()
+      .set('page', page.toString())
+      .set('size', size.toString());
+
+    if (filters) {
+      if (filters.article) params = params.set('article', filters.article);
+      if (filters.description) params = params.set('description', filters.description);
+      if (filters.status) params = params.set('status', filters.status);
+      if (filters.articleType) params = params.set('articleType', filters.articleType);
+      if (filters.articleCondition) params = params.set('articleCondition', filters.articleCondition);
+      if (filters.location) params = params.set('location', filters.location);
+    }
+
+    return this.http.get<Page<Inventory>>(`${this.apiInventoriesUrl}/paginated`, { params });
   }
 }
 

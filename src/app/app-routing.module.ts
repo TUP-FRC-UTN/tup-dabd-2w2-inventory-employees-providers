@@ -15,6 +15,8 @@ import { ProvideConfigComponent } from './components/provider/provide-config/pro
 import { ProviderTypeUpdateComponent } from './components/provider/provider-type-update/provider-type-update.component';
 import { ProviderServiceComponent } from './components/provider/provider-service/provider-service.component';
 import { ProviderServiceUpdateComponent } from './components/provider/provider-service-update/provider-service-update.component';
+import { EmployeeViewAcessComponent } from './components/employee/employee-view-acess/employee-view-acess.component';
+
 
 
 export const routes: Routes = [
@@ -34,9 +36,9 @@ export const routes: Routes = [
   { path: 'inventories/transactions/:inventoryId', component: InventoryTransactionTableComponent },
   { path: 'inventories/config/category', component: InventoryArticleCategoryListComponent},
   { path: 'providers/config/company', component: ProvideConfigComponent},
-  { path: 'providers/config/provider/update', component: ProviderTypeUpdateComponent},
   { path: 'providers/config/service', component: ProviderServiceComponent},
   { path: 'providers/config/service/update', component: ProviderServiceUpdateComponent},
+  { path: 'employees/access/detail', component: EmployeeViewAcessComponent},
   { path: '', redirectTo: '/employees', pathMatch: 'full' }
 ];
 
