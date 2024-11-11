@@ -31,7 +31,7 @@ export class EmployeeFormComponent implements OnInit {
     id:new FormControl(0),
     firstName: new FormControl('', [Validators.required, Validators.minLength(3), Validators.maxLength(100)]),
     lastName: new FormControl('', [Validators.required, Validators.minLength(3), Validators.maxLength(100)]),
-    employeeType: new FormControl(EmployeeType.ADMINTRATIVO, Validators.required),
+    employeeType: new FormControl(EmployeeType.ADMINISTRATIVO, Validators.required),
     //hiringDate: new FormControl(new Date().toISOString().split('T')[0], [Validators.required]), // Default to today
     //hiringDate: new FormControl(new Date().toISOString().slice(0, 19), [Validators.required]),
     //hiringDate: new FormControl(this.today, [Validators.required]),
