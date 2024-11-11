@@ -276,58 +276,63 @@ export class ProviderListComponent implements OnInit {
 
   exportToPDF(): void {
     const doc = new jsPDF();
-    const tableColumn = ['Nombre', 'CUIL', 'Tipo de servicio', 'Dirección', 'Numero de Telefono', 'Estado'];
+    const tableColumn = ['Nombre', 'CUIL', 'Servicio', 'Compañía', 'Dirección', 'Contacto', 'Registro', 'Estado'];
     const tableRows: any[][] = [];
-
+  
     this.providerList.forEach((provider) => {
       const providerData = [
         provider.name,
         provider.cuil,
-        provider.service.name,
+        provider.service?.name,
+        provider.company?.name,
         provider.address,
         provider.contact,
+        provider.registration ? new Date(provider.registration).toLocaleDateString() : '',
         provider.enabled ? 'Activo' : 'Inactivo'
       ];
       tableRows.push(providerData);
     });
-
+  
     autoTable(doc, {
       head: [tableColumn],
       body: tableRows,
     });
-
+  
     doc.save('proveedores.pdf');
   }
+
 
   private createTableFromData(): HTMLTableElement {
     const table = document.createElement('table');
     const thead = table.createTHead();
     const tbody = table.createTBody();
-
+  
     const headerRow = thead.insertRow();
-    ['Nombre', 'CUIL', 'Tipo de servicio', 'Contacto', 'Estado'].forEach(text => {
+    ['Nombre', 'CUIL', 'Servicio', 'Compañía', 'Contacto', 'Registro', 'Estado'].forEach(text => {
       const th = document.createElement('th');
       th.textContent = text;
       headerRow.appendChild(th);
     });
-
+  
     this.providerList.forEach((provider) => {
       const row = tbody.insertRow();
       [
         provider.name,
         provider.cuil,
-        provider.service.name,
+        provider.service?.name,
+        provider.company?.name,
         provider.contact,
+        provider.registration ? new Date(provider.registration).toLocaleDateString() : '',
         provider.enabled ? 'Activo' : 'Inactivo'
       ].forEach((text) => {
         const cell = row.insertCell();
         cell.textContent = text;
       });
     });
-
+  
     return table;
   }
-
+  
   // Navigation methods
   editProvider(id: number): void {
     this.router.navigate(['/providers/form', id]);
