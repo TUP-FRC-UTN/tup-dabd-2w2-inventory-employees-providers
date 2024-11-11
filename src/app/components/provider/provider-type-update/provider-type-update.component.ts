@@ -1,5 +1,7 @@
 import { Component, EventEmitter, Input, OnInit, Output } from '@angular/core';
-import { FormControl, FormGroup, ReactiveFormsModule } from '@angular/forms';
+import { FormControl, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
+import { Company } from '../../../models/suppliers/company.model';
+import { CompanyService } from '../../../services/suppliers/company.service';
 
 @Component({
   selector: 'app-provider-type-update',
@@ -8,35 +10,66 @@ import { FormControl, FormGroup, ReactiveFormsModule } from '@angular/forms';
   templateUrl: './provider-type-update.component.html',
   styleUrl: './provider-type-update.component.css'
 })
-export class ProviderTypeUpdateComponent  implements OnInit{
-
-  @Input() serviceType: any; //Cambiar a ServiceType o lo que fuese
+export class ProviderTypeUpdateComponent implements OnInit {
+  @Input() company: Company | null = null;
   @Output() closeModal = new EventEmitter<void>();
   @Output() showServiceTypeUpdate = new EventEmitter<void>();
 
-  isModalOpen : boolean = true
-  serviceTypeForm = new FormGroup({
-    denomination : new FormControl(''),
-    description : new FormControl('')
-  })
+  isModalOpen: boolean = true;
+  companyForm = new FormGroup({
+    name: new FormControl('', [Validators.required, Validators.minLength(3)]),
+    enabled: new FormControl(true)
+  });
 
+  constructor(private companyService: CompanyService) {}
 
   ngOnInit(): void {
-    //Called after the constructor, initializing input properties, and the first call to ngOnChanges.
-    //Add 'implements OnInit' to the class.
-    
-  }
-  get denominationControl() {
-    return this.serviceTypeForm.get('denomination');
+    if (this.company) {
+      this.companyForm.patchValue({
+        name: this.company.name,
+        enabled: this.company.enabled
+      });
+    }
   }
 
-  get descriptionControl() {
-    return this.serviceTypeForm.get('description');
+  get nameControl() {
+    return this.companyForm.get('name');
   }
-  saveServiceTypeChanges(){}
-  onClose(){
+
+  saveCompanyChanges() {
+    if (this.companyForm.valid) {
+      const companyData: Company = {
+        id: this.company?.id ?? 0,
+        name: this.companyForm.value.name ?? '',
+        enabled: this.companyForm.value.enabled ?? true
+      };
+
+      if (this.company) {
+        // Update existing company
+        this.companyService.updateCompany(companyData).subscribe({
+          next: () => {
+            this.onClose();
+          },
+          error: (error) => {
+            console.error('Error updating company:', error);
+          }
+        });
+      } else {
+        // Create new company
+        this.companyService.createCompany(companyData).subscribe({
+          next: () => {
+            this.onClose();
+          },
+          error: (error) => {
+            console.error('Error creating company:', error);
+          }
+        });
+      }
+    }
+  }
+
+  onClose() {
     this.isModalOpen = false;
     this.closeModal.emit();
   }
-
 }

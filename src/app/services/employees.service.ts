@@ -145,7 +145,7 @@ export class EmployeesService {
     return this.http.get<PaginatedResponse<Employee>>(`${this.apiUrl}/paged`, { params });
   }
 
-  /*getAllEmployeesPaged(filters: {
+ /* getAllEmployeesPaged(filters: {
     page?: number;
     size?: number;
     firstName?: string;
@@ -175,8 +175,8 @@ export class EmployeesService {
         }
       })
     );
-  }  
-*/}
+  } */ 
+}
 
 interface PageResponse<T> {
   content: T[];

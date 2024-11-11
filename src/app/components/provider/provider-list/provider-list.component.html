@@ -36,15 +36,17 @@
           <th>Nombre</th>
           <th>CUIL</th>
           <th>Servicio</th>
+          <th>Compañía</th>  <!-- Nueva columna -->
           <th>Contacto</th>
           <th>Dirección</th>
+          <th>Registro</th>  <!-- Nueva columna -->
           <th>Estado</th>
           <th>Acciones</th>
         </tr>
       </thead>
       <tbody>
         <tr *ngIf="providerList.length === 0">
-          <td colspan="7" class="text-center">
+          <td colspan="9" class="text-center">
             <div class="alert alert-secondary">
               No hay elementos para mostrar
             </div>
@@ -53,9 +55,11 @@
         <tr *ngFor="let provider of providerList; trackBy: trackByFn">
           <td>{{ provider.name }}</td>
           <td>{{ provider.cuil }}</td>
-          <td>{{ provider.service }}</td>
+          <td>{{ provider.service.name }}</td>
+          <td>{{ provider.company.name }}</td>  <!-- Nueva celda -->
           <td>{{ provider.contact }}</td>
           <td>{{ provider.address }}</td>
+          <td>{{ provider.registration | date:'dd/MM/yyyy' }}</td>
           <td>
             <i *ngIf="provider.enabled" class="bi bi-check2-circle text-success" style="font-size: 1.5rem;"></i>
             <i *ngIf="!provider.enabled" class="bi bi-x-circle text-danger" style="font-size: 1.5rem;"></i>
@@ -125,47 +129,63 @@
 
 
   <!-- Modal de Filtros -->
-  <div *ngIf="showModalFilter" class="modal fade show" tabindex="-1" role="dialog" style="display: block;">
-    <div class="modal-dialog modal-dialog-centered" role="document">
-      <div class="modal-content">
-        <div class="modal-header">
-          <h5 class="modal-title">Filtrar Proveedores</h5>
-          <button type="button" class="btn-close" aria-label="Close" (click)="closeModalFilter()"></button>
-        </div>
-        <div class="modal-body">
-          <form [formGroup]="filterForm">
-            <div class="form-group">
-              <label>Nombre</label>
-              <input type="text" class="form-control" placeholder="Nombre" formControlName="name">
-            </div>
-            <div class="form-group">
-              <label>CUIL</label>
-              <input type="text" class="form-control" placeholder="CUIL" formControlName="cuil">
-            </div>
-            <div class="form-group">
-              <label>Servicio</label>
-              <input type="text" class="form-control" placeholder="Servicio" formControlName="service">
-            </div>
-            <div class="form-group">
-              <label>Número de Teléfono</label>
-              <input type="text" class="form-control" placeholder="Número de Teléfono" formControlName="phone">
-            </div>
-            <div class="form-group">
-              <label>Estado</label>
-              <select class="form-select" formControlName="enabled">
-                <option value="">Todos los Estados</option>
-                <option [value]="true">Activo</option>
-                <option [value]="false">Inactivo</option>
-              </select>
-            </div>
-          </form>
-        </div>
-        <div class="modal-footer">
-          <button type="button" class="btn btn-outline-danger" (click)="clearFilters()">
-            <i class="bi bi-trash"></i></button>
-          <button type="button" class="btn btn-primary" (click)="applyFilters()">Aplicar Filtros</button>
-        </div>
+<!-- Modal de Filtros -->
+<div *ngIf="showModalFilter" class="modal fade show" tabindex="-1" role="dialog" style="display: block;">
+  <div class="modal-dialog modal-dialog-centered" role="document">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title">Filtrar Proveedores</h5>
+        <button type="button" class="btn-close" aria-label="Close" (click)="closeModalFilter()"></button>
+      </div>
+      <div class="modal-body">
+        <form [formGroup]="filterForm">
+          <div class="form-group mb-3">
+            <label>Nombre</label>
+            <input type="text" class="form-control" placeholder="Nombre" formControlName="name">
+          </div>
+          <div class="form-group mb-3">
+            <label>CUIL</label>
+            <input type="text" class="form-control" placeholder="CUIL" formControlName="cuil">
+          </div>
+          <div class="form-group mb-3">
+            <label>Servicio</label>
+            <input type="text" class="form-control" placeholder="Servicio" formControlName="service.name">
+          </div>
+          <!-- Nuevo campo para Compañía -->
+          <div class="form-group mb-3">
+            <label>Compañía</label>
+            <input type="text" class="form-control" placeholder="Compañía" formControlName="company.name">
+          </div>
+          <div class="form-group mb-3">
+            <label>Contacto</label>
+            <input type="text" class="form-control" placeholder="Contacto" formControlName="contact">
+          </div>
+          <!-- Campos de fecha -->
+          <div class="form-group mb-3">
+            <label>Fecha de Registro (Desde)</label>
+            <input type="date" class="form-control" formControlName="start">
+          </div>
+          <div class="form-group mb-3">
+            <label>Fecha de Registro (Hasta)</label>
+            <input type="date" class="form-control" formControlName="end">
+          </div>
+          <div class="form-group mb-3">
+            <label>Estado</label>
+            <select class="form-select" formControlName="enabled">
+              <option value="">Todos los Estados</option>
+              <option [value]="true">Activo</option>
+              <option [value]="false">Inactivo</option>
+            </select>
+          </div>
+        </form>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-outline-danger" (click)="clearFilters()">
+          <i class="bi bi-trash"></i>
+        </button>
+        <button type="button" class="btn btn-primary" (click)="applyFilters()">Aplicar Filtros</button>
       </div>
     </div>
   </div>
+</div>
 </app-main-container>
