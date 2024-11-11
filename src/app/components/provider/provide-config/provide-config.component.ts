@@ -1,6 +1,6 @@
 import { Component, inject, OnInit, TemplateRef, ViewChild } from '@angular/core';
 import { FormControl, FormGroup, ReactiveFormsModule } from '@angular/forms';
-import { MainContainerComponent } from 'ngx-dabd-grupo01';
+import { Filter, FilterConfigBuilder, MainContainerComponent, TableFiltersComponent } from 'ngx-dabd-grupo01';
 import { ProviderTypeUpdateComponent } from "../provider-type-update/provider-type-update.component";
 import { CompanyService } from '../../../services/suppliers/company.service';
 import { Company } from '../../../models/suppliers/company.model';
@@ -9,11 +9,13 @@ import autoTable from 'jspdf-autotable';
 import * as XLSX from 'xlsx';
 import { NgbModal } from '@ng-bootstrap/ng-bootstrap';
 import { debounceTime, distinctUntilChanged } from 'rxjs';
+import { DatePipe } from '@angular/common';
 
 @Component({
   selector: 'app-provide-config',
   standalone: true,
-  imports: [MainContainerComponent, ReactiveFormsModule, ProviderTypeUpdateComponent],
+  imports: [MainContainerComponent, ReactiveFormsModule, ProviderTypeUpdateComponent, TableFiltersComponent],
+  providers: [DatePipe],
   templateUrl: './provide-config.component.html',
   styleUrl: './provide-config.component.css'
 })
@@ -33,8 +35,27 @@ export class ProvideConfigComponent implements OnInit {
 
   private modalService = inject(NgbModal);
   private companyService = inject(CompanyService);
+  currentFilters! : Record<string,any>;
 
   @ViewChild('infoModal') infoModal!: TemplateRef<any>;
+
+  filterConfig: Filter[] = new FilterConfigBuilder()
+    .textFilter(
+     'Nombre',
+     'firstName',
+     '' 
+    ).selectFilter(
+      'Tipo de Empleado',
+      'employeeType',
+      'Seleccione un Tipo',
+      [
+        { value: '', label: 'Todos' },
+        { value: 'ADMINISTRATIVO', label: 'Administrativo' },
+        { value: 'GUARDIA', label: 'Guardia' },
+        { value: 'CONTADOR', label: 'Contador'},
+        { value: 'MANTENIMIENTO', label: 'Mantenimiento'}
+      ]
+    ).build();
 
   ngOnInit(): void {
     this.loadCompanies();
@@ -52,6 +73,11 @@ export class ProvideConfigComponent implements OnInit {
       });
   }
 
+  filterChange($event: Record<string, any>) {
+    const filters = $event;
+    this.currentFilters = filters;
+    this.loadCompanies();
+  }
   private filterCompanies(searchTerm: string): void {
     if (!searchTerm) {
       this.companies = [...this.originalCompanies];
