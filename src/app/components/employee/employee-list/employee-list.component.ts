@@ -45,7 +45,7 @@ export class EmployeeListComponent implements OnInit {
 
   // Forms and Filters
   filterForm!: FormGroup;
-  searchFilter = new FormControl('');
+  searchFilter:FormControl = new FormControl('');
   statusTypes = Object.values(StatusType);
   employeeTypes = Object.values(EmployeeType);
   documentTypes = Object.values(DocumentType);
@@ -80,14 +80,25 @@ export class EmployeeListComponent implements OnInit {
       state: ['']
     });
 
-    // Search filter with debounce
     this.searchFilter.valueChanges
       .pipe(debounceTime(300), distinctUntilChanged())
-      .subscribe(() => this.getEmployees());
+      .subscribe(() => this.searchEmployees());
   }
 
   ngOnInit(): void {
     this.getEmployees();
+  }
+
+  searchEmployees(){
+    if (!this.searchFilter.value||this.searchFilter.value == null) {
+      this.getEmployees();
+   }
+
+   this.filteredEmployeeList= this.filteredEmployeeList.filter(emp =>
+     emp.firstName.toLowerCase().includes(this.searchFilter.value.toLowerCase() ?? '')
+     ||emp.lastName.toLowerCase().includes(this.searchFilter.value.toLowerCase() ?? '')
+     ||emp.docNumber.toLowerCase().includes(this.searchFilter.value.toLowerCase() ?? '')
+   );
   }
 
   getEmployees(page: number = 0, size: number = this.pageSize, searchTerm?: string): void {

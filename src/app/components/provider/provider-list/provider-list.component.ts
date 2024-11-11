@@ -32,7 +32,7 @@ Chart.register(...registerables);
   schemas: [CUSTOM_ELEMENTS_SCHEMA]
 })
 export class ProviderListComponent implements OnInit {
-  @ViewChild('pieChart') pieChartRef!: ElementRef;
+  //@ViewChild('pieChart') pieChartRef!: ElementRef;
   @ViewChild('providersTable') providersTable!: ElementRef;
   @ViewChild('infoModal') infoModal!: TemplateRef<any>;
 
@@ -41,7 +41,7 @@ export class ProviderListComponent implements OnInit {
   private originalProviders: Supplier[] = [];
   isLoading = false;
 
-  searchFilterAll = new FormControl('');
+  searchFilterAll:FormControl = new FormControl('');
   filterForm: FormGroup;
 
   showModalFilter: boolean = false;
@@ -79,9 +79,20 @@ export class ProviderListComponent implements OnInit {
         distinctUntilChanged()
       )
       .subscribe(searchTerm => {
-        this.getProviders(this.currentPage - 1, this.pageSize, searchTerm || '');
+        this.searchProviders(searchTerm);
       });
   }
+  
+  searchProviders(searchTerm:string){
+    if (!this.searchFilterAll.value||this.searchFilterAll.value==null) {
+      this.getProviders();
+   }
+
+   this.providerList = this.providerList.filter(p =>
+     p.name.toLowerCase().includes(searchTerm.toLowerCase() ?? '')
+     ||p.details?.toLowerCase().includes(searchTerm.toLowerCase() ?? '')
+     ||p.service.toLowerCase().includes(searchTerm.toLowerCase() ?? '')
+   );  }
 
   ngOnInit(): void {
     this.getProviders();
@@ -114,9 +125,9 @@ export class ProviderListComponent implements OnInit {
         this.totalPages = Math.ceil(this.totalItems / this.pageSize);
         this.isLoading = false;
   
-        this.calculateMetrics();
-        this.createPieChart();
-        this.createBarChart();
+        //this.calculateMetrics();
+        //this.createPieChart();
+        //this.createBarChart();
       },
       error: (error) => {
         console.error('Error fetching providers:', error);
@@ -179,7 +190,7 @@ export class ProviderListComponent implements OnInit {
     }, {} as { [key: string]: number });
   }
 
-  createPieChart(): void {
+  /*createPieChart(): void {
     if (this.pieChart) {
       this.pieChart.destroy();
     }
@@ -202,7 +213,7 @@ export class ProviderListComponent implements OnInit {
         }
       }
     });
-  }
+  }*/
 
   createBarChart(): void {
     if (this.barChart) {
