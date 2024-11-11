@@ -22,12 +22,24 @@ import { Countries } from '../../../models/enums/countries.enum';
   styleUrls: ['./employee-form.component.scss'],
 })
 export class EmployeeFormComponent implements OnInit {
+
+  today = new Date().toISOString();
+  formattedToday = this.today.split('T')[0];
+  formattedDateTime = this.today.slice(0, 19);
+
   employeeForm = new FormGroup({
     id:new FormControl(0),
     firstName: new FormControl('', [Validators.required, Validators.minLength(3), Validators.maxLength(100)]),
     lastName: new FormControl('', [Validators.required, Validators.minLength(3), Validators.maxLength(100)]),
     employeeType: new FormControl(EmployeeType.ADMINTRATIVO, Validators.required),
-    hiringDate: new FormControl(new Date().toISOString().split('T')[0], [Validators.required]),
+    //hiringDate: new FormControl(new Date().toISOString().split('T')[0], [Validators.required]), // Default to today
+    //hiringDate: new FormControl(new Date().toISOString().slice(0, 19), [Validators.required]),
+    //hiringDate: new FormControl(this.today, [Validators.required]),
+    //hiringDate: new FormControl(this.formattedDateTime, [Validators.required]),
+    hiringDate: new FormControl<string>(this.formattedDateTime, {
+      validators: [Validators.required],
+      nonNullable: true,
+    }),
     documentType: new FormControl(DocumentType.DNI, Validators.required),
     docNumber: new FormControl('', [Validators.required, Validators.pattern(/^[0-9.-]*$/)]),
     salary: new FormControl(0, [Validators.required, Validators.min(0)]),
@@ -101,7 +113,13 @@ export class EmployeeFormComponent implements OnInit {
         this.getById(id);
       }
     });
-    // this.addContact();
+
+    this.addContact();
+
+    this.employeeForm.get('hiringDate')?.valueChanges.subscribe(value => {
+      console.log(value);
+      this.employeeForm.patchValue({ hiringDate: value });
+    })
   }
 
   getById(id: number) {

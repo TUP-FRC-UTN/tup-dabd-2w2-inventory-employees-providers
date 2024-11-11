@@ -72,6 +72,7 @@ export interface Employee {
   documentType: DocumentType; // Tipo de documento (DNI, Pasaporte, etc.).
   docNumber: string; // Número del documento del empleado.
   hiringDate: string; // Fecha de contratación del empleado.
+  //hiringDate: Date;
   salary: number; // Salario del empleado.
   state: StatusType; // Estado del empleado (Activo o Inactivo).
   address?: Address; // Dirección del empleado.
