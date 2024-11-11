@@ -172,10 +172,8 @@ export class ProviderListComponent implements OnInit {
     this.inactiveCount = this.providerList.filter(provider => provider.enabled === false).length;
 
     this.serviceCountMap = this.providerList.reduce((acc, provider) => {
-      const service = provider.service.name;
-      if (service) {
-        acc[service] = (acc[service] || 0) + 1;
-      }
+      const serviceName = provider.service?.name || 'Sin servicio';
+      acc[serviceName] = (acc[serviceName] || 0) + 1;
       return acc;
     }, {} as { [key: string]: number });
   }
