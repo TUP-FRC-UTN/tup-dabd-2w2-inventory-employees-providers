@@ -4,7 +4,7 @@ import { ReactiveFormsModule, FormsModule, FormBuilder, FormControl, FormGroup }
 import { NgbModal, NgbPaginationModule } from '@ng-bootstrap/ng-bootstrap';
 import { Router, RouterModule } from '@angular/router';
 import { ProvidersService } from '../../../services/providers.service';
-import { Supplier } from '../../../models/supplier.model';
+import { Supplier } from '../../../models/suppliers/supplier.model';
 import { ToastService, MainContainerComponent, ConfirmAlertComponent } from 'ngx-dabd-grupo01';
 import { debounceTime, distinctUntilChanged } from 'rxjs';
 import * as XLSX from 'xlsx';
@@ -66,7 +66,8 @@ export class ProviderListComponent implements OnInit {
     this.filterForm = this.fb.group({
       name: [''],
       cuil: [''],
-      service: [''],
+      'service.name': [''],
+      'company.name': [''],
       contact: [''],
       address: [''],
       enabled: ['']
@@ -171,7 +172,7 @@ export class ProviderListComponent implements OnInit {
     this.inactiveCount = this.providerList.filter(provider => provider.enabled === false).length;
 
     this.serviceCountMap = this.providerList.reduce((acc, provider) => {
-      const service = provider.service;
+      const service = provider.service.name;
       if (service) {
         acc[service] = (acc[service] || 0) + 1;
       }
@@ -270,7 +271,7 @@ export class ProviderListComponent implements OnInit {
       const providerData = [
         provider.name,
         provider.cuil,
-        provider.service,
+        provider.service.name,
         provider.address,
         provider.contact,
         provider.enabled ? 'Activo' : 'Inactivo'
@@ -303,7 +304,7 @@ export class ProviderListComponent implements OnInit {
       [
         provider.name,
         provider.cuil,
-        provider.service,
+        provider.service.name,
         provider.contact,
         provider.enabled ? 'Activo' : 'Inactivo'
       ].forEach((text) => {

@@ -1,7 +1,7 @@
 import { Injectable } from '@angular/core';
 import { HttpClient, HttpParams } from '@angular/common/http';
 import { Observable } from 'rxjs';
-import { Supplier } from '../models/supplier.model';
+import { Supplier } from '../models/suppliers/supplier.model';
 import { PaginatedResponse } from '../models/api-response';
 
 @Injectable({
@@ -13,14 +13,15 @@ export class ProvidersService {
   constructor(private http: HttpClient) {}
 
   getProviders(filters?: {
-    name?: string,
-    cuil?: string,
-    service?: string,
-    addressId?: number,
-    enabled?: boolean,
-    phoneNumber?: string,
     page?: number,
     size?: number
+    name?: string,
+    cuil?: string,
+    contact?: string,
+    addressId?: number,
+    enabled?: boolean,
+    company?: string,
+    service?: string,
   }): Observable<PaginatedResponse<Supplier>> {
     let params = new HttpParams();
   

@@ -2,7 +2,7 @@ import { Component, CUSTOM_ELEMENTS_SCHEMA, ElementRef, inject, OnInit, Template
 import { CommonModule } from '@angular/common';
 import { ReactiveFormsModule, FormBuilder, FormControl, FormGroup } from '@angular/forms';
 import { ProvidersService } from '../../../services/providers.service';
-import { Supplier } from '../../../models/supplier.model';
+import { Supplier } from '../../../models/suppliers/supplier.model';
 import { ToastService, MainContainerComponent } from 'ngx-dabd-grupo01';
 import { debounceTime, distinctUntilChanged } from 'rxjs';
 import { Chart, ChartType, registerables } from 'chart.js';
@@ -121,10 +121,8 @@ export class ProviderDashboardComponent implements OnInit {
     this.inactiveCount = this.providerList.filter(provider => provider.enabled === false).length;
 
     this.serviceCountMap = this.providerList.reduce((acc, provider) => {
-      const service = provider.service;
-      if (service) {
-        acc[service] = (acc[service] || 0) + 1;
-      }
+      const serviceName = provider.service?.name || 'Sin servicio';
+      acc[serviceName] = (acc[serviceName] || 0) + 1;
       return acc;
     }, {} as { [key: string]: number });
   }
