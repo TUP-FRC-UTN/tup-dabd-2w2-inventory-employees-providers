@@ -81,6 +81,11 @@
                     </a>
                   </li>
                   <li>
+                    <a class="dropdown-item" (click)="showEmployeeAccess(employee.id)" title="Ver accessos">
+                      Ver accesos
+                    </a>
+                  </li>
+                  <li>
                     <a class="dropdown-item text-danger" *ngIf="employee.state != 'DOWN'"
                       (click)="deleteEmployee(employee.id!)" title="Eliminar">
                       Eliminar
@@ -267,3 +272,5 @@
     <button type="button" class="btn btn-secondary" (click)="modal.close()">Cerrar</button>
   </div>
 </ng-template>
+
+<app-employee-view-acess #employeeAccess></app-employee-view-acess>
