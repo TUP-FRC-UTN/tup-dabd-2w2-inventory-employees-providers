@@ -115,7 +115,7 @@ export class EmployeesService {
 
   getAllEmployeesPaged(
     page: number = 0,
-    size: number = 10,
+    size: number = 40,
     filters?: {
       firstName?: string;
       lastName?: string;
