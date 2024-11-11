@@ -102,11 +102,14 @@ export class ProviderListComponent implements OnInit {
     if (searchTerm) {
       filters.name = searchTerm;
       filters.cuil = searchTerm;
-      filters.service = searchTerm;
+      filters['service.name'] = searchTerm;  // Cambiado
+      filters['company.name'] = searchTerm;  // Añadido
       filters.contact = searchTerm;
       filters.address = searchTerm;
     }
   
+    console.log('Filters being sent:', filters); // Para debug
+    
     this.providerService.getProviders(filters).subscribe({
       next: (response) => {
         this.providerList = response.content;
@@ -319,10 +322,10 @@ export class ProviderListComponent implements OnInit {
       [
         provider.name,
         provider.cuil,
-        provider.service?.name,
-        provider.company?.name,
+        provider.service.name,
+        provider.company.name,
         provider.contact,
-        provider.registration ? new Date(provider.registration).toLocaleDateString() : '',
+        provider.registration,
         provider.enabled ? 'Activo' : 'Inactivo'
       ].forEach((text) => {
         const cell = row.insertCell();
@@ -332,7 +335,7 @@ export class ProviderListComponent implements OnInit {
   
     return table;
   }
-  
+
   // Navigation methods
   editProvider(id: number): void {
     this.router.navigate(['/providers/form', id]);
