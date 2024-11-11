@@ -2,6 +2,8 @@ import { Component, inject, OnInit, TemplateRef, ViewChild } from '@angular/core
 import { FormControl, FormGroup, ReactiveFormsModule } from '@angular/forms';
 import { MainContainerComponent } from 'ngx-dabd-grupo01';
 import { ProviderTypeUpdateComponent } from "../provider-type-update/provider-type-update.component";
+import { CompanyService } from '../../../services/suppliers/company.service';
+import { Company } from '../../../models/suppliers/company.model';
 import jsPDF from 'jspdf';
 import autoTable from 'jspdf-autotable';
 import * as XLSX from 'xlsx';
