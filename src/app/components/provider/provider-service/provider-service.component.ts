@@ -8,6 +8,7 @@ import jsPDF from 'jspdf';
 import autoTable from 'jspdf-autotable';
 import * as XLSX from 'xlsx';
 import { NgbModal } from '@ng-bootstrap/ng-bootstrap';
+import { debounceTime, distinctUntilChanged } from 'rxjs';
 
 @Component({
   selector: 'app-provider-service',
@@ -23,6 +24,7 @@ export class ProviderServiceComponent implements OnInit {
   });
 
   searchFilter = new FormControl('');
+  originalServices: Service[] = [];  // Nuevo array para datos originales
   showModalFilter: boolean = false;
   showServiceTypeUpdate: boolean = false;
   services: Service[] = [];
@@ -35,12 +37,37 @@ export class ProviderServiceComponent implements OnInit {
 
   ngOnInit(): void {
     this.loadServices();
+    this.setupSearchFilter();  // Agregar configuración del filtro
+  }
+
+  private setupSearchFilter(): void {
+    this.searchFilter.valueChanges
+      .pipe(
+        debounceTime(300),
+        distinctUntilChanged()
+      )
+      .subscribe(searchTerm => {
+        this.filterServices(searchTerm || '');
+      });
+  }
+
+  private filterServices(searchTerm: string): void {
+    if (!searchTerm) {
+      this.services = [...this.originalServices];
+      return;
+    }
+
+    const term = searchTerm.toLowerCase().trim();
+    this.services = this.originalServices.filter(service => 
+      service.name.toLowerCase().includes(term)
+    );
   }
 
   loadServices() {
     this.serviceService.getServices().subscribe({
       next: (response) => {
-        this.services = response;
+        this.originalServices = response;  // Guardar copia original
+        this.services = [...this.originalServices];  // Inicializar lista mostrada
       },
       error: (error) => {
         console.error('Error loading services:', error);
@@ -91,6 +118,10 @@ export class ProviderServiceComponent implements OnInit {
       }
     });
   }
+
+    openModalFilter(): void {
+      this.showModalFilter = true;
+    }
 
   closeModalFilter() {
     this.showModalFilter = false;
