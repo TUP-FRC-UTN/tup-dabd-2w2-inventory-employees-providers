@@ -11,14 +11,15 @@ import { InventoryArticleCategoryListComponent } from './components/inventory/in
 import { ServiceFormComponent } from './components/provider/service-form/service-form.component';
 import { ServiceListComponent } from './components/provider/service-list/service-list.component';
 import { ProviderDashboardComponent } from './components/provider/provider-dashboard/provider-dashboard.component';
+import { EmployeeDashboardComponent } from './components/employee/employee-dashboard/employee-dashboard.component';
+import { InventoryDashboardComponent } from './components/inventory/inventory-dashboard/inventory-dashboard.component';
 import { ProvideConfigComponent } from './components/provider/provide-config/provide-config.component';
 import { ProviderTypeUpdateComponent } from './components/provider/provider-type-update/provider-type-update.component';
 
 
-
-
 export const routes: Routes = [
   { path: 'employees/list', component: EmployeeListComponent },
+  { path: 'employees/dashboard', component: EmployeeDashboardComponent },
   { path: 'employees/form', component: EmployeeFormComponent },
   { path: 'employees/form/:id', component: EmployeeFormComponent },
   { path: 'providers/list', component: ProviderListComponent },
@@ -31,6 +32,7 @@ export const routes: Routes = [
   { path: 'articles/article', component: ArticleFormComponent},
   { path: 'articles/article/:id', component: ArticleFormComponent },
   { path: 'inventories', component: InventoryTableComponent },
+  { path: 'inventory/dashboard', component: InventoryDashboardComponent },
   { path: 'transactions/:id', component: TransactionComponentForm },
   { path: 'inventories/transactions/:inventoryId', component: InventoryTransactionTableComponent },
   { path: 'inventories/config/category', component: InventoryArticleCategoryListComponent},
