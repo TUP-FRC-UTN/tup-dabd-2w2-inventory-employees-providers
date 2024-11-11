@@ -13,6 +13,8 @@ import { EmployeeDashboardComponent } from './components/employee/employee-dashb
 import { InventoryDashboardComponent } from './components/inventory/inventory-dashboard/inventory-dashboard.component';
 import { ProvideConfigComponent } from './components/provider/provide-config/provide-config.component';
 import { ProviderTypeUpdateComponent } from './components/provider/provider-type-update/provider-type-update.component';
+import { ProviderServiceComponent } from './components/provider/provider-service/provider-service.component';
+import { ProviderServiceUpdateComponent } from './components/provider/provider-service-update/provider-service-update.component';
 
 
 export const routes: Routes = [
@@ -33,6 +35,8 @@ export const routes: Routes = [
   { path: 'inventories/config/category', component: InventoryArticleCategoryListComponent},
   { path: 'providers/config/company', component: ProvideConfigComponent},
   { path: 'providers/config/provider/update', component: ProviderTypeUpdateComponent},
+  { path: 'providers/config/service', component: ProviderServiceComponent},
+  { path: 'providers/config/service/update', component: ProviderServiceUpdateComponent},
   { path: '', redirectTo: '/employees', pathMatch: 'full' }
 ];
 
