@@ -49,8 +49,9 @@ export class ProviderDashboardComponent implements OnInit {
     this.filterForm = this.fb.group({
       name: [''],
       cuil: [''],
-      service: [''],
-      phone: [''],
+      'service.name': [''],
+      'company.name': [''],
+      contact: [''],
       enabled: ['']
     });
 
@@ -75,8 +76,9 @@ export class ProviderDashboardComponent implements OnInit {
     if (searchTerm) {
       filters.name = searchTerm;
       filters.cuil = searchTerm;
-      filters.service = searchTerm;
-      filters.phone = searchTerm;
+      filters['service.name'] = searchTerm;
+      filters['company.name'] = searchTerm;
+      filters.contact = searchTerm;
     }
 
     this.providerService.getProviders(filters).subscribe({

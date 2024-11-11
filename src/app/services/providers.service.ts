@@ -18,10 +18,11 @@ export class ProvidersService {
     name?: string,
     cuil?: string,
     contact?: string,
-    addressId?: number,
+    address?: string,
     enabled?: boolean,
-    company?: string,
-    service?: string,
+    'company.name'?: string,
+    'service.name'?: string,
+    registration?: string   
   }): Observable<PaginatedResponse<Supplier>> {
     let params = new HttpParams();
   
