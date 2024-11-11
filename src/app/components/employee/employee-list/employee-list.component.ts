@@ -14,13 +14,14 @@ import { MapperService } from '../../../services/MapperCamelToSnake/mapper.servi
 import { Chart, ChartType } from 'chart.js';
 import { EmployeeListInfoComponent } from './employee-list-info/employee-list-info.component';
 import { TableFiltersComponent, Filter, FilterConfigBuilder } from 'ngx-dabd-grupo01';
+import { EmployeeViewAcessComponent } from '../employee-view-acess/employee-view-acess.component';
 
 @Component({
   selector: 'app-employee-list',
   standalone: true,
   imports: [
     CommonModule, ReactiveFormsModule, FormsModule, RouterModule,
-    MainContainerComponent, ConfirmAlertComponent, DatePipe, TableFiltersComponent
+    MainContainerComponent, ConfirmAlertComponent, DatePipe, TableFiltersComponent, EmployeeViewAcessComponent
   ],
   providers:[DatePipe],
   templateUrl: './employee-list.component.html',
@@ -30,7 +31,7 @@ import { TableFiltersComponent, Filter, FilterConfigBuilder } from 'ngx-dabd-gru
 export class EmployeeListComponent implements OnInit {
   @ViewChild('infoModal') infoModal!: TemplateRef<any>;
   @ViewChild('pieChart') pieChartRef!: ElementRef;
-  
+  @ViewChild('employeeAccess') employeeAccess!: EmployeeViewAcessComponent;
   showModalFilters: boolean = false;
   
   // Metrics
@@ -152,12 +153,46 @@ export class EmployeeListComponent implements OnInit {
 
   getEmployees(page: number = 0, size: number = this.pageSize, searchTerm?: string): void {
     this.isLoading = true;
+
     const filters = this.currentFilters;
 
     this.employeeService.getAllEmployeesPaged(this.currentPage,this.pageSize,filters).subscribe({
+
+    /*const filters = {
+      page: this.currentPage,
+      size: this.pageSize,
+      firstName: this.filterForm.get('firstName')?.value || '',
+      lastName: this.filterForm.get('lastName')?.value || '',
+      type: this.filterForm.get('employeeType')?.value || '',
+      docType: this.filterForm.get('docType')?.value || '',
+      docNumber: this.filterForm.get('docNumber')?.value || '',
+      state: this.filterForm.get('state')?.value || '',
+      //date: this.filterForm.get('hiringDate')?.value || '',
+      date: this.formatearFecha(this.filterForm.get('hiringDate')?.value) || '',
+      salary: this.filterForm.get('salary')?.value || ''
+    };
+    
+
+    this.employeeService.getAllEmployeesPaged(filters).subscribe({*/
+
       next: (response) => {
         response = this.mapperService.toCamelCase(response);
-        this.employeeList = this.mapperService.toCamelCase(response.content);
+        
+        //this.employeeList = this.mapperService.toCamelCase(response.content);
+        this.employeeList = response.content.map((empleado: any) => {
+          const hiringDate = empleado.hiringDate || empleado.hiring_date;
+          
+          return {
+            ...empleado,
+            hiringDate: hiringDate ? this.formatearFecha(hiringDate) : ''
+          };
+        });
+        console.log('Respuesta original:', response);
+        console.log('Respuesta después de mapeo:', response);
+        console.log('Primer empleado:', response.content[0]);
+        console.log('Fecha del primer empleado:', response.content[0].hiringDate);
+        console.log("empleado.hiringDate", this.employeeList[0].hiringDate)
+        
         this.filteredEmployeeList = [...this.employeeList];
         this.totalItems = response.totalElements;
         this.totalPages = response.totalPages;
@@ -210,6 +245,10 @@ export class EmployeeListComponent implements OnInit {
 
   // Chart methods remain the same...
   createPieChart(): void {
+    if (!this.pieChartRef?.nativeElement) {
+      console.warn('Elemento del gráfico circular no encontrado');
+      return;
+    }
     if (this.pieChart) {
       this.pieChart.destroy();
     }
@@ -379,6 +418,38 @@ export class EmployeeListComponent implements OnInit {
       centered: true,
       scrollable: true
     });
+  }
+
+  private formatearFecha(fecha: string | Date | null): string {
+    if (!fecha) return '';
+    
+    // Si ya es un objeto Date
+    if (fecha instanceof Date) {
+      return fecha.toISOString().split('T')[0];
+    }
+    
+    // Si es un string, manejar diferentes formatos
+    try {
+      // Manejar formato LocalDateTime (yyyy-MM-dd'T'HH:mm:ss)
+      if (fecha.includes('T')) {
+        return fecha.split('T')[0];
+      }
+      
+      // Si es solo un string de fecha (yyyy-MM-dd)
+      return fecha;
+    } catch (error) {
+      console.error('Error al formatear la fecha:', error);
+      return '';
+    }
+  }
+
+  showEmployeeAccess(employeeId: number) {
+    console.log('Showing access for employee:', employeeId);
+    if (this.employeeAccess) {
+      this.employeeAccess.showEmployeeSchedule(employeeId);
+    } else {
+      console.error('Employee access component not found');
+    }
   }
 }
 

@@ -1,6 +1,6 @@
 import { inject, Injectable } from '@angular/core';
 import { HttpClient, HttpParams } from '@angular/common/http';
-import { BehaviorSubject, map, Observable } from 'rxjs';
+import { BehaviorSubject, map, Observable, tap } from 'rxjs';
 import { Employee, EmployeeFilter, EmployeePayment, EmployeeSchedule, StatusType } from '../models/employee.model';
 import { MapperService } from './MapperCamelToSnake/mapper.service';
 import { PaginatedResponse } from '../models/api-response';
@@ -25,8 +25,9 @@ export class EmployeesService {
   }
 
   getEmployeeSchedules(employeeId: number): Observable<EmployeeSchedule[]> {
-    return this.http.get<EmployeeSchedule[]>(`${this.apiUrl}/employee/${employeeId}`);
+    return this.http.get<EmployeeSchedule[]>(`${this.apiUrlSHIFT}/employee/${employeeId}`);
   }
+  
   
 
   getEmployeesPageable(
@@ -111,6 +112,7 @@ export class EmployeesService {
   // }
   
 
+
   getAllEmployeesPaged(
     page: number = 0,
     size: number = 10,
@@ -142,7 +144,39 @@ export class EmployeesService {
   
     return this.http.get<PaginatedResponse<Employee>>(`${this.apiUrl}/paged`, { params });
   }
-}
+
+  /*getAllEmployeesPaged(filters: {
+    page?: number;
+    size?: number;
+    firstName?: string;
+    lastName?: string;
+    type?: string;
+    docType?: string;
+    docNumber?: string;
+    state?: string;
+    date?: string;
+    salary?: string;
+  }): Observable<PaginatedResponse<Employee>> {
+    let params = new HttpParams();
+    
+    Object.entries(filters).forEach(([key, value]) => {
+      if (value !== undefined && value !== '') {
+        params = params.append(key, value.toString());
+      }
+    });
+    return this.http.get<PaginatedResponse<Employee>>(`${this.apiUrl}/paged`, { params })//;
+    .pipe(
+      tap((response) => {
+        console.log('Respuesta de la API:', response);
+        console.log('Contenido de la primera página:', response.content);
+        if (response.content.length > 0) {
+          console.log('Primer empleado:', response.content[0]);
+          console.log('Fecha de contratación del primer empleado:', response.content[0].hiringDate);
+        }
+      })
+    );
+  }  
+*/}
 
 interface PageResponse<T> {
   content: T[];

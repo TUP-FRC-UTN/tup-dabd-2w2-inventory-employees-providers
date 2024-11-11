@@ -15,6 +15,7 @@ import { EmployeeDashboardComponent } from './components/employee/employee-dashb
 import { InventoryDashboardComponent } from './components/inventory/inventory-dashboard/inventory-dashboard.component';
 import { ProvideConfigComponent } from './components/provider/provide-config/provide-config.component';
 import { ProviderTypeUpdateComponent } from './components/provider/provider-type-update/provider-type-update.component';
+import { EmployeeViewAcessComponent } from './components/employee/employee-view-acess/employee-view-acess.component';
 
 
 export const routes: Routes = [
@@ -38,6 +39,7 @@ export const routes: Routes = [
   { path: 'inventories/config/category', component: InventoryArticleCategoryListComponent},
   { path: 'providers/config/provider', component: ProvideConfigComponent},
   { path: 'providers/config/provider/update', component: ProviderTypeUpdateComponent},
+  { path: 'employees/access/detail', component: EmployeeViewAcessComponent},
   { path: '', redirectTo: '/employees', pathMatch: 'full' }
 ];
 
