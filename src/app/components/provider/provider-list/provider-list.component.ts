@@ -38,7 +38,7 @@ export class ProviderListComponent implements OnInit {
 
   providerList: Supplier[] = [];
   filteredProviders: Supplier[] = [];
-  private originalProviders: Supplier[] = [];
+  originalProviders: Supplier[] = [];
   isLoading = false;
 
   searchFilterAll = new FormControl('');
@@ -82,55 +82,67 @@ export class ProviderListComponent implements OnInit {
         distinctUntilChanged()
       )
       .subscribe(searchTerm => {
-        this.getProviders(this.currentPage - 1, this.pageSize, searchTerm || '');
+        this.filterProviders(searchTerm || '');
       });
   }
+
+  // Nuevo método para filtrado local
+private filterProviders(searchTerm: string): void {
+  if (!searchTerm) {
+      this.providerList = [...this.originalProviders];
+      return;
+  }
+
+  const term = searchTerm.toLowerCase().trim();
+  this.providerList = this.originalProviders.filter(provider => 
+      // Buscar en todos los campos visibles
+      provider.name.toLowerCase().includes(term) ||
+      provider.cuil.toLowerCase().includes(term) ||
+      provider.service?.name.toLowerCase().includes(term) ||
+      provider.company?.name.toLowerCase().includes(term) ||
+      provider.contact.toLowerCase().includes(term) ||
+      provider.address.toLowerCase().includes(term)
+  );
+
+  // Actualizar métricas y gráficos con los datos filtrados
+  this.calculateMetrics();
+  this.createPieChart();
+  this.createBarChart();
+}
 
   ngOnInit(): void {
     this.getProviders();
   }
 
-  getProviders(page: number = 0, size: number = this.pageSize, searchTerm?: string): void {
-    this.isLoading = true;
-    
-    const filters = {
+// Modificar getProviders para guardar la lista original
+getProviders(page: number = 0, size: number = this.pageSize): void {
+  this.isLoading = true;
+  
+  const filters = {
       ...this.getFilters(),
       page,
       size
-    };
-  
-    if (searchTerm) {
-      filters.name = searchTerm;
-      filters.cuil = searchTerm;
-      filters['service.name'] = searchTerm;  // Cambiado
-      filters['company.name'] = searchTerm;  // Añadido
-      filters.contact = searchTerm;
-      filters.address = searchTerm;
-    }
-  
-    console.log('Filters being sent:', filters); // Para debug
-    
-    this.providerService.getProviders(filters).subscribe({
+  };
+
+  this.providerService.getProviders(filters).subscribe({
       next: (response) => {
-        this.providerList = response.content;
-        this.originalProviders = response.content;
-        this.filteredProviders = response.content;
-        this.totalItems = response.totalElements;
-        // Calculate total pages
-        this.totalPages = Math.ceil(this.totalItems / this.pageSize);
-        this.isLoading = false;
-  
-        this.calculateMetrics();
-        this.createPieChart();
-        this.createBarChart();
+          this.originalProviders = response.content;  // Guardar la lista original
+          this.providerList = [...this.originalProviders];  // Copia inicial
+          this.totalItems = response.totalElements;
+          this.totalPages = Math.ceil(this.totalItems / this.pageSize);
+          this.isLoading = false;
+          
+          this.calculateMetrics();
+          this.createPieChart();
+          this.createBarChart();
       },
       error: (error) => {
-        console.error('Error fetching providers:', error);
-        this.toastService.sendError('Error al cargar proveedores.');
-        this.isLoading = false;
+          console.error('Error fetching providers:', error);
+          this.toastService.sendError('Error al cargar proveedores.');
+          this.isLoading = false;
       }
-    });
-  }
+  });
+}
 
   private getFilters(): any {
     const formValues = this.filterForm.value;
