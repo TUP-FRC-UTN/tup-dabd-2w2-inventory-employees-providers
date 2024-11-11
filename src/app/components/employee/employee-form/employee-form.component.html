@@ -6,7 +6,7 @@
       <div class="flex-row d-flex align-items-center">
         <label for="firstName" class="col-form-label col-md-2">Nombre<label class="text-danger">*</label></label>
         <input type="text" class="form-control m-2" id="firstName" formControlName="firstName"
-          placeholder="Ingrese el nombre"
+          
           [ngClass]="{'is-invalid': employeeForm.get('firstName')?.invalid && employeeForm.get('firstName')?.touched,
                      'is-valid': employeeForm.get('firstName')?.valid && employeeForm.get('firstName')?.touched}">
       </div>
@@ -21,7 +21,7 @@
       <div class="flex-row d-flex align-items-center">
         <label for="lastName" class="col-form-label col-md-2">Apellido<label class="text-danger">*</label></label>
         <input type="text" class="form-control m-2" id="lastName" formControlName="lastName"
-          placeholder="Ingrese el apellido"
+         
           [ngClass]="{'is-invalid': employeeForm.get('lastName')?.invalid && employeeForm.get('lastName')?.touched,
                      'is-valid': employeeForm.get('lastName')?.valid && employeeForm.get('lastName')?.touched}">
       </div>
@@ -86,7 +86,7 @@
       <div class="flex-row d-flex align-items-center">
         <label for="docNumber" class="col-form-label col-md-2">Documento<label class="text-danger">*</label></label>
         <input type="text" class="form-control m-2" id="docNumber" formControlName="docNumber"
-          placeholder="Ingrese el número de documento" style="text-align: left;"
+           style="text-align: left;"
           [ngClass]="{'is-invalid': employeeForm.get('docNumber')?.invalid && employeeForm.get('docNumber')?.touched,
                      'is-valid': employeeForm.get('docNumber')?.valid && employeeForm.get('docNumber')?.touched}">
       </div>
@@ -104,7 +104,7 @@
         <div class="input-group m-2">
             <span class="input-group-text">$</span>
             <input type="number" class="form-control" id="salary" formControlName="salary"
-                placeholder="Ingrese el salario" style="text-align: right;"
+                 style="text-align: right;"
                 [ngClass]="{'is-invalid': (employeeForm.get('salary')?.touched && employeeForm.get('salary')?.invalid) || 
                                        (employeeForm.get('salary')?.touched && employeeForm.get('salary')?.value === 0),
                            'is-valid': employeeForm.get('salary')?.touched && employeeForm.get('salary')?.valid && employeeForm.get('salary')?.value !== 0}">
@@ -121,129 +121,131 @@
     
  
     <div class="mb-3"></div>
-    <hr>
+@if (!isEdit) {
+  <hr>
  
-    <!-- Dirección -->
-    <div class="col-12">
+  <!-- Dirección -->
+  <div class="col-12">
+    <div class="">
       <div class="">
-        <div class="">
-          <h5 class=" mb-0">Dirección</h5>
-        </div>
-        <div class="">
-          <div formGroupName="address" class="row">
-            <!-- Calle y Número -->
-            <div class="col-md-6">
-              <div class="flex-row d-flex align-items-center mb-3">
-                <label for="street_address" class="col-form-label col-md-2">Calle<label class="text-danger">*</label></label>
-                <input type="text" class="form-control m-2" id="street_address" formControlName="street_address"
-                  placeholder="Ingrese la calle"
-                  [ngClass]="{'is-invalid': employeeForm.get('address.street_address')?.invalid && employeeForm.get('address.street_address')?.touched,
-                             'is-valid': employeeForm.get('address.street_address')?.valid}">
-              </div>
-              <div>
-                @if (employeeForm.get('address.street_address')?.invalid && employeeForm.get('address.street_address')?.touched) {
-                  <small class="text-danger ms-2">La calle es requerida</small>
-                }
-              </div>
+        <h5 class=" mb-0">Dirección</h5>
+      </div>
+      <div class="">
+        <div formGroupName="address" class="row">
+          <!-- Calle y Número -->
+          <div class="col-md-6">
+            <div class="flex-row d-flex align-items-center mb-3">
+              <label for="street_address" class="col-form-label col-md-2">Calle<label class="text-danger">*</label></label>
+              <input type="text" class="form-control m-2" id="street_address" formControlName="street_address"
+                
+                [ngClass]="{'is-invalid': employeeForm.get('address.street_address')?.invalid && employeeForm.get('address.street_address')?.touched,
+                           'is-valid': employeeForm.get('address.street_address')?.valid}">
             </div>
- 
-            <div class="col-md-6">
-              <div class="flex-row d-flex align-items-center mb-3">
-                <label for="number" class="col-form-label col-md-2">Número<label class="text-danger">*</label></label>
-                <input type="number" class="form-control m-2" id="number" formControlName="number"
-                  placeholder="Ingrese el número" style="text-align: right;"
-                  [ngClass]="{'is-invalid': employeeForm.get('address.number')?.invalid && employeeForm.get('address.number')?.touched,
-                             'is-valid': employeeForm.get('address.number')?.valid && employeeForm.get('address.number')?.value !== 0}">
-              </div>
-              <div>
-                @if (employeeForm.get('address.number')?.invalid && employeeForm.get('address.number')?.touched) {
-                  <small class="text-danger ms-2">El número es requerido</small>
-                }
-              </div>
+            <div>
+              @if (employeeForm.get('address.street_address')?.invalid && employeeForm.get('address.street_address')?.touched) {
+                <small class="text-danger ms-2">La calle es requerida</small>
+              }
             </div>
- 
-            <!-- Piso y Departamento -->
-            <div class="col-md-6">
-              <div class="flex-row d-flex align-items-center mb-3">
-                <label for="floor" class="col-form-label col-md-2">Piso</label>
-                <input type="number" class="form-control m-2" id="floor" formControlName="floor"
-                  placeholder="Ingrese el piso" style="text-align: right;">
-              </div>
-            </div>
- 
-            <div class="col-md-6">
-              <div class="flex-row d-flex align-items-center mb-3">
-                <label for="apartment" class="col-form-label col-md-2">Departamento</label>
-                <input type="text" class="form-control m-2" id="apartment" formControlName="apartment"
-                  placeholder="Ingrese el departamento">
-              </div>
-            </div>
- 
-            <!-- País y Provincia -->
-            <div class="col-md-6">
-              <div class="flex-row d-flex align-items-center mb-3">
-                <label for="country" class="col-form-label col-md-2">País<label class="text-danger">*</label></label>
-                <select id="country" type="select" class="form-control m-2" id="country" formControlName="country"
-                  placeholder="Ingrese el país"
-                  [ngClass]="{'is-invalid': employeeForm.get('address.country')?.invalid && employeeForm.get('address.country')?.touched,
-                  'is-valid': employeeForm.get('address.country')?.valid}">
-                  <option *ngFor="let country of countryOptions" [value]="country.value">{{ country.display }}</option>
-                </select>
-              </div>
-              <div>
-                <small class="text-danger ms-2" *ngIf="employeeForm.get('address.country')?.invalid && employeeForm.get('address.country')?.touched">El país es requerido</small>
-              </div>
-            </div>
-            
-            <div class="col-md-6">
-              <div class="flex-row d-flex align-items-center mb-3">
-                <label for="province" class="col-form-label col-md-2">Provincia<label class="text-danger">*</label></label>
-                <select id="province" type="select" class="form-control m-2" formControlName="province"
-                  placeholder="Ingrese la provincia"
-                  [ngClass]="{'is-invalid': employeeForm.get('address.province')?.invalid && employeeForm.get('address.province')?.touched,
-                  'is-valid': employeeForm.get('address.province')?.valid}">
-                  <option *ngFor="let province of provinceOptions" [value]="province.value">{{ province.display }}</option>
-                </select>
-              </div>
-              <div>
-                <small class="text-danger ms-2" *ngIf="employeeForm.get('address.province')?.invalid && employeeForm.get('address.province')?.touched">La provincia es requerida</small>
-              </div>
-            </div>
- 
-            <!-- Ciudad y Código Postal -->
-            <div class="col-md-6">
-              <div class="flex-row d-flex align-items-center mb-3">
-                <label for="city" class="col-form-label col-md-2">Ciudad<label class="text-danger">*</label></label>
-                <input type="text" class="form-control m-2" id="city" formControlName="city"
-                  placeholder="Ingrese la ciudad"
-                  [ngClass]="{'is-invalid': employeeForm.get('address.city')?.invalid && employeeForm.get('address.city')?.touched,
-                             'is-valid': employeeForm.get('address.city')?.valid}">
-              </div>
-              <div>
-                @if (employeeForm.get('address.city')?.invalid && employeeForm.get('address.city')?.touched) {
-                  <small class="text-danger ms-2">La ciudad es requerida</small>
-                }
-              </div>
-            </div>
+          </div>
 
           <div class="col-md-6">
             <div class="flex-row d-flex align-items-center mb-3">
-              <label for="postal_code" class="col-form-label col-md-2">Código Postal<label class="text-danger">*</label></label>
-              <input type="number" class="form-control m-2" id="postal_code" formControlName="postal_code"
-                placeholder="Ingrese el código postal" style="text-align: right;"
-                [ngClass]="{'is-invalid': employeeForm.get('address.postal_code')?.invalid && employeeForm.get('address.postal_code')?.touched,
-                           'is-valid': employeeForm.get('address.postal_code')?.valid && employeeForm.get('address.postal_code')?.value !== 0}">
+              <label for="number" class="col-form-label col-md-2">Número<label class="text-danger">*</label></label>
+              <input type="number" class="form-control m-2" id="number" formControlName="number"
+                 style="text-align: right;"
+                [ngClass]="{'is-invalid': employeeForm.get('address.number')?.invalid && employeeForm.get('address.number')?.touched,
+                           'is-valid': employeeForm.get('address.number')?.valid && employeeForm.get('address.number')?.value !== 0}">
             </div>
             <div>
-              @if (employeeForm.get('address.postal_code')?.invalid && employeeForm.get('address.postal_code')?.touched) {
-                <small class="text-danger ms-2">El código postal es requerido</small>
+              @if (employeeForm.get('address.number')?.invalid && employeeForm.get('address.number')?.touched) {
+                <small class="text-danger ms-2">El número es requerido</small>
               }
             </div>
+          </div>
+
+          <!-- Piso y Departamento -->
+          <div class="col-md-6">
+            <div class="flex-row d-flex align-items-center mb-3">
+              <label for="floor" class="col-form-label col-md-2">Piso</label>
+              <input type="number" class="form-control m-2" id="floor" formControlName="floor"
+                 style="text-align: right;">
+            </div>
+          </div>
+
+          <div class="col-md-6">
+            <div class="flex-row d-flex align-items-center mb-3">
+              <label for="apartment" class="col-form-label col-md-2">Departamento</label>
+              <input type="text" class="form-control m-2" id="apartment" formControlName="apartment"
+                >
+            </div>
+          </div>
+
+          <!-- País y Provincia -->
+          <div class="col-md-6">
+            <div class="flex-row d-flex align-items-center mb-3">
+              <label for="country" class="col-form-label col-md-2">País<label class="text-danger">*</label></label>
+              <select id="country" type="select" class="form-control m-2" id="country" formControlName="country"
+                
+                [ngClass]="{'is-invalid': employeeForm.get('address.country')?.invalid && employeeForm.get('address.country')?.touched,
+                'is-valid': employeeForm.get('address.country')?.valid}">
+                <option *ngFor="let country of countryOptions" [value]="country.value">{{ country.display }}</option>
+              </select>
+            </div>
+            <div>
+              <small class="text-danger ms-2" *ngIf="employeeForm.get('address.country')?.invalid && employeeForm.get('address.country')?.touched">El país es requerido</small>
+            </div>
+          </div>
+          
+          <div class="col-md-6">
+            <div class="flex-row d-flex align-items-center mb-3">
+              <label for="province" class="col-form-label col-md-2">Provincia<label class="text-danger">*</label></label>
+              <select id="province" type="select" class="form-control m-2" formControlName="province"
+                
+                [ngClass]="{'is-invalid': employeeForm.get('address.province')?.invalid && employeeForm.get('address.province')?.touched,
+                'is-valid': employeeForm.get('address.province')?.valid}">
+                <option *ngFor="let province of provinceOptions" [value]="province.value">{{ province.display }}</option>
+              </select>
+            </div>
+            <div>
+              <small class="text-danger ms-2" *ngIf="employeeForm.get('address.province')?.invalid && employeeForm.get('address.province')?.touched">La provincia es requerida</small>
+            </div>
+          </div>
+
+          <!-- Ciudad y Código Postal -->
+          <div class="col-md-6">
+            <div class="flex-row d-flex align-items-center mb-3">
+              <label for="city" class="col-form-label col-md-2">Ciudad<label class="text-danger">*</label></label>
+              <input type="text" class="form-control m-2" id="city" formControlName="city"
+                
+                [ngClass]="{'is-invalid': employeeForm.get('address.city')?.invalid && employeeForm.get('address.city')?.touched,
+                           'is-valid': employeeForm.get('address.city')?.valid}">
+            </div>
+            <div>
+              @if (employeeForm.get('address.city')?.invalid && employeeForm.get('address.city')?.touched) {
+                <small class="text-danger ms-2">La ciudad es requerida</small>
+              }
+            </div>
+          </div>
+
+        <div class="col-md-6">
+          <div class="flex-row d-flex align-items-center mb-3">
+            <label for="postal_code" class="col-form-label col-md-2">Código Postal<label class="text-danger">*</label></label>
+            <input type="number" class="form-control m-2" id="postal_code" formControlName="postal_code"
+               style="text-align: right;"
+              [ngClass]="{'is-invalid': employeeForm.get('address.postal_code')?.invalid && employeeForm.get('address.postal_code')?.touched,
+                         'is-valid': employeeForm.get('address.postal_code')?.valid && employeeForm.get('address.postal_code')?.value !== 0}">
+          </div>
+          <div>
+            @if (employeeForm.get('address.postal_code')?.invalid && employeeForm.get('address.postal_code')?.touched) {
+              <small class="text-danger ms-2">El código postal es requerido</small>
+            }
           </div>
         </div>
       </div>
     </div>
   </div>
+</div>
+}
 
   <div class="mb-3"></div>
   <hr>

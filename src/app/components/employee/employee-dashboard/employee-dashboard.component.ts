@@ -3,12 +3,12 @@ import { FormBuilder, FormControl, FormGroup, ReactiveFormsModule } from '@angul
 import { EmployeesService } from '../../../services/employees.service';
 import { Employee } from '../../../models/employee.model';
 import { ToastService, MainContainerComponent } from 'ngx-dabd-grupo01';
-import { BaseChartDirective } from 'ng2-charts';
 import { ChartDataset, ChartOptions } from 'chart.js';
 import { CommonModule } from '@angular/common';
 import { MapperService } from '../../../services/MapperCamelToSnake/mapper.service';
 import { NgbModal } from '@ng-bootstrap/ng-bootstrap';
 import { EmployeeDashboardInfoComponent } from './employe-dashboard-info/employee-dashboard-info.component';
+import { BaseChartDirective } from 'ng2-charts';
 
 @Component({
   selector: 'app-employee-dashboard',
