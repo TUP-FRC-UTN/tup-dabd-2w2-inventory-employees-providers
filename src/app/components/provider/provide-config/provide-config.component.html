@@ -11,9 +11,10 @@
       placeholder="Buscar compañía..." 
       [formControl]="searchFilter"
     />
-    <button type="button" class="btn btn-outline-info" (click)="openModalFilter()">
+    <app-table-filters style="z-index: 1;" [filters]="filterConfig" (filterValueChange)="filterChange($event)"></app-table-filters> 
+     <!-- <button type="button" class="btn btn-outline-info" (click)="openModalFilter()">
       <i class="bi bi-funnel-fill"></i>
-    </button>
+    </button>  -->
   </div>
   
   <!-- Botones de acción -->
@@ -134,11 +135,19 @@
 
   <!-- Componente de Alta/Edición -->
   @if (showServiceTypeUpdate) {
-    <app-provider-type-update 
-      [company]="selectedCompany" 
-      (closeModal)="onServiceTypeUpdateClose()">
-    </app-provider-type-update>
+    <div class="modal-backdrop fade show"></div>
+    <div class="modal fade show d-block" tabindex="-1" role="dialog">
+      <div class="modal-dialog modal-dialog-centered" role="document">
+        <div class="modal-content">
+          <app-provider-type-update 
+            [company]="selectedCompany" 
+            (closeModal)="onServiceTypeUpdateClose()">
+          </app-provider-type-update>
+        </div>
+      </div>
+    </div>
   }
+  
 
   <ng-template #infoModal let-modal>
     <div class="modal-header fs-6 py-1">

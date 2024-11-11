@@ -318,9 +318,12 @@ export class EmployeeFormComponent implements OnInit {
       debounceTime(300), // para evitar múltiples llamadas al backend
       switchMap((documentNumber) => 
         this.employeeService.checkIfDocumentExists(documentNumber)
+        
       ),
       map((exists: boolean) => (exists ? { documentExists: true } : null))
+      
     );
+    
 }
 
 onCancel(){
@@ -370,7 +373,7 @@ onAccessSaved() {
       }
       this.employeeForm.get('contactsForm')?.reset();
     } else {
-      this.toastService.sendError("Contacto no valido.")
+      //this.toastService.sendError("Contacto no valido.")
     }
   }
 
