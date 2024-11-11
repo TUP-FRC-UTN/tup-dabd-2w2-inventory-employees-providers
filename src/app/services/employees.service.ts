@@ -112,7 +112,40 @@ export class EmployeesService {
   // }
   
 
-  getAllEmployeesPaged(filters: {
+
+  getAllEmployeesPaged(
+    page: number = 0,
+    size: number = 10,
+    filters?: {
+      firstName?: string;
+      lastName?: string;
+      type?: string;
+      docType?: string;
+      docNumber?: string;
+      state?: string;
+      date?: string;
+      salary?: string;
+    }
+  ): Observable<PaginatedResponse<Employee>> {
+    let params = new HttpParams()
+      .set('page', page.toString())
+      .set('size', size.toString());
+  
+    if (filters) {
+      if (filters.firstName) params = params.set('firstName', filters.firstName);
+      if (filters.lastName) params = params.set('lastName', filters.lastName);
+      if (filters.type) params = params.set('type', filters.type);
+      if (filters.docType) params = params.set('docType', filters.docType);
+      if (filters.docNumber) params = params.set('docNumber', filters.docNumber);
+      if (filters.state) params = params.set('state', filters.state);
+      if (filters.date) params = params.set('date', filters.date);
+      if (filters.salary) params = params.set('salary', filters.salary);
+    }
+  
+    return this.http.get<PaginatedResponse<Employee>>(`${this.apiUrl}/paged`, { params });
+  }
+
+  /*getAllEmployeesPaged(filters: {
     page?: number;
     size?: number;
     firstName?: string;
@@ -143,7 +176,7 @@ export class EmployeesService {
       })
     );
   }  
-}
+*/}
 
 interface PageResponse<T> {
   content: T[];

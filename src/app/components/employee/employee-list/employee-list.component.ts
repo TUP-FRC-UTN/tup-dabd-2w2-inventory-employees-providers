@@ -9,10 +9,11 @@ import * as XLSX from 'xlsx';
 import jsPDF from 'jspdf';
 import autoTable from 'jspdf-autotable';
 import { debounceTime, distinctUntilChanged } from 'rxjs';
-import { CommonModule } from '@angular/common';
+import { CommonModule, DatePipe } from '@angular/common';
 import { MapperService } from '../../../services/MapperCamelToSnake/mapper.service';
 import { Chart, ChartType } from 'chart.js';
 import { EmployeeListInfoComponent } from './employee-list-info/employee-list-info.component';
+import { TableFiltersComponent, Filter, FilterConfigBuilder } from 'ngx-dabd-grupo01';
 import { EmployeeViewAcessComponent } from '../employee-view-acess/employee-view-acess.component';
 
 @Component({
@@ -20,9 +21,9 @@ import { EmployeeViewAcessComponent } from '../employee-view-acess/employee-view
   standalone: true,
   imports: [
     CommonModule, ReactiveFormsModule, FormsModule, RouterModule,
-    MainContainerComponent, ConfirmAlertComponent,
-    EmployeeViewAcessComponent
-],
+    MainContainerComponent, ConfirmAlertComponent, DatePipe, TableFiltersComponent, EmployeeViewAcessComponent
+  ],
+  providers:[DatePipe],
   templateUrl: './employee-list.component.html',
   styleUrls: ['./employee-list.component.css'],
   schemas: [CUSTOM_ELEMENTS_SCHEMA]
@@ -44,14 +45,61 @@ export class EmployeeListComponent implements OnInit {
   employeeList: Employee[] = [];
   filteredEmployeeList: Employee[] = [];
   isLoading = false;
+  currentFilters! : Record<string,any>;
 
   // Forms and Filters
   filterForm!: FormGroup;
-  searchFilter = new FormControl('');
+  searchFilter:FormControl = new FormControl('');
   statusTypes = Object.values(StatusType);
   employeeTypes = Object.values(EmployeeType);
   documentTypes = Object.values(DocumentType);
 
+  filterConfig: Filter[] = new FilterConfigBuilder()
+    .textFilter(
+     'Nombre',
+     'firstName',
+     '' 
+    )
+    .textFilter(
+      'Apellido',
+      'lastName',
+      ''
+    )
+    .selectFilter(
+      'Tipo de Empleado',
+      'employeeType',
+      'Seleccione un Tipo',
+      [
+        { value: '', label: 'Todos' },
+        { value: 'ADMINISTRATIVO', label: 'Administrativo' },
+        { value: 'GUARDIA', label: 'Guardia' },
+        { value: 'CONTADOR', label: 'Contador'},
+        { value: 'MANTENIMIENTO', label: 'Mantenimiento'}
+      ]
+    )
+    .textFilter(
+      'Número de Documento',
+      'docNumber',
+      ''
+    )
+    .selectFilter(
+      'Estado',
+      'state',
+      'Seleccione un Estado',
+      [
+        { value: '', label: 'Todos' },
+        { value: 'IN_SERVICE', label: 'Activo' },
+        { value: 'DOWN', label: 'Inactivo' },
+      ]
+    )
+    .build();
+
+    filterChange($event: Record<string, any>) {
+      const filters = $event;
+      this.currentFilters = filters;
+      this.getEmployees();
+    }
+  
   // Pagination
   currentPage: number = 0; // Changed to 0-based for backend compatibility
   totalItems: number = 0;
@@ -82,19 +130,35 @@ export class EmployeeListComponent implements OnInit {
       state: ['']
     });
 
-    // Search filter with debounce
     this.searchFilter.valueChanges
       .pipe(debounceTime(300), distinctUntilChanged())
-      .subscribe(() => this.getEmployees());
+      .subscribe(() => this.searchEmployees());
   }
 
   ngOnInit(): void {
     this.getEmployees();
   }
 
+  searchEmployees(){
+    if (!this.searchFilter.value||this.searchFilter.value == null) {
+      this.getEmployees();
+   }
+
+   this.filteredEmployeeList= this.filteredEmployeeList.filter(emp =>
+     emp.firstName.toLowerCase().includes(this.searchFilter.value.toLowerCase() ?? '')
+     ||emp.lastName.toLowerCase().includes(this.searchFilter.value.toLowerCase() ?? '')
+     ||emp.docNumber.toLowerCase().includes(this.searchFilter.value.toLowerCase() ?? '')
+   );
+  }
+
   getEmployees(page: number = 0, size: number = this.pageSize, searchTerm?: string): void {
     this.isLoading = true;
-    const filters = {
+
+    const filters = this.currentFilters;
+
+    this.employeeService.getAllEmployeesPaged(this.currentPage,this.pageSize,filters).subscribe({
+
+    /*const filters = {
       page: this.currentPage,
       size: this.pageSize,
       firstName: this.filterForm.get('firstName')?.value || '',
@@ -109,7 +173,8 @@ export class EmployeeListComponent implements OnInit {
     };
     
 
-    this.employeeService.getAllEmployeesPaged(filters).subscribe({
+    this.employeeService.getAllEmployeesPaged(filters).subscribe({*/
+
       next: (response) => {
         response = this.mapperService.toCamelCase(response);
         
@@ -131,9 +196,6 @@ export class EmployeeListComponent implements OnInit {
         this.filteredEmployeeList = [...this.employeeList];
         this.totalItems = response.totalElements;
         this.totalPages = response.totalPages;
-        this.calculateMetrics();
-        this.createPieChart();
-        this.createBarChart();
         this.isLoading = false;
       },
       error: (error) => {
