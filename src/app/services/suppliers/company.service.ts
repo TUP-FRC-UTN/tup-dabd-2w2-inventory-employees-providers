@@ -24,8 +24,8 @@ export class CompanyService {
     return this.http.post<Company>(this.apiCompanyUrl, company);
   }
 
-  updateCompany(id: number, updatedCompany: Partial<Company>): Observable<Company> {
-    return this.http.put<Company>(`${this.apiCompanyUrl}/${id}`, updatedCompany);
+  updateCompany(updatedCompany: Company): Observable<Company> {
+    return this.http.put<Company>(this.apiCompanyUrl, updatedCompany);
   }
 
   deleteCompany(id: number): Observable<void> {
