@@ -6,6 +6,8 @@ import { Supplier } from '../../../models/supplier.model';
 import { ToastService, MainContainerComponent } from 'ngx-dabd-grupo01';
 import { debounceTime, distinctUntilChanged } from 'rxjs';
 import { Chart, ChartType, registerables } from 'chart.js';
+import { ProviderDashboardInfoComponent } from './provider-dashboard-info/provider-dashboard-info.component';
+import { NgbModal } from '@ng-bootstrap/ng-bootstrap';
 
 Chart.register(...registerables);
 
@@ -29,6 +31,10 @@ export class ProviderDashboardComponent implements OnInit {
   filterForm: FormGroup;
 
   showModalFilter: boolean = false;
+
+  serviceTypes: string[] = []; // Array para almacenar los tipos de servicio
+  private modalService = inject(NgbModal);
+
 
   activeCount: number = 0;
   inactiveCount: number = 0;
@@ -60,6 +66,7 @@ export class ProviderDashboardComponent implements OnInit {
 
   ngOnInit(): void {
     this.getProviders();
+    
   }
 
   getProviders(searchTerm?: string): void {
@@ -174,7 +181,15 @@ export class ProviderDashboardComponent implements OnInit {
       }
     });
   }
-
+  showInfo(): void {
+    this.modalService.open(ProviderDashboardInfoComponent, {
+      size: 'lg',
+      backdrop: 'static',
+      keyboard: false,
+      centered: true,
+      scrollable: true
+    });
+  }
   openModalFilter(): void {
     this.showModalFilter = true;
   }
