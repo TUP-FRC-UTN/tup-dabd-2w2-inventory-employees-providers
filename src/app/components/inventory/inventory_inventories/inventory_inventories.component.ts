@@ -1,5 +1,5 @@
-import { CommonModule } from '@angular/common';
-import { Component, inject, OnInit, TemplateRef, viewChild } from '@angular/core';
+import { CommonModule,DatePipe } from '@angular/common';
+import { Component, inject, OnInit, TemplateRef, viewChild, ViewChild } from '@angular/core';
 import { FormBuilder, FormControl, FormGroup, FormsModule, ReactiveFormsModule, Validators } from '@angular/forms';
 import { ArticleFormComponent } from '../inventory_articles/inventory_articles_form/inventory_articles_form.component';
 import { RouterModule } from '@angular/router';
@@ -8,8 +8,8 @@ import { InventoryTransactionTableComponent } from '../inventory_transaction/inv
 import { InventoryInventoriesUpdateComponent } from './inventory-inventories-update/inventory-inventories-update.component';
 import { MapperService } from '../../../services/MapperCamelToSnake/mapper.service';
 import { Inventory, StatusType, } from '../../../models/inventory.model';
-import { Article, MeasurementUnit, Status } from '../../../models/article.model';
-import { InventoryService } from '../../../services/inventory.service';
+import { Article, ArticleType, MeasurementUnit } from '../../../models/article.model';
+import { InventoryService, Page } from '../../../services/inventory.service';
 import Swal from 'sweetalert2';
 import jsPDF from 'jspdf';
 import 'jspdf-autotable';
@@ -17,26 +17,29 @@ import * as XLSX from 'xlsx';
 import autoTable from 'jspdf-autotable';
 import { MainContainerComponent, ToastService } from 'ngx-dabd-grupo01';
 import { NgbModal } from '@ng-bootstrap/ng-bootstrap';
+import { TableFiltersComponent, Filter, FilterConfigBuilder } from 'ngx-dabd-grupo01';
+import { debounceTime, distinctUntilChanged } from 'rxjs';
 
 
 @Component({
   selector: 'app-inventory',
   standalone: true,
-  imports: [
-    CommonModule,
-    ReactiveFormsModule,
-    RouterModule,
-    FormsModule,
-    ArticleFormComponent,
-    TransactionComponentForm,
-    InventoryTransactionTableComponent,
-    InventoryInventoriesUpdateComponent,
-    MainContainerComponent
-  ],
+  imports: [CommonModule,
+     ReactiveFormsModule,
+      ArticleFormComponent,
+       RouterModule,
+        TransactionComponentForm,
+         InventoryTransactionTableComponent,
+          InventoryInventoriesUpdateComponent,
+          FormsModule,
+          TableFiltersComponent,
+          MainContainerComponent
+        ],
+        providers:[DatePipe],
   templateUrl: './inventory_inventories.component.html',
   styleUrls: ['./inventory_inventories.component.css']
-
 })
+
 export class InventoryTableComponent implements OnInit {
 
   private mapperService = inject(MapperService);
@@ -44,7 +47,64 @@ export class InventoryTableComponent implements OnInit {
   private toastService = inject(ToastService);
   private modalService = inject(NgbModal);
 
-  searchInput = new FormControl('');
+  filterConfig: Filter[] = new FilterConfigBuilder()
+    .textFilter(
+     'Artículo',
+     'article',
+     '' 
+    )
+    .selectFilter(
+      'Estado',
+      'status',
+      'Seleccione un estado',
+      [
+        { value: '', label: 'Todos' },
+        { value: 'ACTIVE', label: 'Activo' },
+        { value: 'INACTIVE', label: 'Inactivo' },
+      ]
+    )
+    .selectFilter(
+      'Tipo de Artículo',
+      'articleType',
+      'Seleccione un tipo de articulo',
+      [
+        {value: 'REGISTRABLE' ,label:'Registrable'},
+        {value: 'NON_REGISTRABLE', label:'No Registrable'}
+      ]
+    )
+    .textFilter(
+      'Ubicación',
+      'location',
+      ''
+    )
+    .build();
+
+  currentFilters!: Record<string, any>;
+
+  filterChange($event: Record<string, any>) {
+    const filters = $event;
+    this.currentFilters = filters;
+
+    this.inventoryService.getInventoriesPagedFiltered(
+      this.currentPage,
+      this.itemsPerPage,
+      filters
+    ).subscribe({
+      next: (page: Page<Inventory>) => {
+        page = this.mapperService.toCamelCase(page);
+        this.inventories = this.mapperService.toCamelCase(page.content);
+        this.totalPages = page.totalPages;
+        this.totalElements = page.totalElements;
+        this.isLoading = false;
+      },
+      error: (error) => {
+        console.error('Error loading inventories:', error);
+        this.isLoading = false;
+      }
+    });    
+  }
+  
+  searchInput:FormControl = new FormControl('');
 
   readonly infoModal = viewChild.required<TemplateRef<any>>('infoModal');
 
@@ -58,6 +118,7 @@ export class InventoryTableComponent implements OnInit {
   showInventoryUpdate: boolean = false;
 
   inventoryForm: FormGroup;
+  articleTypes = ArticleType;
   inventories: Inventory[] = [];
   articles: Article[] = [];
   activeArticles: Article[] = []; // Solo los ítems activos
@@ -82,46 +143,61 @@ export class InventoryTableComponent implements OnInit {
     });
 
     this.filterForm = this.fb.group({
-      articleNameFilter: [''],
-      stockFilter: [''],
-      locationFilter: [''],
-      measure: [null]  // Agrega 'measure' si necesitas este filtro en particular.
+      article: [''],
+      description: [''],
+      status: [null],
+      articleType: [null],
+      articleCondition: [null],
+      location: ['']
     });
-
 
   }
 
   ngOnInit(): void {
-    this.getInventories();
+    this.loadInventories();
+    this.searchInput.valueChanges.subscribe(() => {
+      this.inventories = this.filterInventories();
+    });
   }
 
-  getInventories(): void {
-    this.isLoading = true;
-    this.searchInput.valueChanges.subscribe(data => {
-      if (data === null || data === '') {
-        this.getInventories();
-      }
-      this.inventories = this.inventories.filter(
-        x => x.article.name.toLowerCase().includes(data!.toLowerCase())
-      )
-    })
+  filterInventories(){
+    if (!this.searchInput.value|| this.searchInput.value == null) {
+      this.loadInventories();
+   }
 
-    this.inventoryService.getInventories().subscribe((inventories: Inventory[]) => {
+   return this.inventories.filter(inv =>
+     inv.article.name.toLowerCase().includes(this.searchInput.value.toLowerCase() ?? '')
+     || inv.location?.toLowerCase().includes(this.searchInput.value.toLowerCase() ?? '')
+     || inv.article.articleCategory.denomination.toLowerCase().includes(this.searchInput.value.toLowerCase() ?? '')
+     || inv.article.articleType.toLowerCase().includes(this.searchInput.value.toLowerCase() ?? '')
+   );
+  }
+  /*getInventories(): void {
+  this.isLoading = true;
+  this.searchInput.valueChanges.subscribe( data => {
+    if(data === null || data === ''){
+      this.loadInventories();
+    }
+    this.inventories = this.inventories.filter(
+      x => x.article.name.toLowerCase().includes(data!.toLowerCase())
+      || x.location?.toLowerCase().includes(data!.toLowerCase())
+    )
+  })
+
+  this.inventoryService.getInventories().subscribe((inventories: Inventory[]) => {
+    this.inventories = inventories.map( inventory => ({
+      ...this.mapperService.toCamelCase(inventory),
+    }));
+    this.inventories = inventories;
+    this.filteredInventories = inventories;
+    this.isLoading = false;
+    this.inventoryService.getInventories().subscribe((inventories: any[]) => {
+
       this.inventories = inventories.map(inventory => ({
         ...this.mapperService.toCamelCase(inventory),
       }));
-      this.inventories = inventories;
-      this.filteredInventories = inventories;
-      this.isLoading = false;
-      this.inventoryService.getInventories().subscribe((inventories: any[]) => {
-        this.inventories = inventories.map(inventory => ({
-          ...this.mapperService.toCamelCase(inventory), // Convertir todo el inventario a camelCase
-          article: this.mapperService.toCamelCase(inventory.article) // Convertir el artículo a camelCase
-        }));
-      });
-      console.log(this.inventories)
-    })
-  };
+  console.log(this.inventories)
+  })};*/
 
   // Método para convertir la unidad de medida a una representación amigable
   getDisplayUnit(unit: MeasurementUnit): string {
@@ -150,27 +226,15 @@ export class InventoryTableComponent implements OnInit {
     }).then(result => {
       if (result.isConfirmed) {
         this.inventoryService.deleteInventory(id).subscribe(() => {
-          this.getInventories();
+          this.loadInventories();
           this.toastService.sendSuccess('El inventario ha sido eliminado con éxito.');
         });
       }
     });
   }
-  clearFilters(): void {
-    this.filterForm.reset();  // Reinicia todos los filtros
-    this.applyFilters();      // Aplica los filtros después de limpiar para actualizar la lista
-  }
-  applyFilters(): void {
-    const filters = this.filterForm.value;
 
-    this.inventoryService.getFilteredInventories(filters).subscribe({
-      next: (filteredInventories) => {
-        this.inventories = filteredInventories;  // Actualiza la lista con los inventarios filtrados
-      },
-      error: () => {
-        alert('Hubo un problema al aplicar los filtros');
-      }
-    });
+  applyFilters(): void {
+    this.loadInventories();
   }
 
   resetForm(): void {
@@ -196,7 +260,8 @@ export class InventoryTableComponent implements OnInit {
     console.log('onRegisterTransactionClose');
     debugger
     this.showRegisterTransactionForm = this.showRegisterTransactionForm;
-    this.getInventories();
+    this.selectedInventory = null;
+    this.loadInventories();
   }
   onTransactionsClose() {
     this.showTransactions = this.showTransactions;
@@ -206,7 +271,7 @@ export class InventoryTableComponent implements OnInit {
     debugger
     this.showInventoryUpdate = false;
     this.selectedInventory = null;
-    this.getInventories();
+    this.loadInventories();
   }
 
   onNewArticle() {
@@ -243,28 +308,10 @@ export class InventoryTableComponent implements OnInit {
   selectedInventory: Inventory | null = null;
   showModalFilter: boolean = false;
 
-  loadInventories(): void {
-    this.inventoryService.getInventoriesPageable(this.currentPage, this.itemsPerPage)
-      .subscribe({
-        next: (page) => {
-          console.log(page)
-          page = this.mapperService.toCamelCase(page);
-          console.log(page);
-          this.inventories = this.mapperService.toCamelCase(page.content)
-          this.totalPages = page.totalPages;
-          this.totalElements = page.totalElements;
-          this.currentPage = page.number;
-        },
-        error: (error) => {
-          console.error('Error loading inventories:', error);
-          // Handle error appropriately
-        }
-      });
-  }
-  filterActiveInventories(): void {
-    this.currentFilter = 'active';
-    this.inventories = this.originalInventories.filter(inventory => inventory.status === StatusType.ACTIVE);
-  }
+filterActiveInventories(): void {
+  this.currentFilter = 'active';
+  this.inventories = this.originalInventories.filter(inventory => inventory.status === StatusType.ACTIVE);
+}
 
   filterInactiveInventories(): void {
     this.currentFilter = 'inactive';
@@ -296,6 +343,7 @@ export class InventoryTableComponent implements OnInit {
     this.currentPage = 0; // Reset to first page
     this.loadInventories();
   }
+
   exportToPDF(): void {
     const doc = new jsPDF({
       orientation: 'portrait',
@@ -322,8 +370,7 @@ export class InventoryTableComponent implements OnInit {
       ];
       tableRows.push(inventoryData);
     });
-
-    autoTable(doc, {
+      autoTable(doc, {
       head: [tableColumn],
       body: tableRows,
       startY: 25,
@@ -387,5 +434,40 @@ export class InventoryTableComponent implements OnInit {
       // if (valueA > valueB) return this.sortDirection === 'asc' ? 1 : -1;
       return 0;
     });
+  }
+
+  loadInventories(): void {
+    this.isLoading = true;
+    const filters = this.currentFilters;
+    
+    this.inventoryService.getInventoriesPagedFiltered(
+      this.currentPage,
+      this.itemsPerPage,
+      filters
+    ).subscribe({
+      next: (page: Page<Inventory>) => {
+        page = this.mapperService.toCamelCase(page);
+        this.inventories = this.mapperService.toCamelCase(page.content);
+        this.totalPages = page.totalPages;
+        this.totalElements = page.totalElements;
+        this.isLoading = false;
+      },
+      error: (error) => {
+        console.error('Error loading inventories:', error);
+        this.isLoading = false;
+      }
+    });
+  }
+
+  onPageChange(page: number): void {
+    this.currentPage = page;
+    this.loadInventories();
+  }
+
+
+  clearFilters(): void {
+    this.filterForm.reset();
+    this.currentPage = 0;
+    this.loadInventories();
   }
 }
