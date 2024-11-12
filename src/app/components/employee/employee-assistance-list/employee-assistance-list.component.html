@@ -1,0 +1,272 @@
+<app-main-container title="Lista de Asistencia" (infoButtonClick)="showInfo()">
+
+    <!-- Header con búsqueda, filtros y botones de acción -->
+    <div class="d-flex justify-content-between align-items-center mb-3">
+      <div class="input-group w-25">
+        <span class="input-group-text"><i class="bi bi-search"></i></span>
+        <input type="text" class="form-control" placeholder="Buscar empleado..." [formControl]="searchFilter" />
+        <app-table-filters style="z-index: 1;" [filters]="filterConfig" (filterValueChange)="filterChange($event)"></app-table-filters>
+      </div>
+      <div class="d-flex align-items-center">
+        <button type="button" class="btn btn-outline-primary me-2" [routerLink]="['/employees/form']">
+          <i class="bi bi-plus"></i>
+        </button>
+        <button type="button" class="btn btn-success me-2" (click)="exportToExcel()">
+          <i class="bi bi-file-earmark-excel"></i>
+        </button>
+        <button type="button" class="btn btn-danger" (click)="exportToPDF()">
+          <i class="bi bi-file-earmark-pdf"></i>
+        </button>
+      </div>
+    </div>
+  
+    <!-- Tabla de empleados -->
+    <div class="table-container mt-3">
+      <table class="table table-striped">
+        <thead class="bg-light">
+          <tr>
+            <th>
+              Empleado
+            </th>
+            <th>
+              Rol
+            </th>
+            <th>
+              Documento
+            </th>
+            <th>
+              Fecha Contratación
+            </th>
+            <th>
+              Estado
+            </th>
+            <th class="text-center">Acciones</th>
+          </tr>
+        </thead>
+  
+        <tbody>
+          <tr *ngFor="let employee of filteredEmployeeList; let i = index">
+            <td>{{ employee.lastName }}, {{ employee.firstName }}</td>
+            <td>{{ employee.employeeType }}</td>
+            <td>{{ employee.docNumber }}</td>
+            <td>{{ employee.hiringDate | date:'dd/MM/yyyy' }}</td>
+            <td>
+              <p class="mb-0">
+                <i *ngIf="employee.state.toString() == 'IN_SERVICE'" class="bi bi-check2-circle text-success"
+                  style="font-size: 1.5rem;"></i>
+                <i *ngIf="employee.state.toString() != 'IN_SERVICE'" class="bi bi-x-circle text-danger"
+                  style="font-size: 1.5rem;"></i>
+              </p>
+            </td>
+            <td>
+              <div class="d-flex justify-content-center gap-2">
+                <div class="btn-group" role="group">
+                  <!-- Botón principal que despliega el menú -->
+                  <button type="button" class="btn btn-sm btn-secondary dropdown-toggle" data-bs-toggle="dropdown"
+                    aria-expanded="false">
+                    <i class="bi bi-three-dots-vertical"></i>
+                  </button>
+                  <ul class="dropdown-menu">
+                    <li>
+                      <a class="dropdown-item" *ngIf="employee.state != 'DOWN'" (click)="editEmployee(employee)"
+                        title="Editar">
+                        Editar
+                      </a>
+                    </li>
+                    <li>
+                      <a class="dropdown-item" (click)="showDetailModal(detailModal, employee.id)" title="Ver"
+                        aria-disabled="true">
+                        Ver detalles
+                      </a>
+                    </li>
+                    <li>
+                      <a class="dropdown-item" (click)="showEmployeeAccess(employee.id)" title="Ver accessos">
+                        Ver accesos
+                      </a>
+                    </li>
+                    <li>
+                      <a class="dropdown-item text-danger" *ngIf="employee.state != 'DOWN'"
+                        (click)="deleteEmployee(employee.id!)" title="Eliminar">
+                        Eliminar
+                      </a>
+                    </li>
+                  </ul>
+                </div>
+              </div>
+            </td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  
+    <!-- Paginación -->
+    <div class="d-flex justify-content-between align-items-center p-3 border-top">
+      <!-- Left side - Items per page dropdown -->
+      <div class="d-flex align-items-center">
+        <select (change)="onItemsPerPageChange()" class="form-select form-select-sm" style="width: auto;"
+          [(ngModel)]="pageSize">
+          <option value="5">5 Elementos</option>
+          <option value="10">10 Elementos</option>
+          <option value="20">20 Elementos</option>
+          <option value="50">50 Elementos</option>
+        </select>
+      </div>
+  
+      <!-- Navigation buttons -->
+      <div class="ms-3">
+        <button class="btn btn-outline-secondary btn-sm me-1" [disabled]="currentPage === 0" (click)="goToPreviousPage()">
+          <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-chevron-left"
+            viewBox="0 0 16 16">
+            <path fill-rule="evenodd"
+              d="M11.354 1.646a.5.5 0 0 1 0 .708L5.707 8l5.647 5.646a.5.5 0 0 1-.708.708l-6-6a.5.5 0 0 1 0-.708l6-6a.5.5 0 0 1 .708 0z" />
+          </svg>
+        </button>
+        <button class="btn btn-outline-secondary btn-sm" [disabled]="currentPage === totalPages -1"
+          (click)="goToNextPage()">
+          <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-chevron-right"
+            viewBox="0 0 16 16">
+            <path fill-rule="evenodd"
+              d="M4.646 1.646a.5.5 0 0 1 .708 0l6 6a.5.5 0 0 1 0 .708l-6 6a.5.5 0 0 1-.708-.708L10.293 8 4.646 2.354a.5.5 0 0 1 0-.708z" />
+          </svg>
+        </button>
+      </div>
+    </div>
+  
+    <!-- FILTRO MODAL -->
+    <div *ngIf="showModalFilters" class="modal fade show" tabindex="-1" role="dialog" style="display: block;">
+      <div class="modal-dialog modal-lg" role="document">
+        <div class="modal-content">
+          <div class="modal-header">
+            <h5 class="modal-title">Filtrar Empleados</h5>
+            <button type="button" class="btn-close" aria-label="Close" (click)="closeModalFilters()"></button>
+          </div>
+          <div class="modal-body">
+            <form [formGroup]="filterForm">
+              <div class="row">
+                <div class="col-md-4">
+                  <label>Nombre</label>
+                  <input type="text" class="form-control" placeholder="Nombre" formControlName="firstName">
+                </div>
+                <div class="col-md-4">
+                  <label>Apellido</label>
+                  <input type="text" class="form-control" placeholder="Apellido" formControlName="lastName">
+                </div>
+                <div class="col-md-4">
+                  <label>Tipo de Empleado</label>
+                  <select class="form-select" formControlName="employeeType">
+                    <option value="">Seleccionar</option>
+                    <!-- Llenado de opciones dinámicas -->
+                    <option *ngFor="let type of employeeTypes" [value]="type">{{ type }}</option>
+                  </select>
+                </div>
+              </div>
+              <div class="row mt-3">
+                <div class="col-md-4">
+                  <label>Número de Documento</label>
+                  <input type="text" class="form-control" placeholder="Número de Documento" formControlName="docNumber">
+                </div>
+                <div class="col-md-4">
+                  <label>Estado</label>
+                  <select class="form-select" formControlName="state">
+                    <option value="">Seleccionar</option>
+                    <!-- Llenado de opciones dinámicas -->
+                    <option *ngFor="let status of statusTypes" [value]="status">{{ status }}</option>
+                  </select>
+                </div>
+              </div>
+            </form>
+          </div>
+          <div class="modal-footer">
+            <button type="button" class="btn btn-outline-danger" (click)="clearFilters()">
+              <i class="bi bi-trash"></i>
+            </button>
+            <button type="button" class="btn btn-primary" (click)="applyFilters()">Aplicar Filtros</button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </app-main-container>
+  
+  <ng-template #detailModal let-modal>
+    <div class="modal-header">
+      <h4 class="modal-title" id="modal-basic-title">Detalles del Empleado</h4>
+      <button type="button" class="btn-close" aria-label="Close" (click)="modal.dismiss()"></button>
+    </div>
+    <div class="modal-body">
+      <div class="container" *ngIf="selectedEmployee">
+        <div class="row mb-3">
+          <!-- Nombre Completo -->
+          <div class="col-md-6">
+            <div class="card">
+              <div class="card-body">
+                <h6 class="card-subtitle mb-1 text-muted">Nombre Completo</h6>
+                <p class="card-text">{{selectedEmployee.lastName}}, {{selectedEmployee.firstName}}</p>
+              </div>
+            </div>
+          </div>
+          <!-- Documento -->
+          <div class="col-md-6">
+            <div class="card">
+              <div class="card-body">
+                <h6 class="card-subtitle mb-1 text-muted">Documento</h6>
+                <p class="card-text">{{selectedEmployee.documentType}}: {{selectedEmployee.docNumber}}</p>
+              </div>
+            </div>
+          </div>
+        </div>
+  
+        <div class="row mb-3">
+          <!-- Tipo de Empleado -->
+          <div class="col-md-6">
+            <div class="card">
+              <div class="card-body">
+                <h6 class="card-subtitle mb-1 text-muted">Rol del Empleado</h6>
+                <p class="card-text">{{selectedEmployee.employeeType}}</p>
+              </div>
+            </div>
+          </div>
+          <!-- Estado -->
+          <div class="col-md-6">
+            <div class="card">
+              <div class="card-body d-flex align-items-center">
+                <h6 class="card-subtitle mb-1 text-muted me-2">Estado</h6>
+                <i *ngIf="selectedEmployee.state.toString() == 'IN_SERVICE'" class="bi bi-check2-circle text-success"
+                  style="font-size: 1.5rem;"></i>
+                <i *ngIf="selectedEmployee.state.toString() != 'IN_SERVICE'" class="bi bi-x-circle text-danger"
+                  style="font-size: 1.5rem;"></i>
+              </div>
+            </div>
+          </div>
+        </div>
+  
+        <div class="row mb-3">
+          <!-- Salario -->
+          <div class="col-md-6">
+            <div class="card">
+              <div class="card-body">
+                <h6 class="card-subtitle mb-1 text-muted">Salario</h6>
+                <p class="card-text">${{selectedEmployee.salary}}</p>
+              </div>
+            </div>
+          </div>
+          <!-- Contacto -->
+          <div class="col-md-6">
+            <div class="card">
+              <div class="card-body">
+                <h6 class="card-subtitle mb-1 text-muted">Contacto</h6>
+                @if (selectedEmployee.contact != null) {
+                <p class="card-text">{{selectedEmployee.contact.contactType}}: {{selectedEmployee.contact.contactValue}}
+                </p>
+                } @else {
+                <p class="card-text">Sin Contacto</p>
+                }
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button type="button" class="btn btn-secondary" (click)="modal.close()">Cerrar</button>
+    </div>
+  </ng-template>  
