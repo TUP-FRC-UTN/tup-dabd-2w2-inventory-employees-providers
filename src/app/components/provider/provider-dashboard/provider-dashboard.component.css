@@ -1,0 +1,9 @@
+.modal {
+    background-color: rgba(0, 0, 0, 0.5);
+  }
+  
+  .chart-container {
+    position: relative;
+    height: 300px;
+    width: 100%;
+  }
