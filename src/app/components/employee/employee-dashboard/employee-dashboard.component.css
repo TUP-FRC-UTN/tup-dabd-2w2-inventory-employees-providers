@@ -11,3 +11,44 @@
   .icon-circle i {
     font-size: 1.25rem;
   }
+  :host {
+    display: block;
+    width: 100%;
+  }
+  
+  .card {
+    height: 100%;
+    
+    .card-body.fixed-height {
+      height: 400px;
+      display: flex;
+      flex-direction: column;
+    }
+  }
+  
+  .chart-wrapper {
+    position: relative;
+    flex: 1;
+    min-height: 0; 
+    height: 300px; 
+  }
+  
+  .chart-info {
+    margin-top: auto;
+    padding-top: 1rem;
+  }
+  
+  canvas {
+    width: 100% !important;
+    height: 100% !important;
+  }
+  
+  
+  .row {
+    margin-right: 0;
+    margin-left: 0;
+  }
+  
+  .container {
+    max-width: 1400px;
+  }

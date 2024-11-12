@@ -1,9 +1,9 @@
 <app-main-container title="Dashboard de Empleados" (infoButtonClick)="showInfo()">
-  <!-- KPIs de Empleados -->
+  <!-- Primera fila de KPIs -->
   <div class="row mb-4">
     <!-- Empleados Contratados Último Mes -->
     <div class="col-md-3 mb-3">
-      <div class="card">
+      <div class="card shadow-sm">
         <div class="card-body">
           <div class="d-flex align-items-center mb-2">
             <div class="icon-circle bg-primary text-white me-3">
@@ -11,69 +11,93 @@
             </div>
             <h6 class="card-subtitle text-muted mb-0">Empleados Contratados Último Mes</h6>
           </div>
-          <h2 class="card-title mb-0">{{ employeesHiredLastMonth }}</h2>
+          <h3 class="card-title mb-0">{{ employeesHiredLastMonth }}</h3>
           <small class="text-muted">Usuarios registrados</small>
         </div>
       </div>
     </div>
 
-    <!-- Usuarios Activos -->
+    <!-- Empleados Activos -->
     <div class="col-md-3 mb-3">
-      <div class="card">
+      <div class="card shadow-sm">
         <div class="card-body">
           <div class="d-flex align-items-center mb-2">
-            <div class="icon-circle bg-warning text-white me-3">
+            <div class="icon-circle bg-success text-white me-3">
               <i class="bi bi-check-circle"></i>
             </div>
             <h6 class="card-subtitle text-muted mb-0">Empleados Activos</h6>
           </div>
-          <h2 class="card-title mb-0">{{ inServiceCount }}</h2>
+          <h3 class="card-title mb-0">{{ inServiceCount }}</h3>
           <small class="text-muted">Actualmente activos</small>
         </div>
       </div>
     </div>
 
-    <!-- Empleados Inactivos -->
+    <!-- Tasa de Retención -->
     <div class="col-md-3 mb-3">
-      <div class="card">
+      <div class="card shadow-sm">
         <div class="card-body">
           <div class="d-flex align-items-center mb-2">
-            <div class="icon-circle bg-danger text-white me-3">
-              <i class="bi bi-x-circle"></i>
+            <div class="icon-circle bg-info text-white me-3">
+              <i class="bi bi-graph-up"></i>
             </div>
-            <h6 class="card-subtitle text-muted mb-0">Empleados Inactivos</h6>
+            <h6 class="card-subtitle text-muted mb-0">Tasa de Retención</h6>
           </div>
-          <h2 class="card-title mb-0">{{ inactiveCount }}</h2>
-          <small class="text-muted">Actualmente inactivos</small>
+          <h3 class="card-title mb-0">{{ formatNumber(retentionRate) }}%</h3>
+          <small class="text-muted">Empleados activos</small>
+        </div>
+      </div>
+    </div>
+
+    <!-- Antigüedad Promedio -->
+    <div class="col-md-3 mb-3">
+      <div class="card shadow-sm">
+        <div class="card-body">
+          <div class="d-flex align-items-center mb-2">
+            <div class="icon-circle bg-warning text-white me-3">
+              <i class="bi bi-calendar-check"></i>
+            </div>
+            <h6 class="card-subtitle text-muted mb-0">Antigüedad Promedio</h6>
+          </div>
+          <h3 class="card-title mb-0">{{ formatNumber(avgTenure) }}</h3>
+          <small class="text-muted">Años</small>
         </div>
       </div>
     </div>
   </div>
 
-  <!-- Gráficos de Empleados -->
-  <!-- <div class="chart-section mb-4 mt-3 p-3 border rounded">
-    <div class="charts d-flex justify-content-between mt-4">
-      <div class="chart">
-        <h6>Estado de Empleados (Activos vs. Inactivos)</h6>
-        <canvas baseChart height="220px" [type]="'pie'" 
-          [datasets]="pieChartEmployeeStatusDatasets"
-          [labels]="pieChartEmployeeStatusLabels" 
-          [options]="pieChartOptions"></canvas>
+  <!-- Segunda fila de KPIs -->
+  <div class="row mb-4">
+    <!-- Nómina Total -->
+    <div class="col-md-6 mb-3">
+      <div class="card shadow-sm">
+        <div class="card-body">
+          <div class="d-flex align-items-center mb-2">
+            <div class="icon-circle bg-purple text-white me-3">
+              <i class="bi bi-cash"></i>
+            </div>
+            <h6 class="card-subtitle text-muted mb-0">Nómina Total Mensual</h6>
+          </div>
+          <h3 class="card-title mb-0">$ {{ formatNumber(totalPayroll) }}</h3>
+          <small class="text-muted">Salario promedio: $ {{ formatNumber(averageSalary) }}</small>
+        </div>
       </div>
     </div>
-  </div> -->
+  </div>
 
-  <div class="container mt-5">
-    <h3 class="text-center text-secondary">Métricas de Empleados</h3>
-    <div class="row gy-4">
-  
-      <!-- Gráfico de torta y métricas -->
-      <div class="col-md-4">
+  <!-- Gráficos -->
+  <div class="container mt-4">
+    <h3 class="text-center text-secondary mb-4">Métricas de Empleados</h3>
+    <div class="row g-4">
+      <!-- Estado de Empleados (Pie) -->
+      <div class="col-md-6">
         <div class="card border-0 shadow-lg rounded-4">
-          <div class="card-body">
+          <div class="card-body fixed-height">
             <h5 class="card-title text-secondary mb-3">Estado de Empleados</h5>
-            <canvas #pieChart style="height: 200px;"></canvas>
-            <div class="mt-3">
+            <div class="chart-wrapper">
+              <canvas #pieChart></canvas>
+            </div>
+            <div class="mt-3 chart-info">
               <p><strong>Total Empleados:</strong> {{ employeeList.length }}</p>
               <p><strong>Empleados Activos:</strong> {{ inServiceCount }}</p>
               <p><strong>Empleados Inactivos:</strong> {{ inactiveCount }}</p>
@@ -81,18 +105,42 @@
           </div>
         </div>
       </div>
-  
-      <!-- Gráfico de barras para Proveedores por Tipo de Servicio -->
-      <div class="col-md-8">
+
+      <!-- Empleados por Tipo (Bar) -->
+      <div class="col-md-6">
         <div class="card border-0 shadow-lg rounded-4">
-          <div class="card-body">
+          <div class="card-body fixed-height">
             <h5 class="card-title text-secondary mb-3">Empleados por Rol</h5>
-            <canvas id="barChart"></canvas>
+            <div class="chart-wrapper">
+              <canvas #barChart></canvas>
+            </div>
           </div>
         </div>
       </div>
-      
 
+      <!-- Distribución de Antigüedad (Line) -->
+      <div class="col-md-6">
+        <div class="card border-0 shadow-lg rounded-4">
+          <div class="card-body fixed-height">
+            <h5 class="card-title text-secondary mb-3">Distribución de Antigüedad</h5>
+            <div class="chart-wrapper">
+              <canvas #lineChart></canvas>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Evolución de Nómina (Bar) -->
+      <div class="col-md-6">
+        <div class="card border-0 shadow-lg rounded-4">
+          <div class="card-body fixed-height">
+            <h5 class="card-title text-secondary mb-3">Evolución de Nómina Mensual</h5>
+            <div class="chart-wrapper">
+              <canvas #salaryChart></canvas>
+            </div>
+          </div>
+        </div>
+      </div>
     </div>
   </div>
 </app-main-container>
