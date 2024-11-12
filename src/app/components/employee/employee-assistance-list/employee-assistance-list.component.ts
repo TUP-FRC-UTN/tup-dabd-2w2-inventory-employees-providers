@@ -1,7 +1,7 @@
 import { CommonModule, DatePipe } from '@angular/common';
 import { Component, inject, TemplateRef, ViewChild } from '@angular/core';
-import { FormControl, ReactiveFormsModule } from '@angular/forms';
-import { Filter, FilterConfigBuilder, ToastService, TableFiltersComponent } from 'ngx-dabd-grupo01';
+import { FormBuilder, FormControl, FormGroup, ReactiveFormsModule } from '@angular/forms';
+import { Filter, FilterConfigBuilder, ToastService, TableFiltersComponent, MainContainerComponent } from 'ngx-dabd-grupo01';
 import { EmployeesService } from '../../../services/employees.service';
 import { ActivatedRoute, Router } from '@angular/router';
 import { MapperService } from '../../../services/MapperCamelToSnake/mapper.service';
@@ -17,7 +17,7 @@ import { EmployeeAssistanceListInfoComponent } from './employee-assistance-list-
 @Component({
   selector: 'app-employee-assistance-list',
   standalone: true,
-  imports: [TableFiltersComponent, CommonModule, ReactiveFormsModule],
+  imports: [TableFiltersComponent, CommonModule, ReactiveFormsModule,MainContainerComponent],
   providers: [DatePipe],
   templateUrl: './employee-assistance-list.component.html',
   styleUrl: './employee-assistance-list.component.css'
@@ -26,6 +26,8 @@ export class EmployeeAssistanceListComponent {
   //Info
   @ViewChild('infoModal') infoModal!: TemplateRef<any>;
 
+
+
   // Lists
   employeeAssistances:EmployeeAccess[]=[];
   isLoading = false;
@@ -33,6 +35,8 @@ export class EmployeeAssistanceListComponent {
 
   // Forms and Filters
   searchFilter:FormControl = new FormControl('');
+  filterForm: FormGroup;
+  paginationForm: FormGroup;
   filterConfig: Filter[] = new FilterConfigBuilder()
     .textFilter(
      'Nombre',
@@ -63,6 +67,16 @@ export class EmployeeAssistanceListComponent {
     )
     .build();
 
+    constructor(private fb: FormBuilder) {
+      this.filterForm = this.fb.group({
+        searchFilter: this.searchFilter,
+      });
+      this.paginationForm = this.fb.group({
+        page: [0],
+        size: [this.pageSize],
+      });
+    }
+ 
     filterChange($event: Record<string, any>) {
       const filters = $event;
       this.currentFilters = filters;

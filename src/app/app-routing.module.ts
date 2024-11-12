@@ -16,6 +16,7 @@ import { ProviderTypeUpdateComponent } from './components/provider/provider-type
 import { ProviderServiceComponent } from './components/provider/provider-service/provider-service.component';
 import { ProviderServiceUpdateComponent } from './components/provider/provider-service-update/provider-service-update.component';
 import { EmployeeViewAcessComponent } from './components/employee/employee-view-acess/employee-view-acess.component';
+import { EmployeeAssistanceListComponent } from './components/employee/employee-assistance-list/employee-assistance-list.component';
 
 
 
@@ -39,6 +40,7 @@ export const routes: Routes = [
   { path: 'providers/config/service', component: ProviderServiceComponent},
   { path: 'providers/config/service/update', component: ProviderServiceUpdateComponent},
   { path: 'employees/access/detail', component: EmployeeViewAcessComponent},
+  { path: 'employees/assistant', component: EmployeeAssistanceListComponent},
   { path: '', redirectTo: '/employees', pathMatch: 'full' }
 ];
 
