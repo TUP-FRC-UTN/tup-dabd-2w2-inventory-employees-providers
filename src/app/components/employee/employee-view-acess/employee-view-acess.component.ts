@@ -24,7 +24,6 @@ export class EmployeeViewAcessComponent {
   private employeesService = inject(EmployeesService);
   private cdr = inject(ChangeDetectorRef);
 
-  // Definir el tipo para el orden de los días
   private readonly dayOrderMap: { [key: string]: number } = {
     'Lunes': 1,
     'Martes': 2,
@@ -37,6 +36,11 @@ export class EmployeeViewAcessComponent {
 
   showEmployeeSchedule(employeeId: number): void {
     console.log('showEmployeeSchedule called with ID:', employeeId);
+    if (!employeeId) {
+      console.error('[EmployeeViewAccess] No se proporcionó ID de empleado válido');
+      return;
+    }
+
     this.loading = true;
     this.error = null;
     this.selectedSchedules = [];
@@ -49,25 +53,35 @@ export class EmployeeViewAcessComponent {
       })
     ).subscribe({
       next: (response) => {
-        // Convertir la respuesta a un array si no lo es
         const schedules = Array.isArray(response) ? response : [response];
-        console.log('Received schedules:', schedules);
-        console.log('schedules.length', schedules.length);
-        if (schedules && schedules.length > 0) {
-          this.selectedSchedules = schedules;
-          this.currentSchedule = this.selectedSchedules[0];
-          console.log('Current schedule:', this.currentSchedule);
-          console.log('Selected schedules:', this.selectedSchedules);
-
-          setTimeout(() => this.openModal(), 0);
-        } else {
+        console.log('[EmployeeViewAccess] Horarios recibidos:', schedules);
+        
+        if (!schedules) {
+          console.warn('[EmployeeViewAccess] La respuesta de horarios es nula o indefinida');
           this.error = 'No se encontraron horarios para este empleado';
           this.openModal();
+          return;
         }
+
+        if (schedules.length === 0) {
+          console.warn('[EmployeeViewAccess] No se encontraron horarios para el empleado:', employeeId);
+          this.error = 'No se encontraron horarios para este empleado';
+          this.openModal();
+          return;
+        }
+
+        this.selectedSchedules = schedules;
+        this.currentSchedule = this.selectedSchedules[0];
+        
+        if (!this.currentSchedule) {
+          console.warn('[EmployeeViewAccess] No se pudo establecer el horario actual');
+        }
+
+        console.log('[EmployeeViewAccess] Horario actual establecido:', this.currentSchedule);
+        setTimeout(() => this.openModal(), 0);
       },
       error: (err) => {
-        console.error('Error loading schedules:', err);
-        //this.error = 'Error al cargar los horarios: ' + (err.message || 'Error desconocido');
+        console.error('[EmployeeViewAccess] Error al cargar horarios:', err);
         this.error = 'No se encontraron horarios para este empleado';
         this.openModal();
       }
@@ -75,23 +89,45 @@ export class EmployeeViewAcessComponent {
   }
 
   getDaySchedules(): Array<{day: string, entry: string, exit: string}> {
-    if (!this.currentSchedule?.day_schedules) return [];
+    if (!this.currentSchedule?.day_schedules) {
+      console.warn('[EmployeeViewAccess] Intentando obtener horarios diarios sin un horario actual válido');
+      return [];
+    }
     
-    return Object.entries(this.currentSchedule.day_schedules)
-      .map(([day, schedule]) => ({
-        day: this.getDayName(day),
-        entry: this.formatTime(schedule.entry_time),
-        exit: this.formatTime(schedule.exit_time)
-      }))
-      .sort((a, b) => this.getDayOrder(a.day) - this.getDayOrder(b.day));
+    try {
+      return Object.entries(this.currentSchedule.day_schedules)
+        .map(([day, schedule]) => {
+          if (!schedule.entry_time || !schedule.exit_time) {
+            console.warn(`[EmployeeViewAccess] Horarios incompletos para el día ${day}`);
+          }
+          return {
+            day: this.getDayName(day),
+            entry: this.formatTime(schedule.entry_time),
+            exit: this.formatTime(schedule.exit_time)
+          };
+        })
+        .sort((a, b) => this.getDayOrder(a.day) - this.getDayOrder(b.day));
+    } catch (error) {
+      console.error('[EmployeeViewAccess] Error al procesar los horarios diarios:', error);
+      return [];
+    }
   }
 
   private getDayOrder(day: string): number {
-    return this.dayOrderMap[day] || 8; // 8 como valor por defecto para días desconocidos
+    const order = this.dayOrderMap[day];
+    if (!order) {
+      console.warn(`[EmployeeViewAccess] Día no reconocido en el ordenamiento: ${day}`);
+    }
+    return order || 8;
   }
 
   private openModal(): void {
-    if (this.modalContent) {
+    if (!this.modalContent) {
+      console.error('[EmployeeViewAccess] Template del modal no encontrado');
+      return;
+    }
+
+    try {
       const modalRef = this.modalService.open(this.modalContent, {
         size: 'lg',
         backdrop: 'static',
@@ -103,19 +139,25 @@ export class EmployeeViewAcessComponent {
         () => {
           this.resetState();
         },
-        () => {
+        (reason) => {
+          console.warn('[EmployeeViewAccess] Modal cerrado por:', reason);
           this.resetState();
         }
       );
-    } else {
-      console.error('Modal template not found!');
+    } catch (error) {
+      console.error('[EmployeeViewAccess] Error al abrir el modal:', error);
     }
   }
 
   private resetState(): void {
-    this.selectedSchedules = [];
-    this.currentSchedule = null;
-    this.error = null;
+    try {
+      this.selectedSchedules = [];
+      this.currentSchedule = null;
+      this.error = null;
+      console.log('[EmployeeViewAccess] Estado reiniciado correctamente');
+    } catch (error) {
+      console.error('[EmployeeViewAccess] Error al reiniciar el estado:', error);
+    }
   }
 
   getDayName(key: string): string {
@@ -128,15 +170,33 @@ export class EmployeeViewAcessComponent {
       'SATURDAY': 'Sábado',
       'SUNDAY': 'Domingo'
     };
+    
+    if (!days[key]) {
+      console.warn(`[EmployeeViewAccess] Clave de día no reconocida: ${key}`);
+    }
+    
     return days[key] || key;
   }
 
   formatTime(time: string): string {
-    if (!time) return '';
-    return time.substring(0, 5);
+    if (!time) {
+      console.warn('[EmployeeViewAccess] Intentando formatear tiempo nulo o vacío');
+      return '';
+    }
+    try {
+      return time.substring(0, 5);
+    } catch (error) {
+      console.error('[EmployeeViewAccess] Error al formatear tiempo:', error);
+      return '';
+    }
   }
 
   setCurrentSchedule(schedule: EmployeeSchedule): void {
+    if (!schedule) {
+      console.warn('[EmployeeViewAccess] Intentando establecer un horario nulo como actual');
+      return;
+    }
     this.currentSchedule = schedule;
+    console.log('[EmployeeViewAccess] Nuevo horario actual establecido:', schedule);
   }
 }
