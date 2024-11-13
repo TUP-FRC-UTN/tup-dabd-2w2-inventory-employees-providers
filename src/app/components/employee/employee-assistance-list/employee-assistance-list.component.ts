@@ -1,11 +1,10 @@
 import { CommonModule, DatePipe } from '@angular/common';
 import { Component, inject, TemplateRef, ViewChild } from '@angular/core';
-import { FormBuilder, FormControl, FormGroup, ReactiveFormsModule } from '@angular/forms';
+import { FormBuilder, FormControl, FormGroup, FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { Filter, FilterConfigBuilder, ToastService, TableFiltersComponent, MainContainerComponent } from 'ngx-dabd-grupo01';
 import { EmployeesService } from '../../../services/employees.service';
 import { ActivatedRoute, Router } from '@angular/router';
 import { MapperService } from '../../../services/MapperCamelToSnake/mapper.service';
-import { debounceTime, distinctUntilChanged } from 'rxjs';
 import jsPDF from 'jspdf';
 import * as XLSX from 'xlsx';
 import autoTable, { Table } from 'jspdf-autotable';
@@ -13,11 +12,12 @@ import { NgbModal } from '@ng-bootstrap/ng-bootstrap';
 import { EmployeeAssistanceService } from '../../../services/employee-assistance.service';
 import { EmployeeAccess } from '../../../models/employeeAccess';
 import { EmployeeAssistanceListInfoComponent } from './employee-assistance-list-info/employee-assistance-list-info.component';
+import { Employee } from '../../../models/employee.model';
 
 @Component({
   selector: 'app-employee-assistance-list',
   standalone: true,
-  imports: [TableFiltersComponent, CommonModule, ReactiveFormsModule,MainContainerComponent],
+  imports: [TableFiltersComponent, FormsModule,CommonModule, ReactiveFormsModule,MainContainerComponent],
   providers: [DatePipe],
   templateUrl: './employee-assistance-list.component.html',
   styleUrl: './employee-assistance-list.component.css'
@@ -26,8 +26,6 @@ export class EmployeeAssistanceListComponent {
   //Info
   @ViewChild('infoModal') infoModal!: TemplateRef<any>;
 
-
-
   // Lists
   employeeAssistances:EmployeeAccess[]=[];
   isLoading = false;
@@ -35,25 +33,21 @@ export class EmployeeAssistanceListComponent {
 
   // Forms and Filters
   searchFilter:FormControl = new FormControl('');
+  currentEmployee:Employee | undefined;
+  currentEmployeeId:number = 0;
   filterForm: FormGroup;
-  paginationForm: FormGroup;
   filterConfig: Filter[] = new FilterConfigBuilder()
-    .textFilter(
-     'Nombre',
-     'firstName',
-     ''
-    )
     .dateFilter(
       'Fecha Desde',
       'fromDate',
       '',
-      'dd-MM-yyyy'
+      'yyyy-MM-dd'
     )
     .dateFilter(
       'Fecha Hasta',
       'toDate',
       '',
-      'dd-MM-yyyy'
+      'yyyy-MM-dd'
     )
     .selectFilter(
       'Tipo de Acceso',
@@ -71,16 +65,12 @@ export class EmployeeAssistanceListComponent {
       this.filterForm = this.fb.group({
         searchFilter: this.searchFilter,
       });
-      this.paginationForm = this.fb.group({
-        page: [0],
-        size: [this.pageSize],
-      });
     }
  
     filterChange($event: Record<string, any>) {
       const filters = $event;
       this.currentFilters = filters;
-      //this.getEmployees();
+      this.getEmployees();
     }
   
   // Pagination
@@ -100,25 +90,55 @@ export class EmployeeAssistanceListComponent {
   private modalService = inject(NgbModal);
 
   ngOnInit(): void {
-    this.getEmployees();
+    this.activatedRouter.params.subscribe((params) =>{
+      const id = +params['id'];
+      console.log(id);
+      if (id) {
+        this.getById(id);
+      }});
+      this.getEmployees();
+    if(this.currentEmployee!=undefined){
+      this.getEmployees();
+    }
   }
 
-  getEmployees(page: number = 0, size: number = this.pageSize, searchTerm?: string): void {
+  getEmployees(page: number = this.currentPage, size: number = this.pageSize, searchTerm?: string): void {
     this.isLoading = true;
-    const filters = this.currentFilters;
-    
+    let filters:Record<string,any> = [];
+    if(this.currentFilters!=undefined){
+      filters = this.currentFilters;
+    }
+    filters['textFilter'] = this.currentEmployee?.docNumber;
+    filters['docType'] = 'CUIL';
+    filters['visitorType'] = 'EMPLOYEE';
+
     this.assistanceService.getAllEmployeesPaged(this.currentPage,this.pageSize,filters).subscribe({
       next:(response) => {
+        console.log(response);
         response = this.mapperService.toCamelCase(response);
-        this.employeeAssistances = this.mapperService.toCamelCase(response.content);
+        this.employeeAssistances = this.mapperService.toCamelCase(response.items);
         this.totalItems = response.totalElements;
-        this.totalPages = response.totalPages;
+        this.totalPages = (this.totalItems/this.pageSize);
         this.isLoading = false;
       },
       error: (error) => {
         console.error('Error trayendo asistencia:', error);
         this.toastService.sendError('Error al cargar horarios.');
         this.isLoading = false;
+      }
+    })
+    console.log(this.employeeAssistances)
+  }
+
+  getById(id: number) {
+    this.employeeService.getEmployeeById(this.currentEmployeeId).subscribe({
+      next: (response) => {
+        console.log(response);
+        this.currentEmployee = this.mapperService.toCamelCase(response);
+      },
+      error: (error) => {
+        this.toastService.sendError("Hubo un error al obtener la información del empleado.");
+        console.error(error);
       }
     })
   }
@@ -148,11 +168,11 @@ export class EmployeeAssistanceListComponent {
   exportToPDF(): void {
     const doc = new jsPDF();
     autoTable(doc, {
-      head: [['Empleado', 'Acción', 'Documento', 'Comentarios', 'Tardío']],
+      head: [['Fecha', 'Hora', 'Acción', 'Comentarios', 'Tardío']],
       body: this.employeeAssistances.map(employee => [
-        `${employee.lastName} ${employee.firstName}`,
-        `${employee.action}: ${employee.actionDate.toLocaleDateString()}`,
-        `${employee.docType}: ${employee.docNumber}`,
+        `${new Date(employee.actionDate).toLocaleDateString()}`,
+        `${new Date(employee.actionDate).getHours()+':'+new Date(employee.actionDate).getMinutes()}`,
+        `${employee.action}`,
         employee.comments,
         employee.isLate
       ])
@@ -162,10 +182,10 @@ export class EmployeeAssistanceListComponent {
 
   exportToExcel(): void {
     const data = this.employeeAssistances.map(employee => ({
-      Empleado: `${employee.lastName} ${employee.firstName}`,
-      Acción:  `${employee.action}: ${employee.actionDate.toLocaleDateString()}`,
-      Documento: `${employee.docType}: ${employee.docNumber}`,
-      'Comentarios': employee.comments,
+      Fecha: `${new Date(employee.actionDate).toLocaleDateString()}`,
+      Hora:`${new Date(employee.actionDate).getHours()+':'+new Date(employee.actionDate).getMinutes()}`,
+      Acción:  `${employee.action}`,
+      Comentarios: employee.comments,
       Tardío: employee.isLate
     }));
     const ws = XLSX.utils.json_to_sheet(data);

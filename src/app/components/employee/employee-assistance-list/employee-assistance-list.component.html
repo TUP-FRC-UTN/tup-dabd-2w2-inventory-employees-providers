@@ -1,4 +1,4 @@
-<app-main-container title="Control de Asistencias" (infoButtonClick)="showInfo()">
+<app-main-container title="Control de Asistencias" subTitle="Empleado: {{currentEmployee?.firstName}} {{currentEmployee?.lastName}}" (infoButtonClick)="showInfo()">
   <!-- Header con búsqueda, filtros y botones de exportación -->
   <div class="d-flex justify-content-between align-items-center mb-3">
     <div class="input-group w-25">
@@ -7,11 +7,7 @@
              class="form-control" 
              placeholder="Buscar asistencia..." 
              [formControl]="searchFilter" />
-      <app-table-filters 
-        style="z-index: 1;" 
-        [filters]="filterConfig" 
-        (filterValueChange)="filterChange($event)">
-      </app-table-filters>
+             <app-table-filters style="z-index: 1;" [filters]="filterConfig" (filterValueChange)="filterChange($event)"></app-table-filters>
     </div>
     <div class="d-flex align-items-center">
       <button type="button" class="btn btn-success me-2" (click)="exportToExcel()">
@@ -23,32 +19,29 @@
     </div>
   </div>
 
-  <!-- Tabla de asistencias -->
   <div class="table-container mt-3">
     <table class="table table-striped">
       <thead class="bg-light">
         <tr>
-          <th>Empleado</th>
+          <th>Fecha</th>
+          <th>Hora</th>
           <th>Tipo de Acceso</th>
-          <th>Fecha/Hora</th>
-          <th>Documento</th>
           <th>Estado</th>
           <th>Comentarios</th>
         </tr>
       </thead>
       <tbody>
         <tr *ngFor="let assistance of employeeAssistances">
-          <td>{{ assistance.lastName }}, {{ assistance.firstName }}</td>
+          <td>{{assistance.actionDate  | date:"dd/MM/yyyy"}}</td>
+          <td>{{ assistance.actionDate | date:'HH:mm' }}</td>
           <td>
-            <span [ngClass]="{
-              'badge bg-success': assistance.action === 'ENTRY',
-              'badge bg-danger': assistance.action === 'EXIT'
+            <span class="custom-badge" [ngClass]="{
+              'bg-success text-white': assistance.action === 'ENTRY',
+              'bg-danger text-white': assistance.action === 'EXIT'
             }">
               {{ assistance.action === 'ENTRY' ? 'Entrada' : 'Salida' }}
             </span>
           </td>
-          <td>{{ assistance.actionDate | date:'dd/MM/yyyy HH:mm' }}</td>
-          <td>{{ assistance.docType }}: {{ assistance.docNumber }}</td>
           <td>
             <i [ngClass]="{
               'bi bi-check-circle text-success': !assistance.isLate,
@@ -79,23 +72,17 @@
   </div>
 
   <!-- Paginación con Reactive Forms -->
-  <div class="d-flex justify-content-between align-items-center p-3 border-top" [formGroup]="paginationForm">
+  <div class="d-flex justify-content-between align-items-center p-3 border-top">
     <!-- Selector de elementos por página -->
-    <div class="d-flex align-items-center">
-      <select class="form-select form-select-sm" 
-              formControlName="pageSize" 
-              style="width: auto;">
-        <option [value]="size" *ngFor="let size of sizeOptions">
-          {{ size }} Elementos
-        </option>
-      </select>
-    </div>
+    <select (change)="onItemsPerPageChange()" class="form-select form-select-sm" style="width: auto;"
+    [(ngModel)]="pageSize">
+    <option value="5">5 Elementos</option>
+    <option value="10">10 Elementos</option>
+    <option value="20">20 Elementos</option>
+    <option value="50">50 Elementos</option>
+  </select>
 
     <!-- Información de paginación -->
-    <div class="text-muted">
-      Mostrando {{ employeeAssistances.length }} de {{ totalItems }} registros
-    </div>
-
     <!-- Botones de navegación -->
     <div class="ms-3">
       <button class="btn btn-outline-secondary btn-sm me-1" 
@@ -110,119 +97,4 @@
       </button>
     </div>
   </div>
-
-  <!-- Modal de Filtros (si lo necesitas) -->
-  <div class="modal fade" id="filterModal" tabindex="-1" [formGroup]="filterForm">
-    <div class="modal-dialog">
-      <div class="modal-content">
-        <div class="modal-header">
-          <h5 class="modal-title">Filtros Avanzados</h5>
-          <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
-        </div>
-        <div class="modal-body">
-          <!-- Campos de filtro -->
-          <div class="mb-3">
-            <label class="form-label">Fecha Desde</label>
-            <input type="date" class="form-control" formControlName="fromDate">
-          </div>
-          <div class="mb-3">
-            <label class="form-label">Fecha Hasta</label>
-            <input type="date" class="form-control" formControlName="toDate">
-          </div>
-          <div class="mb-3">
-            <label class="form-label">Tipo de Acceso</label>
-            <select class="form-select" formControlName="actionType">
-              <option value="">Todos</option>
-              <option value="ENTRY">Entradas</option>
-              <option value="EXIT">Salidas</option>
-            </select>
-          </div>
-        </div>
-        <div class="modal-footer">
-          <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cerrar</button>
-          <button type="button" class="btn btn-primary" (click)="applyFilters()">Aplicar</button>
-        </div>
-      </div>
-    </div>
-  </div>
 </app-main-container>
-
-  <!-- <ng-template #detailModal let-modal>
-    <div class="modal-header">
-      <h4 class="modal-title" id="modal-basic-title">Detalles del Empleado</h4>
-      <button type="button" class="btn-close" aria-label="Close" (click)="modal.dismiss()"></button>
-    </div>
-    <div class="modal-body">
-      <div class="container" *ngIf="selectedEmployee">
-        <div class="row mb-3">
-
-          <div class="col-md-6">
-            <div class="card">
-              <div class="card-body">
-                <h6 class="card-subtitle mb-1 text-muted">Nombre Completo</h6>
-                <p class="card-text">{{selectedEmployee.lastName}}, {{selectedEmployee.firstName}}</p>
-              </div>
-            </div>
-          </div>
-          <div class="col-md-6">
-            <div class="card">
-              <div class="card-body">
-                <h6 class="card-subtitle mb-1 text-muted">Documento</h6>
-                <p class="card-text">{{selectedEmployee.documentType}}: {{selectedEmployee.docNumber}}</p>
-              </div>
-            </div>
-          </div>
-        </div>
-  
-        <div class="row mb-3">
-          <div class="col-md-6">
-            <div class="card">
-              <div class="card-body">
-                <h6 class="card-subtitle mb-1 text-muted">Rol del Empleado</h6>
-                <p class="card-text">{{selectedEmployee.employeeType}}</p>
-              </div>
-            </div>
-          </div>
-          <div class="col-md-6">
-            <div class="card">
-              <div class="card-body d-flex align-items-center">
-                <h6 class="card-subtitle mb-1 text-muted me-2">Estado</h6>
-                <i *ngIf="selectedEmployee.state.toString() == 'IN_SERVICE'" class="bi bi-check2-circle text-success"
-                  style="font-size: 1.5rem;"></i>
-                <i *ngIf="selectedEmployee.state.toString() != 'IN_SERVICE'" class="bi bi-x-circle text-danger"
-                  style="font-size: 1.5rem;"></i>
-              </div>
-            </div>
-          </div>
-        </div>
-  
-        <div class="row mb-3">
-          <div class="col-md-6">
-            <div class="card">
-              <div class="card-body">
-                <h6 class="card-subtitle mb-1 text-muted">Salario</h6>
-                <p class="card-text">${{selectedEmployee.salary}}</p>
-              </div>
-            </div>
-          </div>
-
-          <div class="col-md-6">
-            <div class="card">
-              <div class="card-body">
-                <h6 class="card-subtitle mb-1 text-muted">Contacto</h6>
-                @if (selectedEmployee.contact != null) {
-                <p class="card-text">{{selectedEmployee.contact.contactType}}: {{selectedEmployee.contact.contactValue}}
-                </p>
-                } @else {
-                <p class="card-text">Sin Contacto</p>
-                }
-              </div>
-            </div>
-          </div>
-        </div>
-      </div>
-    </div>
-    <div class="modal-footer">
-      <button type="button" class="btn btn-secondary" (click)="modal.close()">Cerrar</button>
-    </div>
-  </ng-template>   -->

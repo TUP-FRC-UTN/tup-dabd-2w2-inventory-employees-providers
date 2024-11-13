@@ -22,7 +22,7 @@ export class EmployeeAssistanceService {
       actionType?: Action; //ENTRY O EXIT
       visitorType?: string; //EMPLOYEE
     }
-  ): Observable<PaginatedResponse<EmployeeAccess>> {
+  ): Observable<AssistancePage<EmployeeAccess>> {
     let params = new HttpParams()
       .set('page', page.toString())
       .set('size', size.toString());
@@ -31,11 +31,16 @@ export class EmployeeAssistanceService {
       if (filters.textFilter) params = params.set('textFilter', filters.textFilter);
       if (filters.fromDate) params = params.set('fromDate', filters.fromDate);
       if (filters.toDate) params = params.set('toDate', filters.toDate);
-      if (filters.docType) params = params.set('documentType', "DNI");
+      params = params.set('documentType', "CUIL");
       if (filters.actionType) params = params.set('actionType', filters.actionType);
       if (filters.visitorType) params = params.set('visitorType', "EMPLOYEE");
     }
   
-    return this.httpClient.get<PaginatedResponse<EmployeeAccess>>(`${this.apiUrl}/paged`, { params });
+    return this.httpClient.get<AssistancePage<EmployeeAccess>>(`${this.apiUrl}`, { params });
   }
+}
+
+export interface AssistancePage<T> {
+  items: T[];
+  totalElements:number
 }

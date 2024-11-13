@@ -21,6 +21,8 @@ import { EmployeeAssistanceListComponent } from './components/employee/employee-
 
 
 export const routes: Routes = [
+  { path: 'employees/assistance', component:EmployeeAssistanceListComponent},
+  { path: 'employees/assistance/:id', component:EmployeeAssistanceListComponent},
   { path: 'employees/list', component: EmployeeListComponent },
   { path: 'employees/dashboard', component: EmployeeDashboardComponent },
   { path: 'employees/form', component: EmployeeFormComponent },
@@ -41,6 +43,6 @@ export const routes: Routes = [
   { path: 'providers/config/service/update', component: ProviderServiceUpdateComponent},
   { path: 'employees/access/detail', component: EmployeeViewAcessComponent},
   { path: 'employees/assistant', component: EmployeeAssistanceListComponent},
-  { path: '', redirectTo: '/employees', pathMatch: 'full' }
+  { path: '', redirectTo: '/employees', pathMatch: 'full'}
 ];
 
