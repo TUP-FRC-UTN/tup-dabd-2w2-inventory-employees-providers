@@ -105,6 +105,9 @@ export class EmployeeFormComponent implements OnInit {
   provinceOptions!: any;
   countryOptions!: any;
   
+  formHasChanges: boolean = false;
+  initialFormValue: any;
+
   ngOnInit(): void {
     this.activatedRoute.params.subscribe((params) => {
       const id = +params['id'];
@@ -120,6 +123,11 @@ export class EmployeeFormComponent implements OnInit {
             postal_code: 5000
           }
         })
+      }
+    });
+    this.employeeForm.valueChanges.subscribe(() => {
+      if (this.isEdit && this.initialFormValue) {
+        this.checkFormChanges();
       }
     });
 
@@ -149,25 +157,30 @@ export class EmployeeFormComponent implements OnInit {
   }
 
   getById(id: number) {
-    this.currentId=id;
+    this.currentId = id;
     this.employeeService.getEmployeeById(id).subscribe((data) => {
       data = this.mapperService.toCamelCase(data);
-      console.log(data);
+      console.log('[EmployeeForm] Datos originales:', data);
+      
       this.employeeForm.patchValue({
-        id:data.id,
+        id: data.id,
         firstName: data.firstName,
         lastName: data.lastName,
         employeeType: data.employeeType,
-        hiringDate: new Date(data.hiringDate).toISOString().split('T')[0], // Format for input
+        hiringDate: new Date(data.hiringDate).toISOString().split('T')[0],
         documentType: data.documentType,
         docNumber: data.docNumber,
         state: StatusType.ACTIVE,
         salary: data.salary,
-        //TODO: ver que traiga la informacion del contacto y del address
-        //address: data.address
       });
+
+      // Guardar el estado inicial del formulario después de cargarlo
+      this.initialFormValue = this.employeeForm.value;
+      this.formHasChanges = false;
+      this.isEdit = true;
+      
+      console.log('[EmployeeForm] Valor inicial del formulario guardado:', this.initialFormValue);
     });
-    this.isEdit=true;
   }
 
   saveEmployee() {
@@ -307,16 +320,21 @@ export class EmployeeFormComponent implements OnInit {
   }
 
   updateEmployee(employee: Employee) {
-    console.log(employee);
+    console.log('[EmployeeForm] Actualizando empleado:', employee);
     this.employeeService.updateEmployee(employee).subscribe({
       next: (response) => {
         this.toastService.sendSuccess("El Empleado ha sido modificado con éxito.");
+        this.formHasChanges = false;
+        this.initialFormValue = this.employeeForm.value;
+        this.router.navigate(['/employees/list']);
       },
       error: (error) => {
         this.toastService.sendError("Hubo un error en la modificación del empleado.");
+        console.error('[EmployeeForm] Error al actualizar:', error);
       }
     });
   }
+
 
   return() {
     this.router.navigate(['employees/list']);
@@ -417,4 +435,30 @@ onAccessSaved() {
     this.contacts.splice(index, 1);
   }
 
+  private checkFormChanges(): void {
+    if (!this.initialFormValue) {
+      console.warn('[EmployeeForm] No hay valor inicial para comparar');
+      return;
+    }
+
+    const currentValue = this.employeeForm.value;
+    this.formHasChanges = !this.isEqual(currentValue, this.initialFormValue);
+    console.log('[EmployeeForm] Formulario tiene cambios:', this.formHasChanges);
+  }
+
+  private isEqual(obj1: any, obj2: any): boolean {
+    return JSON.stringify(this.cleanObject(obj1)) === JSON.stringify(this.cleanObject(obj2));
+  }
+
+  private cleanObject(obj: any): any {
+    const cleaned = { ...obj };
+    Object.keys(cleaned).forEach(key => {
+      if (cleaned[key] === null || cleaned[key] === undefined || cleaned[key] === '') {
+        delete cleaned[key];
+      } else if (typeof cleaned[key] === 'object') {
+        cleaned[key] = this.cleanObject(cleaned[key]);
+      }
+    });
+    return cleaned;
+  }
 }
