@@ -4,7 +4,7 @@ export enum StatusType {
 }
 
 export enum EmployeeType {
-  ADMINTRATIVO = 'ADMINISTRATIVO', // Administrador
+  ADMINISTRATIVO = 'ADMINISTRATIVO', // Administrador
   GUARDIA = 'GUARDIA',
   CONTADOR = 'CONTADOR',
   MANTENIMIENTO = 'MANTENIMIENTO'

@@ -38,7 +38,7 @@ export const routes: Routes = [
   { path: 'providers/config/company', component: ProvideConfigComponent},
   { path: 'providers/config/service', component: ProviderServiceComponent},
   { path: 'providers/config/service/update', component: ProviderServiceUpdateComponent},
-  { path: 'employees/access/detail', component: EmployeeViewAcessComponent},
-  { path: '', redirectTo: '/employees', pathMatch: 'full' }
+  { path: 'employees/access/detail', component: EmployeeViewAcessComponent}
+  //{ path: '', redirectTo: '/employees', pathMatch: 'full' }
 ];
 

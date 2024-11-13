@@ -115,7 +115,7 @@ export class EmployeesService {
 
   getAllEmployeesPaged(
     page: number = 0,
-    size: number = 10,
+    size: number = 40,
     filters?: {
       firstName?: string;
       lastName?: string;
@@ -126,6 +126,7 @@ export class EmployeesService {
       date?: string;
       salary?: string;
     }
+    
   ): Observable<PaginatedResponse<Employee>> {
     let params = new HttpParams()
       .set('page', page.toString())
@@ -141,7 +142,10 @@ export class EmployeesService {
       if (filters.date) params = params.set('date', filters.date);
       if (filters.salary) params = params.set('salary', filters.salary);
     }
-  
+    console.log(filters);
+    console.log('filtros de tipo', filters?.type);
+    debugger
+    console.log('params', params);
     return this.http.get<PaginatedResponse<Employee>>(`${this.apiUrl}/paged`, { params });
   }
 

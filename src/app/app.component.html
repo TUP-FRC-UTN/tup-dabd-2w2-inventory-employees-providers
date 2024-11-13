@@ -21,6 +21,7 @@
       aria-label="Toggle navigation">
       <span class="navbar-toggler-icon"></span>
     </button>
+    
 
     <div class="collapse navbar-collapse" id="navbarNav">
       <div class="navbar-nav">
@@ -32,8 +33,14 @@
         <a class="nav-link" href="#">Notificaciones</a>
         <a class="nav-link" href="#">Usuarios</a>
       </div>
-      
-      <div class="ms-auto d-flex align-items-center">
+
+      <button class="btn btn-outline-secondary m-4" (click)="toggleDarkMode()">
+        <i *ngIf="!darkModeEnabled" class="bi bi-moon"></i>
+        <i *ngIf="darkModeEnabled" class="bi bi-brightness-high"></i>
+        {{ darkModeEnabled ? '' : '' }}
+      </button>
+  
+      <div class="ms-auto d-flex align-items-center ">
         <button class="btn btn-primary d-flex align-items-center me-3">
           <svg 
             xmlns="http://www.w3.org/2000/svg" 

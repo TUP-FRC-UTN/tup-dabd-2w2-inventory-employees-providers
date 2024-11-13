@@ -3,12 +3,15 @@ import { HttpClient, HttpParams } from '@angular/common/http';
 import { Observable } from 'rxjs';
 import { Supplier } from '../models/suppliers/supplier.model';
 import { PaginatedResponse } from '../models/api-response';
+import { Company } from '../models/suppliers/company.model';
+import { Service } from '../models/suppliers/service.model';
 
 @Injectable({
   providedIn: 'root'
 })
 export class ProvidersService {
   private apiUrl = 'http://localhost:8013/suppliers';
+  private apiurlService = 'http://localhost:8013/service';
 
   constructor(private http: HttpClient) {}
 
@@ -41,6 +44,18 @@ export class ProvidersService {
       });
     }
     return this.http.get<PaginatedResponse<Supplier>>(`${this.apiUrl}/pageable`, { params });
+}
+
+getAllProvider():Observable<Supplier[]>{
+  return this.http.get<Supplier[]>(this.apiUrl);
+}
+
+getCompany(): Observable<Company[]> {
+  return this.http.get<Company[]>(`${this.apiUrl}/companies`);
+}
+
+getServices(): Observable<Service[]> {
+  return this.http.get<Service[]>(this.apiurlService);
 }
 
 // Método auxiliar para validar fechas
