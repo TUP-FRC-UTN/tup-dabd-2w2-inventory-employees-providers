@@ -1,252 +1,388 @@
-import { Component, ElementRef, inject, OnInit, ViewChild } from '@angular/core';
-import { FormBuilder, FormControl, FormGroup, ReactiveFormsModule } from '@angular/forms';
-import { InventoryService } from '../../../services/inventory.service';
-import { Inventory, Transaction } from '../../../models/inventory.model';
-import { Chart, ChartType, registerables } from 'chart.js';
-import { CommonModule } from '@angular/common';
-import { MainContainerComponent } from 'ngx-dabd-grupo01';
-import { MapperService } from '../../../services/MapperCamelToSnake/mapper.service';
-import { NgbModal } from '@ng-bootstrap/ng-bootstrap';
-import { InventoryDashboardInfoComponent } from './inventory-dashboard-info/inventory-dashboard-info.component';
-import { InventoryDashComponent } from "../../dashboard/inventory-dash/inventory-dash.component";
+// inventory-dashboard.component.ts
 
-Chart.register(...registerables);
+import { AfterViewInit, Component, OnInit } from '@angular/core';
+import { BaseChartDirective  } from 'ng2-charts';
+import { ChartConfiguration, ChartData } from 'chart.js';
+import { ArticleCateg, ArticleCategory, ArticleCondition } from '../../../models/article.model';
+import { InventoryService } from '../../../services/inventory.service';
+import { Inventory, Transaction, TransactionType } from '../../../models/inventory.model';
+import { MainContainerComponent } from 'ngx-dabd-grupo01';
+import { CommonModule, DecimalPipe } from '@angular/common';
+import { forkJoin } from 'rxjs';
+import {
+  ArcElement,
+  CategoryScale,
+  LinearScale,
+  LineElement,
+  PointElement,
+  Title,
+  Tooltip,
+  Legend,
+  Colors
+} from 'chart.js';
+import { Chart } from 'chart.js';
+Chart.register(
+  ArcElement,
+  CategoryScale,
+  LinearScale,
+  LineElement,
+  PointElement,
+  Title,
+  Tooltip,
+  Legend,
+  Colors
+);
+interface InventoryMetrics {
+  totalItems: number;
+  totalValue: number;
+  lowStockItems: number;
+  mostArticleUsed: string;
+  stockByCategory: Map<ArticleCateg, number>;
+  stockByCondition: Map<ArticleCondition, number>;
+  transactionTrends: {
+    labels: string[];
+    entries: number[];
+    outputs: number[];
+  };
+}
 
 @Component({
-  selector: 'app-inventory-dashboard',
   standalone: true,
-  imports: [CommonModule, ReactiveFormsModule, MainContainerComponent, InventoryDashComponent],
+  imports: [
+    CommonModule,
+    BaseChartDirective, 
+    MainContainerComponent, 
+    DecimalPipe,
+    
+  ],
+  providers: [DecimalPipe],
+  selector: 'app-inventory-dashboard',
   templateUrl: './inventory-dashboard.component.html',
-  styleUrls: ['./inventory-dashboard.component.css']
+  styleUrls: ['./inventory-dashboard.component.scss']
 })
-export class InventoryDashboardComponent implements OnInit {
-  @ViewChild('stockStatusChart') stockStatusChartRef!: ElementRef;
-  @ViewChild('stockByCategoryChart') stockByCategoryChartRef!: ElementRef;
-  @ViewChild('rotationTrendChart') rotationTrendChartRef!: ElementRef;
-
-  mapperService = inject(MapperService);
-  private modalService = inject(NgbModal);
-
-  // Propiedades para KPIs
-  totalStock: number = 0;
-  criticalStockCount: number = 0;
-  normalStockCount: number = 0;
-  averageRotation: number = 0;
-  mostCommonCategory: string = '';
-
-  // Datos para gráficos
-  inventories: Inventory[] = [];
-  rotationData: { [key: string]: number } = {};
-  stockStatusData = {
-    normal: 0,
-    critical: 0,
-    excess: 0
+export class InventoryDashboardComponent implements OnInit , AfterViewInit {
+  metrics: InventoryMetrics = {
+    totalItems: 0,
+    totalValue: 0,
+    lowStockItems: 0,
+    mostArticleUsed: '',
+    stockByCategory: new Map(),
+    stockByCondition: new Map(),
+    transactionTrends: {
+      labels: [],
+      entries: [],
+      outputs: []
+    }
   };
-  categoryStockData: { [key: string]: number } = {};
 
-  searchInput = new FormControl('');
-  filterForm: FormGroup;
+  categoryChartData: ChartData<'pie'> = {
+    labels: [],
+    datasets: [{
+      data: [],
+      backgroundColor: [
+        'rgba(255, 99, 132, 0.8)',
+        'rgba(54, 162, 235, 0.8)',
+        'rgba(255, 206, 86, 0.8)',
+        'rgba(75, 192, 192, 0.8)',
+        'rgba(153, 102, 255, 0.8)'
+      ],
+      hoverBackgroundColor: [
+        'rgba(255, 99, 132, 1)',
+        'rgba(54, 162, 235, 1)',
+        'rgba(255, 206, 86, 1)',
+        'rgba(75, 192, 192, 1)',
+        'rgba(153, 102, 255, 1)'
+      ]
+    }]
+  };
 
-  constructor(
-    private inventoryService: InventoryService,
-    private fb: FormBuilder
-  ) {
-    this.filterForm = this.fb.group({
-      articleNameFilter: [''],
-      stockFilter: [''],
-      locationFilter: [''],
-      measure: [null]
-    });
+  conditionChartData: ChartData<'doughnut'> = {
+    labels: [],
+    datasets: [{
+      data: [],
+      backgroundColor: [
+        'rgba(76, 175, 80, 0.8)',
+        'rgba(244, 67, 54, 0.8)',
+        'rgba(255, 193, 7, 0.8)'
+      ],
+      hoverBackgroundColor: [
+        'rgba(76, 175, 80, 1)',
+        'rgba(244, 67, 54, 1)',
+        'rgba(255, 193, 7, 1)'
+      ]
+    }]
+  };
+
+  transactionTrendsChartData: ChartData<'line'> = {
+    labels: [],
+    datasets: [
+      {
+        label: 'Entradas',
+        data: [],
+        borderColor: 'rgba(76, 175, 80, 1)',
+        backgroundColor: 'rgba(76, 175, 80, 0.1)',
+        tension: 0.4,
+        fill: true
+      },
+      {
+        label: 'Salidas',
+        data: [],
+        borderColor: 'rgba(244, 67, 54, 1)',
+        backgroundColor: 'rgba(244, 67, 54, 0.1)',
+        tension: 0.4,
+        fill: true
+      }
+    ]
+  };
+
+  chartOptions: ChartConfiguration['options'] = {
+    responsive: true,
+    maintainAspectRatio: false,
+    plugins: {
+      legend: {
+        display: true,
+        position: 'top',
+      },
+      tooltip: {
+        enabled: true,
+        mode: 'index',
+        intersect: false,
+      }
+    },
+    scales: {
+      x: {
+        display: true,
+      },
+      y: {
+        display: true,
+        beginAtZero: true
+      }
+    }
+  };
+
+  constructor(private inventoryService: InventoryService) {
+    console.log('InventoryDashboardComponent initialized');
   }
 
   ngOnInit(): void {
-    this.getInventories();
+    this.loadInventoryData();
   }
 
-  getInventories(): void {
-    this.inventoryService.getInventories().subscribe({
-      next: (inventories) => {
-        this.inventories = inventories;
-        this.calculateMetrics();
+  private loadInventoryData(): void {
+    console.log('Loading inventory data...');
+    forkJoin({
+      inventories: this.inventoryService.getInventories(),
+      transactions: this.inventoryService.getTransactions()
+    }).subscribe({
+      next: ({ inventories, transactions }) => {
+        console.log('Data loaded:', { inventories, transactions });
+        this.calculateMetrics(inventories);
+        this.calculateTransactionTrends(transactions);
+        this.updateCharts();
       },
       error: (error) => {
-        console.error('Error fetching inventories:', error);
+        console.error('Error loading data:', error);
       }
     });
   }
 
-  calculateMetrics(): void {
-    // Reiniciar contadores
-    this.totalStock = 0;
-    this.criticalStockCount = 0;
-    this.normalStockCount = 0;
-    this.rotationData = {};
-    this.categoryStockData = {};
-    let totalRotation = 0;
-    let rotationCount = 0;
+  private calculateMetrics(inventories: Inventory[]): void {
+    console.log('Calculating metrics for inventories:', inventories);
+    
+    // Total items
+    this.metrics.totalItems = inventories.reduce((sum, inv) => sum + (inv.stock || 0), 0);
+    console.log('Total items:', this.metrics.totalItems);
 
-    // Procesamiento de inventarios
-    this.inventories.forEach((inventory) => {
-      const mappedInventory = this.mapperService.toCamelCase(inventory);
-      const article = mappedInventory.article;
+    // Total value
+    this.metrics.totalValue = inventories.reduce((sum, inv) => {
+      const lastTransactionWithPrice = inv.transactions?.slice()
+        .reverse()
+        .find(t => t.price !== null && t.price !== undefined);
+      const price = lastTransactionWithPrice?.price || 0;
+      return sum + ((inv.stock || 0) * price);
+    }, 0);
+    console.log('Total value:', this.metrics.totalValue);
 
-      // Actualizar stock total
-      this.totalStock += mappedInventory.stock || 0;
+    // Low stock items
+    this.metrics.lowStockItems = inventories.filter(inv => {
+      console.log('Checking low stock for:', inv.article.name, 'Stock:', inv.stock, 'MinStock:', inv.minStock);
+      return inv.stock !== undefined && 
+             inv.stock !== null && 
+             inv.minStock !== undefined && 
+             inv.minStock !== null && 
+             inv.stock <= inv.minStock &&
+             inv.stock > 0; // Solo contar items que aún tienen stock
+    }).length;
 
-      // Conteo de stock crítico/normal
-      if (mappedInventory.stock <= mappedInventory.minStock) {
-        this.criticalStockCount++;
-      } else {
-        this.normalStockCount++;
-      }
-
-      // Cálculo de rotación
-      if (mappedInventory.transactions?.length) {
-        const rotation = this.calculateRotationIndex(mappedInventory.transactions);
-        totalRotation += rotation;
-        rotationCount++;
-      }
-
-      // Actualizar datos por categoría
-      const category = article?.articleCategory?.denomination || 'Sin Categoría';
-      this.categoryStockData[category] = (this.categoryStockData[category] || 0) + (mappedInventory.stock || 0);
-
-      // Procesar transacciones para tendencia de rotación
-      mappedInventory.transactions?.forEach((transaction: Transaction) => {
-        const mappedTransaction = this.mapperService.toCamelCase(transaction);
-        if (mappedTransaction.transactionDate) {
-          const month = new Date(mappedTransaction.transactionDate).toLocaleString('default', { month: 'long' });
-          this.rotationData[month] = (this.rotationData[month] || 0) + 1;
-        }
-      });
-    });
-
-    // Calcular rotación promedio
-    this.averageRotation = rotationCount > 0 ? totalRotation / rotationCount : 0;
-
-    // Encontrar categoría más común
-    this.mostCommonCategory = this.findMostCommonCategory();
-
-    // Crear gráficos
-    this.createCharts();
-  }
-
-  private calculateRotationIndex(transactions: Transaction[]): number {
-    // Implementar cálculo de índice de rotación
-    return transactions.length > 0 ? transactions.length / 30 : 0; // Ejemplo simplificado
-  }
-
-  private findMostCommonCategory(): string {
-    return Object.entries(this.categoryStockData)
-      .sort(([,a], [,b]) => b - a)[0]?.[0] || 'Sin Categoría';
-  }
-
-  createCharts(): void {
-    this.createStockStatusChart();
-    this.createStockByCategoryChart();
-    this.createRotationTrendChart();
-  }
-
-  createStockStatusChart(): void {
-    if (this.stockStatusChartRef) {
-      new Chart(this.stockStatusChartRef.nativeElement, {
-        type: 'doughnut',
-        data: {
-          labels: ['Stock Normal', 'Stock Crítico'],
-          datasets: [{
-            data: [this.normalStockCount, this.criticalStockCount],
-            backgroundColor: ['#28a745', '#dc3545']
-          }]
-        },
-        options: {
-          responsive: true,
-          plugins: {
-            legend: {
-              position: 'right'
-            }
-          }
-        }
-      });
-    }
-  }
-
-  createStockByCategoryChart(): void {
-    if (this.stockByCategoryChartRef) {
-      const labels = Object.keys(this.categoryStockData);
-      const data = Object.values(this.categoryStockData);
-
-      new Chart(this.stockByCategoryChartRef.nativeElement, {
-        type: 'bar',
-        data: {
-          labels,
-          datasets: [{
-            label: 'Stock por Categoría',
-            data,
-            backgroundColor: '#007bff'
-          }]
-        },
-        options: {
-          responsive: true,
-          scales: {
-            y: {
-              beginAtZero: true
-            }
-          }
-        }
-      });
-    }
-  }
-
-  createRotationTrendChart(): void {
-    if (this.rotationTrendChartRef) {
-      const labels = Object.keys(this.rotationData);
-      const data = Object.values(this.rotationData);
-
-      new Chart(this.rotationTrendChartRef.nativeElement, {
-        type: 'line',
-        data: {
-          labels,
-          datasets: [{
-            label: 'Tendencia de Rotación',
-            data,
-            borderColor: '#17a2b8',
-            tension: 0.1
-          }]
-        },
-        options: {
-          responsive: true,
-          scales: {
-            y: {
-              beginAtZero: true
-            }
-          }
-        }
-      });
-    }
-  }
-
-  applyFilters(): void {
-    const filters = this.filterForm.value;
-    this.inventoryService.getFilteredInventories(filters).subscribe({
-      next: (filteredInventories) => {
-        this.inventories = filteredInventories;
-        this.calculateMetrics();
+    // Most used article - FIXED
+    const usageMap = new Map<string, { name: string, usage: number }>();
+    
+    // Primero, calculamos el uso total para cada artículo
+    inventories.forEach(inv => {
+      if (inv.article?.name && inv.transactions?.length > 0) {
+        // Calcular salidas totales
+        const outputs = inv.transactions
+          .filter(t => t.transactionType === TransactionType.OUTPUT)
+          .reduce((sum, t) => sum + (t.quantity || 0), 0);
+          
+        // Actualizar el mapa de uso
+        const currentUsage = usageMap.get(inv.article.name)?.usage || 0;
+        usageMap.set(inv.article.name, {
+          name: inv.article.name,
+          usage: currentUsage + outputs
+        });
+        
+        console.log(`Usage for ${inv.article.name}:`, outputs);
       }
     });
+    
+    const sortedUsage = Array.from(usageMap.values())
+      .sort((a, b) => b.usage - a.usage);
+
+    // Asignar el artículo más usado
+    if (sortedUsage.length > 0) {
+      this.metrics.mostArticleUsed = sortedUsage[0].name;
+      console.log('Most used articles:', sortedUsage);
+    } else {
+      this.metrics.mostArticleUsed = 'Sin movimientos';
+    }
+    console.log('Most used article:', this.metrics.mostArticleUsed);
+
+    // Stock by category
+    this.metrics.stockByCategory = new Map();
+    inventories.forEach(inv => {
+      if (inv.article?.articleCategory) {
+        const category = inv.article.articleCategory;
+        const currentStock = this.metrics.stockByCategory.get(category) || 0;
+        this.metrics.stockByCategory.set(category, currentStock + (inv.stock || 0));
+      }
+    });
+    console.log('Stock by category:', Array.from(this.metrics.stockByCategory.entries()));
+
+    // Stock by condition
+    this.metrics.stockByCondition = new Map();
+    inventories.forEach(inv => {
+      if (inv.article?.articleCondition) {
+        const condition = inv.article.articleCondition;
+        const currentStock = this.metrics.stockByCondition.get(condition) || 0;
+        this.metrics.stockByCondition.set(condition, currentStock + (inv.stock || 0));
+      }
+    });
+    console.log('Stock by condition:', Array.from(this.metrics.stockByCondition.entries()));
   }
 
-  clearFilters(): void {
-    this.filterForm.reset();
-    this.getInventories();
+  private calculateTransactionTrends(transactions: Transaction[]): void {
+    console.log('Calculating transaction trends:', transactions);
+    
+    const monthlyTransactions = new Map<string, { entries: number; outputs: number }>();
+    
+    transactions.forEach(t => {
+      if (t.transactionDate) {
+        const date = new Date(t.transactionDate);
+        const monthKey = `${date.getFullYear()}-${(date.getMonth() + 1).toString().padStart(2, '0')}`;
+        
+        const current = monthlyTransactions.get(monthKey) || { entries: 0, outputs: 0 };
+        
+        if (t.transactionType === TransactionType.ENTRY) {
+          current.entries += t.quantity || 0;
+        } else {
+          current.outputs += t.quantity || 0;
+        }
+        
+        monthlyTransactions.set(monthKey, current);
+      }
+    });
+
+    const sortedMonths = Array.from(monthlyTransactions.entries())
+      .sort((a, b) => a[0].localeCompare(b[0]))
+      .slice(-6);
+
+    this.metrics.transactionTrends.labels = sortedMonths.map(([month]) => {
+      const [year, monthNum] = month.split('-');
+      return new Date(parseInt(year), parseInt(monthNum) - 1)
+        .toLocaleDateString('es-ES', { month: 'short', year: '2-digit' });
+    });
+    this.metrics.transactionTrends.entries = sortedMonths.map(([_, data]) => data.entries);
+    this.metrics.transactionTrends.outputs = sortedMonths.map(([_, data]) => data.outputs);
+    
+    console.log('Transaction trends calculated:', this.metrics.transactionTrends);
   }
 
-  showInfo(): void {
-    this.modalService.open(InventoryDashboardInfoComponent, {
-      size: 'lg',
-      backdrop: 'static',
-      keyboard: false,
-      centered: true,
-      scrollable: true
+  private updateCharts(): void {
+    console.log('Actualizando gráficos...');
+
+    // Actualizar gráfico de categorías
+    const categoryEntries = Array.from(this.metrics.stockByCategory.entries());
+    this.categoryChartData = {
+      labels: categoryEntries.map(([category]) => category.denomination),
+      datasets: [{
+        data: categoryEntries.map(([_, value]) => value),
+        backgroundColor: [
+          'rgba(255, 99, 132, 0.8)',
+          'rgba(54, 162, 235, 0.8)',
+          'rgba(255, 206, 86, 0.8)',
+          'rgba(75, 192, 192, 0.8)',
+          'rgba(153, 102, 255, 0.8)'
+        ]
+      }]
+    };
+    console.log('Datos del gráfico de categorías:', this.categoryChartData);
+
+    // Actualizar gráfico de condición
+    const conditionEntries = Array.from(this.metrics.stockByCondition.entries());
+    this.conditionChartData = {
+      labels: conditionEntries.map(([condition]) => this.formatCondition(condition)),
+      datasets: [{
+        data: conditionEntries.map(([_, value]) => value),
+        backgroundColor: [
+          'rgba(76, 175, 80, 0.8)',
+          'rgba(244, 67, 54, 0.8)',
+          'rgba(255, 193, 7, 0.8)'
+        ]
+      }]
+    };
+    console.log('Datos del gráfico de condición:', this.conditionChartData);
+
+    // Actualizar gráfico de tendencias
+    if (this.metrics.transactionTrends.labels.length > 0) {
+      this.transactionTrendsChartData = {
+        labels: this.metrics.transactionTrends.labels,
+        datasets: [
+          {
+            label: 'Entradas',
+            data: this.metrics.transactionTrends.entries,
+            borderColor: 'rgba(76, 175, 80, 1)',
+            backgroundColor: 'rgba(76, 175, 80, 0.1)',
+            tension: 0.4,
+            fill: true
+          },
+          {
+            label: 'Salidas',
+            data: this.metrics.transactionTrends.outputs,
+            borderColor: 'rgba(244, 67, 54, 1)',
+            backgroundColor: 'rgba(244, 67, 54, 0.1)',
+            tension: 0.4,
+            fill: true
+          }
+        ]
+      };
+      console.log('Datos del gráfico de tendencias:', this.transactionTrendsChartData);
+    }
+  }
+
+  private formatCondition(condition: ArticleCondition): string {
+    const conditionMap: Record<ArticleCondition, string> = {
+      'FUNCTIONAL': 'Funcional',
+      'DEFECTIVE': 'Defectuoso',
+      'UNDER_REPAIR': 'En Reparación'
+    };
+    return conditionMap[condition] || condition;
+  }
+  ngAfterViewInit() {
+    console.log('Datos de los gráficos después de la vista:', {
+      category: this.categoryChartData,
+      condition: this.conditionChartData,
+      trends: this.transactionTrendsChartData
     });
   }
 }
