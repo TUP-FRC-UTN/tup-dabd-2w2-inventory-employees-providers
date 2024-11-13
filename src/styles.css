@@ -174,5 +174,12 @@
 .dark-mode table tr:nth-child(even) {
     background-color: #383838 !important; /* Fondo alternativo en modo oscuro */
 }
+/* search */
+.dark-mode .input-group-text {
+  background-color: #333333 !important; /* Fondo oscuro */
+  color: #e0e0e0 !important; /* Color claro para el texto */
+}
 
-
+.dark-mode .bi-search {
+  color: #e0e0e0 !important; /* Cambia el color del ícono de búsqueda */
+}
