@@ -23,25 +23,34 @@
           <li>
             <a
               class="nav-link text-white"
-              routerLink="/employees/list"
+              routerLink="/employees/dashboard"
               routerLinkActive="active"
-              >Lista de Empleados</a
+              >Gráficos</a
             >
           </li>
           <li>
             <a
               class="nav-link text-white"
-              routerLink="/employees/dashboard"
+              routerLink="/employees/horarios"
               routerLinkActive="active"
-              >Graficos</a
+              >Horarios</a
             >
           </li>
+          <li>
+            <a
+              class="nav-link text-white"
+              routerLink="/employees/list"
+              routerLinkActive="active"
+              >Lista</a
+            >
+          </li>
+
           <li>
             <a
               class="nav-link text-white"
               routerLink="/employees/form"
               routerLinkActive="active"
-              >Registrar Empleado</a
+              >Registrar</a
             >
           </li>
         </ul>
@@ -65,19 +74,19 @@
           <li>
             <a
               class="nav-link text-white"
-              routerLink="/providers/list"
+              routerLink="/providers/dashboard"
               routerLinkActive="active"
-              >Lista de Proveedores</a
             >
+              Gráficos
+            </a>
           </li>
           <li>
             <a
               class="nav-link text-white"
-              routerLink="/providers/dashboard"
+              routerLink="/providers/list"
               routerLinkActive="active"
+              >Lista</a
             >
-              Graficos
-            </a>
           </li>
 
           <li>
@@ -85,25 +94,42 @@
               class="nav-link text-white"
               routerLink="/providers/form"
               routerLinkActive="active"
-              >Registrar Proveedor</a
+              >Registrar</a
             >
           </li>
-          <li>
+          <!-- Configuración -->
+          <div class="nav-item">
             <a
-              class="nav-link text-white"
-              routerLink="/services/list"
-              routerLinkActive="active"
-              >Lista de Empresas</a
+              class="nav-link dropdown-toggle text-white"
+              data-bs-toggle="collapse"
+              href="#configuracionMenu"
+              role="button"
+              aria-expanded="false"
+              aria-controls="configuracionMenu"
             >
-          </li>
-          <li>
-            <a
-              class="nav-link text-white"
-              routerLink="/services/form"
-              routerLinkActive="active"
-              >Registrar Empresa</a
-            >
-          </li>
+              Configuración
+            </a>
+            <div class="collapse" id="configuracionMenu">
+              <ul class="nav flex-column ms-3">
+                <li>
+                  <a
+                    class="nav-link text-white"
+                    routerLink="providers/config/company"
+                    routerLinkActive="active"
+                    >Empresas</a
+                  >
+                </li>
+                <li>
+                  <a
+                    class="nav-link text-white"
+                    routerLink="providers/config/service"
+                    routerLinkActive="active"
+                    >Servicios</a
+                  >
+                </li>
+              </ul>
+            </div>
+          </div>
         </ul>
       </div>
     </div>
@@ -125,16 +151,17 @@
           <li>
             <a
               class="nav-link text-white"
-              routerLink="/inventories"
-              routerLinkActive="active"
-              >Lista de Inventario</a
-            >
-          </li>          <li>
-            <a
-              class="nav-link text-white"
               routerLink="/inventory/dashboard"
               routerLinkActive="active"
-              >Graficos</a
+              >Gráficos
+            </a>
+          </li>
+          <li>
+            <a
+              class="nav-link text-white"
+              routerLink="/inventories"
+              routerLinkActive="active"
+              >Lista</a
             >
           </li>
           <li>
@@ -142,7 +169,7 @@
               class="nav-link text-white"
               routerLink="/articles/article"
               routerLinkActive="active"
-              >Registrar Inventario</a
+              >Registrar</a
             >
           </li>
 

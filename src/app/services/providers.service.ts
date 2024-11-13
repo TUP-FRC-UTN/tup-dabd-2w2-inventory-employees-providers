@@ -1,7 +1,7 @@
 import { Injectable } from '@angular/core';
 import { HttpClient, HttpParams } from '@angular/common/http';
 import { Observable } from 'rxjs';
-import { Supplier } from '../models/supplier.model';
+import { Supplier } from '../models/suppliers/supplier.model';
 import { PaginatedResponse } from '../models/api-response';
 
 @Injectable({
@@ -12,52 +12,42 @@ export class ProvidersService {
 
   constructor(private http: HttpClient) {}
 
-  // getProviders(filters?: {
-  //   name?: string,
-  //   cuil?: string,
-  //   service?: string,
-  //   addressId?: number,
-  //   enabled?: boolean,
-  //   phoneNumber?: string
-  // }): Observable<Supplier[]> {
-  //   let params = new HttpParams();
-    
-  //   if (filters) {
-  //     Object.keys(filters).forEach(key => {
-  //       const value = filters[key as keyof typeof filters];
-  //       if (value !== undefined && value !== '') {
-  //         params = params.append(key, value.toString());
-  //       }
-  //     });
-  //   }
-    
-  //   return this.http.get<Supplier[]>(this.apiUrl, { params });
-  // }
-
   getProviders(filters?: {
-    name?: string,
-    cuil?: string,
-    service?: string,
-    addressId?: number,
-    enabled?: boolean,
-    phoneNumber?: string,
     page?: number,
     size?: number
-  }): Observable<PaginatedResponse<Supplier>> {
+    name?: string,
+    cuil?: string,
+    contact?: string,
+    address?: string,
+    enabled?: boolean,
+    'company.name'?: string,
+    'service.name'?: string,
+    start?: string,
+    end?: string
+}): Observable<PaginatedResponse<Supplier>> {
     let params = new HttpParams();
   
     if (filters) {
       Object.keys(filters).forEach(key => {
         const value = filters[key as keyof typeof filters];
-        if (value !== undefined && value !== '') {
+        // Verificación especial para fechas
+        if (value !== undefined && value !== '' && value !== null) {
+          // Para fechas, asegurarse de que sean fechas válidas
+          if ((key === 'start' || key === 'end') && !this.isValidDate(value as string)) {
+            return;
+          }
           params = params.append(key, value.toString());
         }
       });
     }
     return this.http.get<PaginatedResponse<Supplier>>(`${this.apiUrl}/pageable`, { params });
-  }
-  
-  
+}
+
+// Método auxiliar para validar fechas
+private isValidDate(dateString: string): boolean {
+  const date = new Date(dateString);
+  return date instanceof Date && !isNaN(date.getTime());
+}
 
   getProviderById(id: number): Observable<Supplier> {
     return this.http.get<Supplier>(`${this.apiUrl}/${id}`);

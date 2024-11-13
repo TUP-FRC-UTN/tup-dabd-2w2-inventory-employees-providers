@@ -5,8 +5,7 @@
     <div class="input-group w-25">
       <span class="input-group-text"><i class="bi bi-search"></i></span>
       <input type="text" class="form-control" placeholder="Buscar empleado..." [formControl]="searchFilter" />
-      <button type="button" class="btn btn-outline-info" (click)="openModalFilters()"><i
-          class="bi bi-funnel-fill"></i></button>
+      <app-table-filters style="z-index: 1;" [filters]="filterConfig" (filterValueChange)="filterChange($event)"></app-table-filters>
     </div>
     <div class="d-flex align-items-center">
       <button type="button" class="btn btn-outline-primary me-2" [routerLink]="['/employees/form']">
@@ -78,6 +77,11 @@
                     <a class="dropdown-item" (click)="showDetailModal(detailModal, employee.id)" title="Ver"
                       aria-disabled="true">
                       Ver detalles
+                    </a>
+                  </li>
+                  <li>
+                    <a class="dropdown-item" (click)="showEmployeeAccess(employee.id)" title="Ver accessos">
+                      Ver accesos
                     </a>
                   </li>
                   <li>
@@ -181,7 +185,6 @@
       </div>
     </div>
   </div>
-
 </app-main-container>
 
 <ng-template #detailModal let-modal>
@@ -267,3 +270,5 @@
     <button type="button" class="btn btn-secondary" (click)="modal.close()">Cerrar</button>
   </div>
 </ng-template>
+
+<app-employee-view-acess #employeeAccess></app-employee-view-acess>

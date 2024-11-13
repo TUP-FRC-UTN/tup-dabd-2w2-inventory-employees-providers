@@ -1,10 +1,10 @@
 import { Component, CUSTOM_ELEMENTS_SCHEMA, ElementRef, inject, OnInit, TemplateRef, ViewChild } from '@angular/core';
-import { CommonModule } from '@angular/common';
+import { CommonModule, DatePipe } from '@angular/common';
 import { ReactiveFormsModule, FormsModule, FormBuilder, FormControl, FormGroup } from '@angular/forms';
 import { NgbModal, NgbPaginationModule } from '@ng-bootstrap/ng-bootstrap';
 import { Router, RouterModule } from '@angular/router';
 import { ProvidersService } from '../../../services/providers.service';
-import { Supplier } from '../../../models/supplier.model';
+import { Supplier } from '../../../models/suppliers/supplier.model';
 import { ToastService, MainContainerComponent, ConfirmAlertComponent } from 'ngx-dabd-grupo01';
 import { debounceTime, distinctUntilChanged } from 'rxjs';
 import * as XLSX from 'xlsx';
@@ -12,6 +12,7 @@ import jsPDF from 'jspdf';
 import autoTable from 'jspdf-autotable';
 import { Chart, ChartType, registerables } from 'chart.js';
 import { ProviderListInfoComponent } from './provider-list-info/provider-list-info.component';
+import { TableFiltersComponent, Filter, FilterConfigBuilder } from 'ngx-dabd-grupo01';
 
 Chart.register(...registerables);
 
@@ -25,23 +26,25 @@ Chart.register(...registerables);
     RouterModule,
     MainContainerComponent,
     ConfirmAlertComponent,
-    NgbPaginationModule
+    NgbPaginationModule,
+    TableFiltersComponent
   ],
+  providers:[DatePipe],
   templateUrl: './provider-list.component.html',
   styleUrls: ['./provider-list.component.css'],
   schemas: [CUSTOM_ELEMENTS_SCHEMA]
 })
 export class ProviderListComponent implements OnInit {
-  @ViewChild('pieChart') pieChartRef!: ElementRef;
+  //@ViewChild('pieChart') pieChartRef!: ElementRef;
   @ViewChild('providersTable') providersTable!: ElementRef;
   @ViewChild('infoModal') infoModal!: TemplateRef<any>;
 
   providerList: Supplier[] = [];
   filteredProviders: Supplier[] = [];
-  private originalProviders: Supplier[] = [];
+  originalProviders: Supplier[] = [];
   isLoading = false;
 
-  searchFilterAll = new FormControl('');
+  searchFilterAll:FormControl = new FormControl('');
   filterForm: FormGroup;
 
   showModalFilter: boolean = false;
@@ -50,6 +53,7 @@ export class ProviderListComponent implements OnInit {
   totalPages:number = 1;
   totalItems: number = 0;
   pageSize: number = 10;
+  currentFilters! : Record<string,any>;
 
   activeCount: number = 0;
   inactiveCount: number = 0;
@@ -62,14 +66,56 @@ export class ProviderListComponent implements OnInit {
   private modalService = inject(NgbModal);
   private toastService = inject(ToastService);
 
+  filterConfig: Filter[] = new FilterConfigBuilder()
+  .textFilter(
+    'Nombre',
+    'name',
+    ''
+  )
+  .textFilter(
+    'CUIL',
+    'cuil',
+    ''
+  )
+  .textFilter(
+    'Servicio',
+    'service',
+    ''
+  )
+  .textFilter(
+    'Número de Teléfono',
+    'phone',
+    ''
+  )
+  .selectFilter(
+    'Estado',
+    'enabled',
+    'Seleccione un Estado',
+    [
+      { value: '', label: 'Todos' },
+      { value: 'true', label: 'Activo' },
+      { value: 'false', label: 'Inactivo' }
+    ]
+  )
+  .build();
+
+  filterChange($event: Record<string, any>) {
+    const filters = $event;
+    this.currentFilters = filters;
+    this.getProviders();
+  }
+
   constructor(private fb: FormBuilder) {
     this.filterForm = this.fb.group({
       name: [''],
       cuil: [''],
-      service: [''],
+      'service.name': [''],
+      'company.name': [''],
       contact: [''],
       address: [''],
-      enabled: ['']
+      enabled: [''],
+      start: [''],    // Nueva fecha de inicio
+      end: ['']       // Nueva fecha de fin
     });
 
     // Configure global search with debounce
@@ -79,52 +125,80 @@ export class ProviderListComponent implements OnInit {
         distinctUntilChanged()
       )
       .subscribe(searchTerm => {
-        this.getProviders(this.currentPage - 1, this.pageSize, searchTerm || '');
+
+        this.filterProviders(searchTerm || '');
+
       });
   }
+  
+  searchProviders(searchTerm:string){
+    if (!this.searchFilterAll.value||this.searchFilterAll.value==null) {
+      this.getProviders();
+   }
+
+   this.providerList = this.providerList.filter(p =>
+     p.name.toLowerCase().includes(searchTerm.toLowerCase() ?? '')
+     ||p.details?.toLowerCase().includes(searchTerm.toLowerCase() ?? '')
+     ||p.service.name.toLowerCase().includes(searchTerm.toLowerCase() ?? '')
+   );  }
+
+  // Nuevo método para filtrado local
+private filterProviders(searchTerm: string): void {
+  if (!searchTerm) {
+      this.providerList = [...this.originalProviders];
+      return;
+  }
+
+  const term = searchTerm.toLowerCase().trim();
+  this.providerList = this.originalProviders.filter(provider => 
+      // Buscar en todos los campos visibles
+      provider.name.toLowerCase().includes(term) ||
+      provider.cuil.toLowerCase().includes(term) ||
+      provider.service?.name.toLowerCase().includes(term) ||
+      provider.company?.name.toLowerCase().includes(term) ||
+      provider.contact.toLowerCase().includes(term) ||
+      provider.address.toLowerCase().includes(term)
+  );
+
+  // Actualizar métricas y gráficos con los datos filtrados
+  this.calculateMetrics();
+  // this.createPieChart();
+  this.createBarChart();
+}
 
   ngOnInit(): void {
     this.getProviders();
   }
 
-  getProviders(page: number = 0, size: number = this.pageSize, searchTerm?: string): void {
-    this.isLoading = true;
-    
-    const filters = {
+// Modificar getProviders para guardar la lista original
+getProviders(page: number = 0, size: number = this.pageSize): void {
+  this.isLoading = true;
+  
+  const filters = {
       ...this.getFilters(),
       page,
       size
-    };
-  
-    if (searchTerm) {
-      filters.name = searchTerm;
-      filters.cuil = searchTerm;
-      filters.service = searchTerm;
-      filters.contact = searchTerm;
-      filters.address = searchTerm;
-    }
-  
-    this.providerService.getProviders(filters).subscribe({
+  };
+
+  this.providerService.getProviders(filters).subscribe({
       next: (response) => {
-        this.providerList = response.content;
-        this.originalProviders = response.content;
-        this.filteredProviders = response.content;
-        this.totalItems = response.totalElements;
-        // Calculate total pages
-        this.totalPages = Math.ceil(this.totalItems / this.pageSize);
-        this.isLoading = false;
-  
-        this.calculateMetrics();
-        this.createPieChart();
-        this.createBarChart();
+          this.originalProviders = response.content;  // Guardar la lista original
+          this.providerList = [...this.originalProviders];  // Copia inicial
+          this.totalItems = response.totalElements;
+          this.totalPages = Math.ceil(this.totalItems / this.pageSize);
+          this.isLoading = false;
+          
+          this.calculateMetrics();
+          // this.createPieChart();
+          this.createBarChart();
       },
       error: (error) => {
-        console.error('Error fetching providers:', error);
-        this.toastService.sendError('Error al cargar proveedores.');
-        this.isLoading = false;
+          console.error('Error fetching providers:', error);
+          this.toastService.sendError('Error al cargar proveedores.');
+          this.isLoading = false;
       }
-    });
-  }
+  });
+}
 
   private getFilters(): any {
     const formValues = this.filterForm.value;
@@ -142,11 +216,23 @@ export class ProviderListComponent implements OnInit {
   }
 
   applyFilters(): void {
-    this.currentPage = 1; // Reset to first page when applying filters
-    this.getProviders(0, this.pageSize); // Get first page with new filters
+    const filters = this.filterForm.value;
+    
+    // Solo incluir fechas si ambas están presentes y son válidas
+    if (filters.start && filters.end) {
+        const startDate = new Date(filters.start);
+        const endDate = new Date(filters.end);
+        
+        if (endDate < startDate) {
+            this.toastService.sendError('La fecha final no puede ser anterior a la fecha inicial');
+            return;
+        }
+    }
+    
+    this.currentPage = 1;
+    this.getProviders(0, this.pageSize);
     this.closeModalFilter();
-  }
-
+}
   clearFilters(): void {
     this.filterForm.reset();
     this.currentPage = 1;
@@ -171,15 +257,13 @@ export class ProviderListComponent implements OnInit {
     this.inactiveCount = this.providerList.filter(provider => provider.enabled === false).length;
 
     this.serviceCountMap = this.providerList.reduce((acc, provider) => {
-      const service = provider.service;
-      if (service) {
-        acc[service] = (acc[service] || 0) + 1;
-      }
+      const serviceName = provider.service?.name || 'Sin servicio';
+      acc[serviceName] = (acc[serviceName] || 0) + 1;
       return acc;
     }, {} as { [key: string]: number });
   }
 
-  createPieChart(): void {
+  /*createPieChart(): void {
     if (this.pieChart) {
       this.pieChart.destroy();
     }
@@ -202,7 +286,7 @@ export class ProviderListComponent implements OnInit {
         }
       }
     });
-  }
+  }*/
 
   createBarChart(): void {
     if (this.barChart) {
@@ -263,55 +347,60 @@ export class ProviderListComponent implements OnInit {
 
   exportToPDF(): void {
     const doc = new jsPDF();
-    const tableColumn = ['Nombre', 'CUIL', 'Tipo de servicio', 'Dirección', 'Numero de Telefono', 'Estado'];
+    const tableColumn = ['Nombre', 'CUIL', 'Servicio', 'Compañía', 'Dirección', 'Contacto', 'Registro', 'Estado'];
     const tableRows: any[][] = [];
-
+  
     this.providerList.forEach((provider) => {
       const providerData = [
         provider.name,
         provider.cuil,
-        provider.service,
+        provider.service?.name,
+        provider.company?.name,
         provider.address,
         provider.contact,
+        provider.registration ? new Date(provider.registration).toLocaleDateString() : '',
         provider.enabled ? 'Activo' : 'Inactivo'
       ];
       tableRows.push(providerData);
     });
-
+  
     autoTable(doc, {
       head: [tableColumn],
       body: tableRows,
     });
-
+  
     doc.save('proveedores.pdf');
   }
+
 
   private createTableFromData(): HTMLTableElement {
     const table = document.createElement('table');
     const thead = table.createTHead();
     const tbody = table.createTBody();
-
+  
     const headerRow = thead.insertRow();
-    ['Nombre', 'CUIL', 'Tipo de servicio', 'Contacto', 'Estado'].forEach(text => {
+    ['Nombre', 'CUIL', 'Servicio', 'Compañía', 'Contacto', 'Registro', 'Estado'].forEach(text => {
       const th = document.createElement('th');
       th.textContent = text;
       headerRow.appendChild(th);
     });
-
+  
     this.providerList.forEach((provider) => {
       const row = tbody.insertRow();
       [
         provider.name,
         provider.cuil,
-        provider.service,
+        provider.service.name,
+        provider.company.name,
         provider.contact,
+        provider.registration,
         provider.enabled ? 'Activo' : 'Inactivo'
       ].forEach((text) => {
         const cell = row.insertCell();
         cell.textContent = text;
       });
     });
-
+  
     return table;
   }
 
