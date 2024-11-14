@@ -256,73 +256,58 @@
 
   <!-- Gráficos -->
   <div class="row g-4 mb-4">
-    <!-- Estado de Proveedores -->
-    <div class="col-md-4">
-      <div class="card border-0 shadow-lg rounded-4 h-100">
-        <div class="card-body">
-          <h5 class="card-title text-secondary">Estado de Proveedores</h5>
-          <div class="chart-container" style="height: 300px;">
-            <canvas baseChart
-              [data]="pieChartData"
-              [options]="chartConfigs.pieChart"
-              [type]="'pie'">
-            </canvas>
+      <!-- Estado de Proveedores -->
+      <div class="col-md-4">
+        <div class="card border-0 shadow-lg rounded-4 h-100">
+          <div class="card-body">
+            <h5 class="card-title text-secondary">Estado de Proveedores</h5>
+            <div class="chart-container" style="height: 300px;">
+              <canvas baseChart
+                [data]="pieChartData"
+                [options]="chartConfigs.pieChart"
+                [type]="'pie'">
+              </canvas>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Distribución por Servicio -->
+      <div class="col-md-8">
+        <div class="card border-0 shadow-lg rounded-4 h-100">
+          <div class="card-body">
+            <h5 class="card-title text-secondary">Distribución por Servicio</h5>
+            <div class="chart-container" style="height: 300px;">
+              <canvas baseChart
+                [data]="barChartData"
+                [options]="chartConfigs.barChart"
+                [type]="'bar'">
+              </canvas>
+            </div>
           </div>
         </div>
       </div>
     </div>
 
-    <!-- Distribución por Servicio -->
-    <div class="col-md-8">
-      <div class="card border-0 shadow-lg rounded-4 h-100">
-        <div class="card-body">
-          <h5 class="card-title text-secondary">Distribución por Servicio</h5>
-          <div class="chart-container" style="height: 300px;">
-            <canvas baseChart
-              [data]="barChartData"
-              [options]="chartConfigs.barChart"
-              [type]="'bar'">
-            </canvas>
+    <!-- Gráficos adicionales -->
+    <div class="row g-4">
+      <!-- Tipos de Servicios -->
+      <div class="col-md-6">
+        <div class="card border-0 shadow-lg rounded-4 h-100">
+          <div class="card-body">
+            <h5 class="card-title text-secondary">Tipos de Servicios</h5>
+            <div class="chart-container" style="height: 300px;">
+              <canvas baseChart
+                [data]="doughnutChartData"
+                [options]="chartConfigs.doughnutChart"
+                [type]="'doughnut'">
+              </canvas>
+            </div>
           </div>
         </div>
       </div>
+    
     </div>
-  </div>
-
-  <!-- Gráficos adicionales -->
-  <div class="row g-4">
-    <!-- Tipos de Servicios -->
-    <div class="col-md-6">
-      <div class="card border-0 shadow-lg rounded-4 h-100">
-        <div class="card-body">
-          <h5 class="card-title text-secondary">Tipos de Servicios</h5>
-          <div class="chart-container" style="height: 300px;">
-            <canvas baseChart
-              [data]="doughnutChartData"
-              [options]="chartConfigs.doughnutChart"
-              [type]="'doughnut'">
-            </canvas>
-          </div>
-        </div>
-      </div>
-    </div>
-
-    <!-- Distribución Geográfica -->
-    <div class="col-md-6">
-      <div class="card border-0 shadow-lg rounded-4 h-100">
-        <div class="card-body">
-          <h5 class="card-title text-secondary">Distribución por Zona</h5>
-          <div class="chart-container" style="height: 300px;">
-            <canvas baseChart
-              [data]="horizontalBarChartData"
-              [options]="chartConfigs.horizontalBarChart"
-              [type]="'bar'">
-            </canvas>
-          </div>
-        </div>
-      </div>
-    </div>
-  </div>
 
   <!-- Modal de Filtros -->
   <div class="modal" [class.show]="showModalFilter" [style.display]="showModalFilter ? 'block' : 'none'">
