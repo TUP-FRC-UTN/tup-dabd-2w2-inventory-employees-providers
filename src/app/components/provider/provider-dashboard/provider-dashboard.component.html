@@ -1,31 +1,346 @@
-<app-main-container title="Graficos" (infoButtonClick)="showInfo()">
-  <!-- Header con búsqueda y filtros -->
-  <div class="d-flex justify-content-between align-items-center mb-3">
-    <!-- Sección de búsqueda y filtros -->
+<app-main-container title="Dashboard de Proveedores" (infoButtonClick)="showInfo()">
+  <!-- Barra de búsqueda y filtros -->
+  <div class="d-flex justify-content-between align-items-center mb-4">
     <div class="input-group w-25">
-        <span class="input-group-text">
-          <i class="bi bi-search"></i>
-        </span>
+      <span class="input-group-text">
+        <i class="bi bi-search"></i>
+      </span>
+      <input 
+        type="text" 
+        class="form-control" 
+        [formControl]="searchFilterAll"
+        placeholder="Buscar proveedores..."
+      >
+      <button
+        type="button"
+        class="btn btn-outline-info"
+        (click)="openModalFilter()"
+        title="Abrir filtros"
+      >
+        <i class="bi bi-funnel-fill"></i>
+      </button>
+    </div>
+  </div>
 
-        <button
-          type="button"
-          class="btn btn-outline-info dropdown-toggle"
-          data-bs-toggle="dropdown"
-          aria-expanded="false"
-        >
-          <i class="bi bi-funnel-fill"></i>
-        </button>
+  <!-- KPIs Principales -->
+  <div class="row g-4 mb-4">
+    <!-- Totales -->
+    <div class="col-md-3">
+      <div class="card shadow-sm">
+        <div class="card-body">
+          <div class="d-flex align-items-center mb-2">
+            <div class="icon-circle bg-primary text-white me-3">
+              <i class="bi bi-people"></i>
+            </div>
+            <h6 class="card-subtitle mb-2">Proveedores Registrados</h6>
+          </div>
+          
+          <div class="d-flex align-items-baseline mt-2">
+            <h2 class="card-title mb-0">{{metrics.activeCount}}</h2>
+            <div class="ms-2" *ngIf="metrics.monthlyGrowthRate !== 0">
+              <span class="badge" 
+                    [ngClass]="{
+                      'bg-success': metrics.providersGrowthCount > 0,
+                      'bg-danger': metrics.providersGrowthCount < 0,
+                      'bg-secondary': metrics.providersGrowthCount === 0
+                    }">
+                <i class="bi" [ngClass]="{
+                  'bi-arrow-up': metrics.providersGrowthCount > 0,
+                  'bi-arrow-down': metrics.providersGrowthCount < 0
+                }"></i>
+                {{metrics.monthlyGrowthRate | number:'1.0-1'}}%
+              </span>
+            </div>
+          </div>
+    
+          <div class="mt-2">
+            <small [ngClass]="{
+              'text-muted': metrics.providersGrowthCount === 0,
+              'text-success': metrics.providersGrowthCount > 0,
+              'text-danger': metrics.providersGrowthCount < 0
+            }">
+              {{getGrowthDescription()}}
+            </small>
+          </div>
+    
+          <div class="mt-3 pt-2 border-top">
+            <div class="row g-0">
+              <div class="col-6">
+                <small class="text-muted d-block">{{getMonthName(1) | titlecase}}</small>
+                <span class="fw-medium">{{metrics.previousProvidersCount}}</span>
+              </div>
+              <div class="col-6">
+                <small class="text-muted d-block">{{getMonthName() | titlecase}}</small>
+                <span class="fw-medium">{{metrics.currentMonthCount}}</span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Activación -->
+    <div class="col-md-3">
+      <div class="card shadow-sm">
+        <div class="card-body">
+          <div class="d-flex align-items-center mb-2">
+            <div class="icon-circle bg-success text-white me-3">
+              <i class="bi bi-activity"></i>
+            </div>
+            <h6 class="card-subtitle mb-2">Tasa de Activación</h6>
+          </div>
+          <h2 class="card-title mb-0">{{metrics.activationRate}}%</h2>
+          <div class="mt-2">
+            <small class="text-muted" >{{metrics.activeCount}} proveedores activos</small>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Servicios -->
+    <div class="col-md-3">
+      <div class="card shadow-sm ">
+        <div class="card-body">
+          <div class="d-flex align-items-center mb-2">
+            <div class="icon-circle bg-purple text-white me-3">
+              <i class="bi bi-briefcase"></i>
+            </div>
+            <h6 class="card-subtitle mb-2">Servicios Únicos</h6>
+          </div>
+          
+          <h2 class="card-title mb-0">{{metrics.uniqueServicesCount}}</h2>
+          <div class="mt-2">
+            <small class="text-muted">{{metrics.avgProvidersPerService}} prov. por servicio</small>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Empresas -->
+    <div class="col-md-3">
+      <div class="card shadow-sm ">
+        <div class="card-body">
+          <div class="d-flex align-items-center mb-2">
+            <div class="icon-circle bg-gray text-white me-3">
+              <i class="bi bi-building"></i>
+            </div>
+            <h6 class="card-subtitle mb-2">Empresas Registradas</h6>
+          </div>
+          <div class="d-flex align-items-baseline">
+            <h2 class="card-title mb-0">{{metrics.uniqueCompaniesCount}}</h2>
+            <span class="ms-2 badge" 
+                  [ngClass]="metrics.companiesGrowthRate > 0 ? 'bg-success' : 'bg-danger'">
+              {{metrics.companiesGrowthRate > 0 ? '+' : ''}}{{metrics.companiesGrowthRate | number:'1.0-1'}}%
+            </span>
+          </div>
+          
+          <div class="mt-2">
+            <small class="text-muted">
+              <span [class.text-success]="metrics.companiesGrowthCount > 0"
+                    [class.text-danger]="metrics.companiesGrowthCount < 0">
+                {{metrics.companiesGrowthCount > 0 ? '+' : ''}}{{metrics.companiesGrowthCount}}
+              </span>
+              empresas vs mes anterior
+            </small>
+          </div>
+    
+          <div class="progress mt-2" style="height: 4px;">
+            <div class="progress-bar" 
+                 [ngClass]="metrics.companiesGrowthRate > 0 ? 'bg-success' : 'bg-danger'"
+                 [style.width.%]="metrics.companiesGrowthRate > 0 ">
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- KPIs Servicios -->
+  <div class="row g-4 mb-5">
+    <!-- Servicios Esenciales -->
+    <div class="col-md-4">
+      <div class="card  shadow-sm ">
+        <div class="card-body">
+          <div class="d-flex align-items-center mb-2">
+            <div class="icon-circle bg-orange text-white me-3">
+              <i class="bi bi-shield-check"></i>
+            </div>
+            <h6 class="card-subtitle mb-2">Servicios Esenciales</h6>
+          </div>
+          
+          <h2 class="card-title mb-0">{{metrics.essentialServicesCount}}</h2>
+          <div class="mt-2">
+            <small class="text-muted">{{metrics.specializedServicesCount}} servicios especializados</small>
+          </div>
+        </div>
+      </div>
+    </div>
+    
+
+    <!-- Seguridad -->
+    <div class="col-md-4">
+      <div class="card shadow-sm ">
+        <div class="card-body">
+          <div class="d-flex align-items-center mb-2">
+            <div class="icon-circle bg-danger text-white me-3">
+              <i class="bi bi-lock"></i>
+            </div>
+            <h6 class="card-subtitle mb-2">Proveedores Seguridad</h6>
+          </div>
+          <h2 class="card-title mb-0">{{metrics.securityProvidersCount}}</h2>
+          <div class="mt-2">
+            <small class="text-muted">Servicio crítico</small>
+          </div>
+        </div>
+      </div>
+    </div>
+
+<!-- ESTO COMENTADO, LO DEJO PARA TERMINAR DE MODIFICAR DESPUES  -->
+
+    <!-- Mantenimiento
+    <div class="col-md-4">
+      <div class="card  shadow-sm ">
+        <div class="card-body">
+          <div class="d-flex align-items-center mb-2">
+            <div class="icon-circle bg-info text-white me-3">
+              <i class="bi bi-tools"></i>
+            </div>
+            <h6 class="card-subtitle text-muted mb-2">Mantenimiento</h6>
+          </div>
+          <h2 class="card-title mb-0">{{metrics.maintenanceProvidersCount}}</h2>
+          <div class="mt-2">
+            <small class="text-muted">{{metrics.gardeningProvidersCount}} jardinería</small>
+          </div>
+        </div>
+      </div>
+    </div> -->
+    <!-- KPI de Crecimiento de Empresas -->
+<!-- <div class="col-md-4">
+  <div class="card shadow-sm">
+    <div class="card-body">
+      <div class="d-flex align-items-center mb-2">
+        <div class="icon-circle bg-purple text-white me-3">
+          <i class="bi bi-graph-up-arrow"></i>
+        </div>
+        <h6 class="card-subtitle text-muted mb-2">Crecimiento de Empresas</h6>
+      </div>
       
-        <!-- Dropdown de Filtros -->
-        <div class="dropdown-menu p-3" style="width: 300px;">
+      <div class="d-flex align-items-baseline">
+        <h2 class="card-title mb-0">{{metrics.uniqueCompaniesCount}}</h2>
+        <span class="ms-2 badge" 
+              [ngClass]="metrics.companiesGrowthRate > 0 ? 'bg-success' : 'bg-danger'">
+          {{metrics.companiesGrowthRate > 0 ? '+' : ''}}{{metrics.companiesGrowthRate | number:'1.0-1'}}%
+        </span>
+      </div>
+      
+      <div class="mt-2">
+        <small class="text-muted">
+          <span [class.text-success]="metrics.companiesGrowthCount > 0"
+                [class.text-danger]="metrics.companiesGrowthCount < 0">
+            {{metrics.companiesGrowthCount > 0 ? '+' : ''}}{{metrics.companiesGrowthCount}}
+          </span>
+          empresas vs mes anterior
+        </small>
+      </div>
+
+      <div class="progress mt-2" style="height: 4px;">
+        <div class="progress-bar" 
+             [ngClass]="metrics.companiesGrowthRate > 0 ? 'bg-success' : 'bg-danger'"
+             [style.width.%]="metrics.companiesGrowthRate > 0 ">
+        </div>
+      </div>
+    </div>
+  </div>
+</div> -->
+  </div>
+
+  <!-- Gráficos -->
+  <div class="row g-4 mb-4">
+    <!-- Estado de Proveedores -->
+    <div class="col-md-4">
+      <div class="card border-0 shadow-lg rounded-4 h-100">
+        <div class="card-body">
+          <h5 class="card-title text-secondary">Estado de Proveedores</h5>
+          <div class="chart-container" style="height: 300px;">
+            <canvas baseChart
+              [data]="pieChartData"
+              [options]="chartConfigs.pieChart"
+              [type]="'pie'">
+            </canvas>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Distribución por Servicio -->
+    <div class="col-md-8">
+      <div class="card border-0 shadow-lg rounded-4 h-100">
+        <div class="card-body">
+          <h5 class="card-title text-secondary">Distribución por Servicio</h5>
+          <div class="chart-container" style="height: 300px;">
+            <canvas baseChart
+              [data]="barChartData"
+              [options]="chartConfigs.barChart"
+              [type]="'bar'">
+            </canvas>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Gráficos adicionales -->
+  <div class="row g-4">
+    <!-- Tipos de Servicios -->
+    <div class="col-md-6">
+      <div class="card border-0 shadow-lg rounded-4 h-100">
+        <div class="card-body">
+          <h5 class="card-title text-secondary">Tipos de Servicios</h5>
+          <div class="chart-container" style="height: 300px;">
+            <canvas baseChart
+              [data]="doughnutChartData"
+              [options]="chartConfigs.doughnutChart"
+              [type]="'doughnut'">
+            </canvas>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Distribución Geográfica -->
+    <div class="col-md-6">
+      <div class="card border-0 shadow-lg rounded-4 h-100">
+        <div class="card-body">
+          <h5 class="card-title text-secondary">Distribución por Zona</h5>
+          <div class="chart-container" style="height: 300px;">
+            <canvas baseChart
+              [data]="horizontalBarChartData"
+              [options]="chartConfigs.horizontalBarChart"
+              [type]="'bar'">
+            </canvas>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Modal de Filtros -->
+  <div class="modal" [class.show]="showModalFilter" [style.display]="showModalFilter ? 'block' : 'none'">
+    <div class="modal-dialog">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title">Filtros de Búsqueda</h5>
+          <button type="button" class="btn-close" (click)="closeModalFilter()" aria-label="Cerrar"></button>
+        </div>
+        <div class="modal-body">
           <form [formGroup]="filterForm">
             <div class="mb-3">
               <label class="form-label">Servicio</label>
               <input
                 type="text"
                 class="form-control"
-                placeholder="Servicio"
-                formControlName="service"
+                placeholder="Buscar por servicio"
+                formControlName="serviceName"
               />
             </div>
             <div class="mb-3">
@@ -36,59 +351,36 @@
                 <option [value]="false">Inactivo</option>
               </select>
             </div>
-            <div class="d-flex justify-content-between">
-              <button
-                type="button"
-                class="btn btn-outline-danger"
-                (click)="clearFilters()"
-              >
-                <i class="bi bi-trash"></i>
-              </button>
-              <button
-                type="button"
-                class="btn btn-primary"
-                (click)="applyFilters()"
-              >
-                Aplicar Filtros
-              </button>
+            <div class="mb-3">
+              <label class="form-label">Fecha de Registro</label>
+              <input
+                type="date"
+                class="form-control"
+                formControlName="registration"
+              />
             </div>
           </form>
         </div>
-    </div>   </div>
-      
-
-  <!-- Métricas -->
-  <div class="container mt-5">
-    <h3 class="text-center text-secondary">Métricas de Proveedores</h3>
-    <div class="row gy-4">
-  
-      <!-- Gráfico de torta y métricas -->
-      <div class="col-md-4">
-        <div class="card border-0 shadow-lg rounded-4">
-          <div class="card-body">
-            <h5 class="card-title text-secondary mb-3">Estado de Proveedores</h5>
-            <canvas #pieChart style="height: 200px;"></canvas>
-            <div class="mt-3">
-              <p><strong>Total Proveedores:</strong> {{ providerList.length }}</p>
-              <p><strong>Proveedores Activos:</strong> {{ activeCount }}</p>
-              <p><strong>Proveedores Inactivos:</strong> {{ inactiveCount }}</p>
-            </div>
-          </div>
+        <div class="modal-footer">
+          <button 
+            type="button" 
+            class="btn btn-outline-danger" 
+            (click)="clearFilters()"
+            title="Limpiar filtros"
+          >
+            <i class="bi bi-trash me-1"></i>
+            Limpiar
+          </button>
+          <button 
+            type="button" 
+            class="btn btn-primary" 
+            (click)="applyFilters()"
+          >
+            <i class="bi bi-check2 me-1"></i>
+            Aplicar
+          </button>
         </div>
       </div>
-  
-      <!-- Gráfico de barras para Proveedores por Tipo de Servicio -->
-      <div class="col-md-8">
-        <div class="card border-0 shadow-lg rounded-4">
-          <div class="card-body">
-            <h5 class="card-title text-secondary mb-3">Proveedores por Tipo de Servicio</h5>
-            <canvas id="barChart"></canvas>
-          </div>
-        </div>
-      </div>
-      
-
     </div>
   </div>
-
 </app-main-container>

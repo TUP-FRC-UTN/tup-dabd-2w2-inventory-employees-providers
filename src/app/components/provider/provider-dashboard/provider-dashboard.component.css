@@ -1,0 +1,76 @@
+.modal {
+  background-color: rgba(0, 0, 0, 0.5);
+}
+
+.chart-container {
+  position: relative;
+  height: 300px;
+  width: 100%;
+}
+
+/* Icon Styles */
+.icon-circle {
+width: 40px;
+height: 40px;
+border-radius: 50%;
+display: flex;
+align-items: center;
+justify-content: center;
+}
+
+.icon-circle i {
+font-size: 1.25rem;
+}
+:host {
+display: block;
+width: 100%;
+}
+
+.card {
+height: 100%;
+
+.card-body.fixed-height {
+  height: 400px;
+  display: flex;
+  flex-direction: column;
+}
+}
+
+.chart-wrapper {
+position: relative;
+flex: 1;
+min-height: 0; 
+height: 300px; 
+}
+
+.chart-info {
+margin-top: auto;
+padding-top: 1rem;
+}
+
+canvas {
+width: 100% !important;
+height: 100% !important;
+}
+
+
+.row {
+margin-right: 0;
+margin-left: 0;
+}
+
+.container {
+max-width: 1400px;
+}
+
+.bg-purple {
+background-color: #6f42c1; /* Color morado */
+}
+
+.bg-orange{
+background-color: #fd7e14; /* Color naranja */
+}
+
+.bg-gray{
+background-color: #6c757d; /* Color gris */
+}

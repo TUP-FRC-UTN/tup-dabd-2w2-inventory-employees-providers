@@ -4,6 +4,7 @@ import { FormArray, FormControl, FormGroup, ReactiveFormsModule, Validators } fr
 import { DaySchedule, EmployeeSchedule, ShiftType } from '../../../models/employee.model';
 import { EmployeesService } from '../../../services/employees.service';
 import { ToastService } from 'ngx-dabd-grupo01';
+import { Router } from '@angular/router';
 
 interface DayOfWeek {
   id: string;
@@ -21,10 +22,12 @@ export class EmployeeAccessComponent implements OnInit {
   // Inputs y Outputs
   @Input() employeeId?: number;
   @Output() schedulesSaved = new EventEmitter<void>();
+  @Output() closeModal = new EventEmitter<void>();
 
   // Services
   private scheduleService = inject(EmployeesService);
   private toast = inject(ToastService);
+  private router = inject(Router);
 
   // Variables de fecha
   today = new Date().toISOString().split('T')[0];
@@ -86,11 +89,11 @@ export class EmployeeAccessComponent implements OnInit {
       nonNullable: true,
     }),
     entryTime: new FormControl<string>(this.predefinedShifts[ShiftType.MORNING].entry, {
-      validators: [Validators.required, this.timeValidator()],
+      validators: [Validators.required],
       nonNullable: true,
     }),
     exitTime: new FormControl<string>(this.predefinedShifts[ShiftType.MORNING].exit, {
-      validators: [Validators.required, this.timeValidator()],
+      validators: [Validators.required],
       nonNullable: true,
     })
   });
@@ -189,6 +192,10 @@ export class EmployeeAccessComponent implements OnInit {
         console.log('Horario guardado exitosamente', response);
         this.toast.sendSuccess('Horario guardado exitosamente');
         this.resetForm();
+        this.closeModal.emit();
+        this.schedulesSaved.emit();
+        this.router.navigate(['/employees/list']);
+        
       },
       error: (error) => {
         console.log('Error al guardar el horario', error);
@@ -263,8 +270,8 @@ export class EmployeeAccessComponent implements OnInit {
 
       if (dateFrom.getDate() === now.getDate() && 
           dateFrom.getMonth() === now.getMonth() && 
-          dateFrom.getFullYear() === now.getFullYear() && 
-          selectedTime < now) {
+          dateFrom.getFullYear() === now.getFullYear()
+          ) {
         return { 'pastTime': true };
       }
       return null;

@@ -67,7 +67,7 @@ export class EmployeeListComponent implements OnInit {
     )
     .selectFilter(
       'Tipo de Empleado',
-      'employeeType',
+      'type',
       'Seleccione un Tipo',
       [
         { value: '', label: 'Todos' },
@@ -95,7 +95,12 @@ export class EmployeeListComponent implements OnInit {
     .build();
 
     filterChange($event: Record<string, any>) {
-      const filters = $event;
+      console.log('[Filter Change] Evento originl:', $event);
+
+      const filters = {
+        ...$event
+      };
+
       this.currentFilters = filters;
       this.getEmployees();
     }
@@ -155,25 +160,10 @@ export class EmployeeListComponent implements OnInit {
     this.isLoading = true;
 
     const filters = this.currentFilters;
+    console.log('Filters:', filters);
 
+    debugger
     this.employeeService.getAllEmployeesPaged(this.currentPage,this.pageSize,filters).subscribe({
-
-    /*const filters = {
-      page: this.currentPage,
-      size: this.pageSize,
-      firstName: this.filterForm.get('firstName')?.value || '',
-      lastName: this.filterForm.get('lastName')?.value || '',
-      type: this.filterForm.get('employeeType')?.value || '',
-      docType: this.filterForm.get('docType')?.value || '',
-      docNumber: this.filterForm.get('docNumber')?.value || '',
-      state: this.filterForm.get('state')?.value || '',
-      //date: this.filterForm.get('hiringDate')?.value || '',
-      date: this.formatearFecha(this.filterForm.get('hiringDate')?.value) || '',
-      salary: this.filterForm.get('salary')?.value || ''
-    };
-    
-
-    this.employeeService.getAllEmployeesPaged(filters).subscribe({*/
 
       next: (response) => {
         response = this.mapperService.toCamelCase(response);

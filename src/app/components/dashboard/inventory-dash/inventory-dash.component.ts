@@ -1,6 +1,7 @@
 import { Component, inject, OnInit } from '@angular/core';
 import { CommonModule, DecimalPipe } from '@angular/common';
 import { FormsModule } from '@angular/forms';
+import { BaseChartDirective } from 'ng2-charts';
 
 import { ChartConfiguration, ChartOptions } from 'chart.js';
 import { Article } from '../../../models/article.model';
@@ -15,7 +16,8 @@ import { MapperService } from '../../../services/MapperCamelToSnake/mapper.servi
   imports: [
     CommonModule,
     FormsModule,
-    DecimalPipe,
+    BaseChartDirective,
+    DecimalPipe
   ],
   templateUrl: './inventory-dash.component.html',
   styleUrls: ['./inventory-dash.component.css']
