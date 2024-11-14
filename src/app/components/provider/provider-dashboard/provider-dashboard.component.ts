@@ -69,7 +69,13 @@ export class ProviderDashboardComponent implements OnInit {
     companiesActivationRateChange: 0,
     isNegativeTrend: false,
     isNegativeTrendActive: false,
-    uniqueSuppliersCount: 0
+    uniqueSuppliersCount: 0,
+
+    //proveedores vs corporativos
+    independentProvidersCount: 0,
+    corporateProvidersCount: 0,
+    independentPercentage: 0,
+    corporatePercentage: 0,
   };
   previousProviderList: Supplier[] = [];
   previousCompaniesCount: number = 0;
