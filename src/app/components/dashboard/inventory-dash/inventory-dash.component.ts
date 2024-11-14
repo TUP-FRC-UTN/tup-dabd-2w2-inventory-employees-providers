@@ -8,6 +8,7 @@ import { Article } from '../../../models/article.model';
 import { Inventory, Transaction, TransactionType } from '../../../models/inventory.model';
 import { InventoryService } from '../../../services/inventory.service';
 import { MapperService } from '../../../services/MapperCamelToSnake/mapper.service';
+//import { BaseChartDirective } from 'ng2-charts';
 
 @Component({
   selector: 'app-inventory-dash',
