@@ -85,6 +85,11 @@
                     </a>
                   </li>
                   <li>
+                    <a class="dropdown-item" (click)="showEmployeeAssistance(employee.id)" title="Ver asistencias">
+                      Ver Asistencias
+                    </a>
+                  </li>
+                  <li>
                     <a class="dropdown-item text-danger" *ngIf="employee.state != 'DOWN'"
                       (click)="deleteEmployee(employee.id!)" title="Eliminar">
                       Eliminar
