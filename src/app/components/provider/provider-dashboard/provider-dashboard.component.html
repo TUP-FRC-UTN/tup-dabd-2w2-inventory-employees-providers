@@ -413,6 +413,27 @@
     </div>
   </div>
 
+  <!-- Proveedores registrados x mes -->
+  <div class="col-md-12">
+    <div class="card border-0 shadow-lg rounded-4 h-100">
+      <div class="card-body">
+        <div class="d-flex align-items-center mb-2">
+          <div class="icon-circle bg-indigo text-white me-3">
+            <i class="bi bi-calendar3"></i>
+          </div>
+          <h5 class="card-title text-secondary mb-0">Registro Mensual de Proveedores</h5>
+        </div>
+        <div class="chart-container" style="height: 300px;">
+          <canvas baseChart
+            [data]="monthlyRegistrationChartData"
+            [options]="chartConfigs.monthlyRegistrationChart"
+            [type]="'bar'">
+          </canvas>
+        </div>
+      </div>
+    </div>
+  </div>
+
   <!-- Modal de Filtros -->
   <div class="modal" [class.show]="showModalFilter" [style.display]="showModalFilter ? 'block' : 'none'">
     <div class="modal-dialog">
