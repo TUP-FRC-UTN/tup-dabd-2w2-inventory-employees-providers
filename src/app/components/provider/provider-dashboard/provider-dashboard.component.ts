@@ -623,4 +623,29 @@ export class ProviderDashboardComponent implements OnInit {
     }
     return `${months} mes${months > 1 ? 'es' : ''}`;
   }
+
+  private calculateTopProviders(): void {
+    // Filtrar solo proveedores activos
+    const activeProviders = this.providerList
+      .filter(provider => provider.enabled)
+      .map(provider => ({
+        name: provider.name,
+        companyName: provider.company?.name || 'Independiente',
+        serviceName: provider.service?.name || 'Sin servicio',
+        registrationDate: new Date(provider.registration),
+        timeActive: ''
+      }));
+  
+    // Ordenar por fecha de registro (más antiguos primero)
+    activeProviders.sort((a, b) => a.registrationDate.getTime() - b.registrationDate.getTime());
+  
+    // Tomar los top 5 y calcular su tiempo activo
+    this.topProviders = activeProviders
+      .slice(0, 5)
+      .map(provider => ({
+        ...provider,
+        timeActive: this.calculateTimeActive(provider.registrationDate)
+      }));
+  }
+  
 }
