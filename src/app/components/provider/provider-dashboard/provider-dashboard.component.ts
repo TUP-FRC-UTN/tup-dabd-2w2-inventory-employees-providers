@@ -134,6 +134,15 @@ export class ProviderDashboardComponent implements OnInit {
     }]
   };
 
+  companyBarChartData: ChartData<'bar'> = {
+    labels: [],
+    datasets: [{
+      data: [],
+      label: 'Cantidad de Proveedores',
+      backgroundColor: '#4CAF50'
+    }]
+  };
+
   constructor(
     private fb: FormBuilder,
     private providerService: ProvidersService,
