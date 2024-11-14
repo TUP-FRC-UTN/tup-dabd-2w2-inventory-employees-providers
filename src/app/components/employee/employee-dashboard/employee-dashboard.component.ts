@@ -11,6 +11,7 @@ import { MapperService } from '../../../services/MapperCamelToSnake/mapper.servi
 import { NgbModal } from '@ng-bootstrap/ng-bootstrap';
 import { EmployeeDashboardInfoComponent } from './employe-dashboard-info/employee-dashboard-info.component';
 import { ChartDataset, ChartOptions } from 'chart.js';
+import { ActiveEmployeesModalComponent } from './employee-enabled-modal/employee-enabled-modal.component';
 
 Chart.register(...registerables);
 
@@ -591,4 +592,16 @@ export class EmployeeDashboardComponent implements OnInit, AfterViewInit {
   formatNumber(value: number): string {
     return value.toFixed(1);
   }
+
+  showActiveEmployees(): void {
+    const activeEmployees = this.employeeList.filter(emp => emp.state === StatusType.ACTIVE);
+    
+    const modalRef = this.modalService.open(ActiveEmployeesModalComponent, {
+      size: 'lg',
+      centered: true
+    });
+    
+    modalRef.componentInstance.activeEmployees = activeEmployees;
+  }
+  
 }
