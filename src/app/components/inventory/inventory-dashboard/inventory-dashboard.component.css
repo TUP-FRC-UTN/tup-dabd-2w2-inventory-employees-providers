@@ -1,5 +1,25 @@
 /* Icon Styles */
 .icon-circle {
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .icon-circle i {
+    font-size: 1.25rem;
+  }
+
+  .card {
+    transition: transform 0.2s;
+  }
+  
+  .card:hover {
+    transform: translateY(-5px);
+  }
+
   width: 40px;
   height: 40px;
   border-radius: 50%;
@@ -65,3 +85,4 @@ canvas {
   font-size: 1rem;
   color: #000000;
 }
+

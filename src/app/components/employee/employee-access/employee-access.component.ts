@@ -21,6 +21,7 @@ interface DayOfWeek {
 export class EmployeeAccessComponent implements OnInit {
   // Inputs y Outputs
   @Input() employeeId?: number;
+  @Input() scheduleToEdit?: EmployeeSchedule;
   @Output() schedulesSaved = new EventEmitter<void>();
   @Output() closeModal = new EventEmitter<void>();
 
@@ -48,6 +49,8 @@ export class EmployeeAccessComponent implements OnInit {
     { id: 'SATURDAY', label: 'Sábado' },
     { id: 'SUNDAY', label: 'Domingo' }
   ];
+
+  isEditMode = false;
 
   shiftTypes = Object.values(ShiftType);
 
@@ -107,6 +110,11 @@ export class EmployeeAccessComponent implements OnInit {
   ngOnInit(): void {
     this.selectedDays = ['MONDAY', 'TUESDAY', 'WEDNESDAY', 'THURSDAY', 'FRIDAY'];
     
+    if (this.scheduleToEdit) {
+      this.isEditMode = true;
+      this.initializeEditForm();
+    }
+
     this.accessForm.get('shiftType')?.valueChanges.subscribe(shiftType => {
       if (shiftType) {
         const shift = this.predefinedShifts[shiftType as ShiftType];
@@ -142,11 +150,13 @@ export class EmployeeAccessComponent implements OnInit {
     this.selectedShift = shift;
     this.accessForm.get('shiftType')?.setValue(shift);
     
+    if (!this.isEditMode) {
     const predefinedShift = this.predefinedShifts[shift];
     this.accessForm.patchValue({
       entryTime: predefinedShift.entry,
       exitTime: predefinedShift.exit
     });
+    }
   }
 
   // Métodos de utilidad
@@ -276,5 +286,70 @@ export class EmployeeAccessComponent implements OnInit {
       }
       return null;
     };
+  }
+
+  updateSchedule(): void {
+    if (!this.isFormValid() || !this.employeeId || !this.scheduleToEdit) {
+      if (this.selectedDays.length === 0) {
+        this.showDaysError = true;
+      }
+      return;
+    }
+
+    const formValue = this.accessForm.value;
+    const daySchedules: { [key: string]: DaySchedule } = {};
+
+    this.selectedDays.forEach(day => {
+      daySchedules[day] = {
+        entry_time: formValue.entryTime!,
+        exit_time: formValue.exitTime!
+      };
+    });
+
+    const updatedSchedule: EmployeeSchedule = {
+    
+      employee_id: this.employeeId,
+      start_date: new Date(formValue.dateFrom!).toISOString(),
+      finish_date: new Date(formValue.dateTo!).toISOString(),
+      shift_type: formValue.shiftType!,
+      day_schedules: daySchedules
+    };
+
+    this.scheduleService.updateSchedule(updatedSchedule).subscribe({
+      next: (response) => {
+        console.log('Horario actualizado exitosamente', response);
+        this.toast.sendSuccess('Horario actualizado exitosamente');
+        this.resetForm();
+        this.closeModal.emit();
+        this.schedulesSaved.emit();
+        this.isEditMode = false;
+      },
+      error: (error) => {
+        console.error('Error al actualizar el horario', error);
+        this.toast.sendError('Error al actualizar el horario');
+      }
+    });
+  }
+
+  private initializeEditForm(): void {
+    if (!this.scheduleToEdit) return;
+
+    // Convert dates to YYYY-MM-DD format for input[type="date"]
+    const startDate = new Date(this.scheduleToEdit.start_date).toISOString().split('T')[0];
+    const endDate = new Date(this.scheduleToEdit.finish_date).toISOString().split('T')[0];
+
+    // Get first day schedule for times (assuming all days have same schedule)
+    const firstDaySchedule = Object.values(this.scheduleToEdit.day_schedules)[0];
+    
+    this.accessForm.patchValue({
+      dateFrom: startDate,
+      dateTo: endDate,
+      shiftType: this.scheduleToEdit.shift_type,
+      entryTime: firstDaySchedule?.entry_time?.substring(0, 5) || '',
+      exitTime: firstDaySchedule?.exit_time?.substring(0, 5) || ''
+    });
+
+    this.selectedShift = this.scheduleToEdit.shift_type;
+    this.selectedDays = Object.keys(this.scheduleToEdit.day_schedules);
   }
 }
