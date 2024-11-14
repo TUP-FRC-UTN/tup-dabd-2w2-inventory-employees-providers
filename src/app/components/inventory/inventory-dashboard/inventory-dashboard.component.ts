@@ -24,6 +24,7 @@ import { MapperService } from '../../../services/MapperCamelToSnake/mapper.servi
 import ChartDataLabels from 'chartjs-plugin-datalabels';
 import { NgbModal } from '@ng-bootstrap/ng-bootstrap';
 import { InventoryDashboardInfoComponent } from './inventory-dashboard-info/inventory-dashboard-info.component';
+import { Router } from '@angular/router';
 Chart.register(...registerables, ChartDataLabels);
 Chart.register(
   ArcElement,
@@ -69,6 +70,7 @@ export class InventoryDashboardComponent implements OnInit, AfterViewInit {
   inventoryService: InventoryService = inject(InventoryService);
   cdr: ChangeDetectorRef = inject(ChangeDetectorRef);
   private modalService = inject(NgbModal);
+  private router = inject(Router);
 
   metrics: InventoryMetrics = {
     totalItems: 0,
@@ -359,5 +361,9 @@ console.log("Total de artículos registrables en 'unidades':", this.metrics.tota
       centered: true,
       scrollable: true
     });
+  }
+
+  showInventoryItems(){
+    this.router.navigate(['/inventories']);
   }
 }
