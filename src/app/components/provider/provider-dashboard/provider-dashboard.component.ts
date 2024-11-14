@@ -802,9 +802,33 @@ private calculateIndependentVsCorporateMetrics(): void {
       };
     }
 
+    const chartConfig = this.chartConfigs.servicesByCompanyChart;
+    if (!chartConfig) return;
     // Configurar plugins
-    this.chartConfigs.servicesByCompanyChart.plugins = {
-      ...this.chartConfigs.servicesByCompanyChart.plugins,
+    // Configurar opciones específicas
+    if (chartConfig.scales) {
+      chartConfig.scales['x'] = {
+        stacked: true,
+        title: {
+          display: true,
+          text: 'Compañías'
+        }
+      };
+      chartConfig.scales['y'] = {
+        stacked: true,
+        title: {
+          display: true,
+          text: 'Cantidad de Proveedores'
+        },
+        ticks: {
+          stepSize: 1
+        }
+      };
+    }
+
+  // Configurar plugins con verificación de existencia
+    chartConfig.plugins = {
+      ...(chartConfig.plugins || {}),  // Si plugins no existe, usar un objeto vacío
       tooltip: {
         callbacks: {
           footer: (tooltipItems: any[]) => {
