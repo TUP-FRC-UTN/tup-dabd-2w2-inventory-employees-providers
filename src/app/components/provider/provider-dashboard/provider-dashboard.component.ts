@@ -116,7 +116,10 @@ export class ProviderDashboardComponent implements OnInit {
       'Distribución de Proveedores', 
       false, 
       'right'
-    )
+    ),
+
+    // Proveedores con servicios groupby company basicamente
+    servicesByCompanyChart: this.getChartConfig('bar', 'Distribución de Servicios por Compañía', true)
   };
 
   // Chart data
