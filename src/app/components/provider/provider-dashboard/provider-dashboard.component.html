@@ -329,6 +329,191 @@
 
   <!-- Gráficos -->
   <div class="row g-4 mb-4">
+    <div class="col-md-6">
+      <div class="card border-0 shadow-lg rounded-4 h-100">
+        <div class="card-body">
+          <h5 class="card-title text-secondary">Proveedores por Compañía</h5>
+          <div class="chart-container" style="height: 300px;">
+            <canvas baseChart
+              [data]="companyBarChartData"
+              [options]="chartConfigs.companyBarChart"
+              [type]="'bar'">
+            </canvas>
+          </div>
+        </div>
+      </div>
+    </div>
+  
+    <!-- Proveedores registrados x mes -->
+    <div class="col-md-6">
+      <div class="card border-0 shadow-lg rounded-4 h-100">
+        <div class="card-body">
+          <div class="d-flex align-items-center mb-2">
+            <div class="icon-circle bg-indigo text-white me-3">
+              <i class="bi bi-calendar3"></i>
+            </div>
+            <h5 class="card-title text-secondary mb-0">Registro Mensual de Proveedores</h5>
+          </div>
+          <div class="chart-container" style="height: 300px;">
+            <canvas baseChart
+              [data]="monthlyRegistrationChartData"
+              [options]="chartConfigs.monthlyRegistrationChart"
+              [type]="'bar'">
+            </canvas>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="row g-4 mb-4">
+      <!-- TOP PROVEEDORES ANTIGUOS -->
+    <div class="col-md-6">
+      <div class="card border-0 shadow-lg rounded-4">
+        <div class="card-body">
+          <div class="d-flex align-items-center mb-3">
+            <div class="icon-circle bg-info text-white me-3">
+              <i class="bi bi-trophy"></i>
+            </div>
+            <h5 class="card-title text-secondary mb-0">Top 5 Proveedores más Antiguos</h5>
+          </div>
+          
+          <!-- Lista de proveedores -->
+          <div class="top-providers-list">
+            <div *ngFor="let provider of topProviders; let i = index" 
+                class="provider-item p-3 mb-2 rounded-3"
+                [ngClass]="{'bg-light': i % 2 === 0}">
+              <div class="d-flex align-items-center">
+                <!-- Número de ranking -->
+                <div class="ranking-badge me-3">
+                  <span class="badge" 
+                        [ngClass]="{
+                          'bg-warning text-dark': i === 0,
+                          'bg-secondary text-white': i === 1,
+                          'bg-bronze text-white': i === 2,
+                          'bg-light text-dark': i > 2
+                        }">
+                    #{{i + 1}}
+                  </span>
+                </div>
+                
+                <!-- Información del proveedor -->
+                <div class="provider-info flex-grow-1">
+                  <h6 class="mb-1">{{provider.name}}</h6>
+                  <div class="small text-muted">
+                    <span class="me-2">
+                      <i class="bi bi-building"></i> {{provider.companyName}}
+                    </span>
+                    <span>
+                      <i class="bi bi-gear"></i> {{provider.serviceName}}
+                    </span>
+                  </div>
+                </div>
+                
+                <!-- Tiempo activo -->
+                <div class="time-active text-end">
+                  <span class="badge bg-success">
+                    {{provider.timeActive}}
+                  </span>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Prov Independientes vs Corporativos -->
+    <div class="col-md-6">
+      <div class="card border-0 shadow-lg rounded-4">
+        <div class="card-body">
+          <!-- Título con icono -->
+          <div class="d-flex align-items-center mb-3">
+            <div class="icon-circle bg-primary text-white me-3">
+              <i class="bi bi-pie-chart-fill"></i>
+            </div>
+            <h5 class="card-title text-secondary mb-0">Independientes vs Corporativos</h5>
+          </div>
+    
+          <!-- Contenedor de métricas -->
+          <div class="row mb-4">
+            <!-- Métricas de Independientes -->
+            <div class="col-6">
+              <div class="p-3 rounded-3 bg-light">
+                <div class="d-flex align-items-center">
+                  <div class="icon-circle bg-success text-white me-2" style="width: 30px; height: 30px;">
+                    <i class="bi bi-person"></i>
+                  </div>
+                  <div>
+                    <h6 class="mb-0">Independientes</h6>
+                    <div class="fs-4 fw-bold text-success">{{metrics.independentProvidersCount}}</div>
+                    <small class="text-muted">{{metrics.independentPercentage}}% del total</small>
+                  </div>
+                </div>
+              </div>
+            </div>
+            
+            <!-- Métricas de Corporativos -->
+            <div class="col-6">
+              <div class="p-3 rounded-3 bg-light">
+                <div class="d-flex align-items-center">
+                  <div class="icon-circle bg-primary text-white me-2" style="width: 30px; height: 30px;">
+                    <i class="bi bi-building"></i>
+                  </div>
+                  <div>
+                    <h6 class="mb-0">Corporativos</h6>
+                    <div class="fs-4 fw-bold text-primary">{{metrics.corporateProvidersCount}}</div>
+                    <small class="text-muted">{{metrics.corporatePercentage}}% del total</small>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+    
+          <!-- Gráfico -->
+          <div class="chart-container" style="height: 300px;">
+            <canvas baseChart
+              [data]="independentVsCorporateChartData"
+              [options]="chartConfigs.independentVsCorporateChart"
+              [type]="'doughnut'">
+            </canvas>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+  
+  <!-- PROVEEDORES POR SERVICIO PERO GROUPBY COMPANY -->
+  <div class="col-md-12">
+    <div class="card border-0 shadow-lg rounded-4">
+      <div class="card-body">
+        <!-- Título con icono -->
+        <div class="d-flex align-items-center mb-3">
+          <div class="icon-circle bg-gradient-primary text-white me-3">
+            <i class="bi bi-bar-chart-steps"></i>
+          </div>
+          <h5 class="card-title text-secondary mb-0">Distribución de Servicios por Compañía</h5>
+          <button class="btn btn-link ms-auto text-decoration-none" 
+                  placement="left"
+                  ngbTooltip="Cada barra muestra la distribución de servicios dentro de una compañía">
+            <i class="bi bi-info-circle"></i>
+          </button>
+        </div>
+  
+        <!-- Gráfico -->
+        <div class="chart-container" style="height: 400px;"> <!-- Altura aumentada para mejor visualización -->
+          <canvas baseChart
+            [data]="servicesByCompanyChartData"
+            [options]="chartConfigs.servicesByCompanyChart"
+            [type]="'bar'">
+          </canvas>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- QUE ES ESTO, HAY QUE QUITARLO YA -->
+  <div class="row g-4 mb-4 mt-2">
     <!-- Estado de Proveedores -->
     <div class="col-md-4">
       <div class="card border-0 shadow-lg rounded-4 h-100">
@@ -363,7 +548,7 @@
   </div>
 
   <!-- Gráficos adicionales -->
-  <div class="row g-4">
+  <div class="row g-4 mb-4">
     <!-- Tipos de Servicios -->
     <div class="col-md-6">
       <div class="card border-0 shadow-lg rounded-4 h-100">
@@ -392,186 +577,6 @@
               [type]="'bar'">
             </canvas>
           </div>
-        </div>
-      </div>
-    </div>
-  </div>
-
-  <!-- Proveedores por Compania -->
-  <div class="col-md-12">
-    <div class="card border-0 shadow-lg rounded-4 h-100">
-      <div class="card-body">
-        <h5 class="card-title text-secondary">Proveedores por Compañía</h5>
-        <div class="chart-container" style="height: 300px;">
-          <canvas baseChart
-            [data]="companyBarChartData"
-            [options]="chartConfigs.companyBarChart"
-            [type]="'bar'">
-          </canvas>
-        </div>
-      </div>
-    </div>
-  </div>
-
-  <!-- Proveedores registrados x mes -->
-  <div class="col-md-12">
-    <div class="card border-0 shadow-lg rounded-4 h-100">
-      <div class="card-body">
-        <div class="d-flex align-items-center mb-2">
-          <div class="icon-circle bg-indigo text-white me-3">
-            <i class="bi bi-calendar3"></i>
-          </div>
-          <h5 class="card-title text-secondary mb-0">Registro Mensual de Proveedores</h5>
-        </div>
-        <div class="chart-container" style="height: 300px;">
-          <canvas baseChart
-            [data]="monthlyRegistrationChartData"
-            [options]="chartConfigs.monthlyRegistrationChart"
-            [type]="'bar'">
-          </canvas>
-        </div>
-      </div>
-    </div>
-  </div>
-
-  <div class="col-md-4">
-    <div class="card border-0 shadow-lg rounded-4">
-      <div class="card-body">
-        <div class="d-flex align-items-center mb-3">
-          <div class="icon-circle bg-info text-white me-3">
-            <i class="bi bi-trophy"></i>
-          </div>
-          <h5 class="card-title text-secondary mb-0">Top 5 Proveedores más Antiguos</h5>
-        </div>
-        
-        <!-- Lista de proveedores -->
-        <div class="top-providers-list">
-          <div *ngFor="let provider of topProviders; let i = index" 
-               class="provider-item p-3 mb-2 rounded-3"
-               [ngClass]="{'bg-light': i % 2 === 0}">
-            <div class="d-flex align-items-center">
-              <!-- Número de ranking -->
-              <div class="ranking-badge me-3">
-                <span class="badge" 
-                      [ngClass]="{
-                        'bg-warning text-dark': i === 0,
-                        'bg-secondary text-white': i === 1,
-                        'bg-bronze text-white': i === 2,
-                        'bg-light text-dark': i > 2
-                      }">
-                  #{{i + 1}}
-                </span>
-              </div>
-              
-              <!-- Información del proveedor -->
-              <div class="provider-info flex-grow-1">
-                <h6 class="mb-1">{{provider.name}}</h6>
-                <div class="small text-muted">
-                  <span class="me-2">
-                    <i class="bi bi-building"></i> {{provider.companyName}}
-                  </span>
-                  <span>
-                    <i class="bi bi-gear"></i> {{provider.serviceName}}
-                  </span>
-                </div>
-              </div>
-              
-              <!-- Tiempo activo -->
-              <div class="time-active text-end">
-                <span class="badge bg-success">
-                  {{provider.timeActive}}
-                </span>
-              </div>
-            </div>
-          </div>
-        </div>
-      </div>
-    </div>
-  </div>
-
-  <!-- Prov Independientes vs Corporativos -->
-  <div class="col-md-6">
-    <div class="card border-0 shadow-lg rounded-4">
-      <div class="card-body">
-        <!-- Título con icono -->
-        <div class="d-flex align-items-center mb-3">
-          <div class="icon-circle bg-primary text-white me-3">
-            <i class="bi bi-pie-chart-fill"></i>
-          </div>
-          <h5 class="card-title text-secondary mb-0">Independientes vs Corporativos</h5>
-        </div>
-  
-        <!-- Contenedor de métricas -->
-        <div class="row mb-4">
-          <!-- Métricas de Independientes -->
-          <div class="col-6">
-            <div class="p-3 rounded-3 bg-light">
-              <div class="d-flex align-items-center">
-                <div class="icon-circle bg-success text-white me-2" style="width: 30px; height: 30px;">
-                  <i class="bi bi-person"></i>
-                </div>
-                <div>
-                  <h6 class="mb-0">Independientes</h6>
-                  <div class="fs-4 fw-bold text-success">{{metrics.independentProvidersCount}}</div>
-                  <small class="text-muted">{{metrics.independentPercentage}}% del total</small>
-                </div>
-              </div>
-            </div>
-          </div>
-          
-          <!-- Métricas de Corporativos -->
-          <div class="col-6">
-            <div class="p-3 rounded-3 bg-light">
-              <div class="d-flex align-items-center">
-                <div class="icon-circle bg-primary text-white me-2" style="width: 30px; height: 30px;">
-                  <i class="bi bi-building"></i>
-                </div>
-                <div>
-                  <h6 class="mb-0">Corporativos</h6>
-                  <div class="fs-4 fw-bold text-primary">{{metrics.corporateProvidersCount}}</div>
-                  <small class="text-muted">{{metrics.corporatePercentage}}% del total</small>
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
-  
-        <!-- Gráfico -->
-        <div class="chart-container" style="height: 300px;">
-          <canvas baseChart
-            [data]="independentVsCorporateChartData"
-            [options]="chartConfigs.independentVsCorporateChart"
-            [type]="'doughnut'">
-          </canvas>
-        </div>
-      </div>
-    </div>
-  </div>
-
-  <!-- PROVEEDORES POR SERVICIO PERO GROUPBY COMPANY -->
-  <div class="col-md-12">
-    <div class="card border-0 shadow-lg rounded-4">
-      <div class="card-body">
-        <!-- Título con icono -->
-        <div class="d-flex align-items-center mb-3">
-          <div class="icon-circle bg-gradient-primary text-white me-3">
-            <i class="bi bi-bar-chart-steps"></i>
-          </div>
-          <h5 class="card-title text-secondary mb-0">Distribución de Servicios por Compañía</h5>
-          <button class="btn btn-link ms-auto text-decoration-none" 
-                  placement="left"
-                  ngbTooltip="Cada barra muestra la distribución de servicios dentro de una compañía">
-            <i class="bi bi-info-circle"></i>
-          </button>
-        </div>
-  
-        <!-- Gráfico -->
-        <div class="chart-container" style="height: 400px;"> <!-- Altura aumentada para mejor visualización -->
-          <canvas baseChart
-            [data]="servicesByCompanyChartData"
-            [options]="chartConfigs.servicesByCompanyChart"
-            [type]="'bar'">
-          </canvas>
         </div>
       </div>
     </div>
