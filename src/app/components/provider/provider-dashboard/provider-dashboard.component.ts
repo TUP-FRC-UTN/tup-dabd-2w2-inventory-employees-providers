@@ -146,6 +146,16 @@ export class ProviderDashboardComponent implements OnInit {
     }]
   };
 
+  monthlyRegistrationChartData: ChartData<'bar'> = {
+    labels: [],
+    datasets: [{
+      data: [],
+      label: 'Proveedores Registrados',
+      backgroundColor: '#3f51b5', // Color índigo para diferenciarlo
+      borderRadius: 5 // Bordes redondeados para las barras
+    }]
+  };
+
   constructor(
     private fb: FormBuilder,
     private providerService: ProvidersService,
