@@ -520,4 +520,16 @@ export class ProviderDashboardComponent implements OnInit {
   closeModalFilter(): void {
     this.showModalFilter = false;
   }
+
+  // Suppliers x Compania
+
+  //metodo para calcular
+  private getCompanyDistribution(): { [key: string]: number } {
+    return this.providerList.reduce((acc, provider) => {
+      const companyName = provider.company?.name || 'Sin compañía';
+      acc[companyName] = (acc[companyName] || 0) + 1;
+      return acc;
+    }, {} as { [key: string]: number });
+  }
+  
 }
