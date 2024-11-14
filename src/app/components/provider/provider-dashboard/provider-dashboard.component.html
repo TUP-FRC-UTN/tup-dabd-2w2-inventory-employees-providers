@@ -25,7 +25,7 @@
   <!-- KPIs Principales -->
   <div class="row g-4 mb-4">
     <!-- Totales -->
-    <div class="col-md-3">
+    <div class="col-md-4">
       <div class="card shadow-sm">
         <div class="card-body">
           <div class="d-flex align-items-center mb-2">
@@ -80,7 +80,7 @@
     </div>
 
     <!-- Activación -->
-    <div class="col-md-3">
+    <div class="col-md-4">
       <div class="card shadow-sm">
         <div class="card-body">
           <!-- Título y badge de activación -->
@@ -144,7 +144,7 @@
     </div>
 
     <!-- Servicios -->
-    <div class="col-md-3">
+    <!-- <div class="col-md-3">
       <div class="card shadow-sm ">
         <div class="card-body">
           <div class="d-flex align-items-center mb-2">
@@ -160,10 +160,10 @@
           </div>
         </div>
       </div>
-    </div>
+    </div> -->
 
     <!-- Empresas -->
-<div class="col-md-3">
+<div class="col-md-4">
   <div class="card shadow-sm">
     <div class="card-body">
       <!-- Título y badge -->
@@ -231,7 +231,7 @@
   <!-- KPIs Servicios -->
   <div class="row g-4 mb-5">
     <!-- Servicios Esenciales -->
-    <div class="col-md-4">
+    <!-- <div class="col-md-4">
       <div class="card  shadow-sm ">
         <div class="card-body">
           <div class="d-flex align-items-center mb-2">
@@ -247,11 +247,11 @@
           </div>
         </div>
       </div>
-    </div>
+    </div> -->
     
 
     <!-- Seguridad -->
-    <div class="col-md-4">
+    <!-- <div class="col-md-4">
       <div class="card shadow-sm ">
         <div class="card-body">
           <div class="d-flex align-items-center mb-2">
@@ -266,7 +266,7 @@
           </div>
         </div>
       </div>
-    </div>
+    </div> -->
 
 <!-- ESTO COMENTADO, LO DEJO PARA TERMINAR DE MODIFICAR DESPUES  -->
 
@@ -515,21 +515,7 @@
 
   <!-- QUE ES ESTO, HAY QUE QUITARLO YA -->
   <div class="row g-4 mb-4 mt-2">
-    <!-- Estado de Proveedores -->
-    <div class="col-md-4">
-      <div class="card border-0 shadow-lg rounded-4 h-100">
-        <div class="card-body">
-          <h5 class="card-title text-secondary">Estado de Proveedores</h5>
-          <div class="chart-container" style="height: 300px;">
-            <canvas baseChart
-              [data]="pieChartData"
-              [options]="chartConfigs.pieChart"
-              [type]="'pie'">
-            </canvas>
-          </div>
-        </div>
-      </div>
-    </div>
+    
 
     <!-- Distribución por Servicio -->
     <div class="col-md-8">
@@ -560,22 +546,6 @@
               [data]="doughnutChartData"
               [options]="chartConfigs.doughnutChart"
               [type]="'doughnut'">
-            </canvas>
-          </div>
-        </div>
-      </div>
-    </div>
-
-    <!-- Distribución Geográfica -->
-    <div class="col-md-6">
-      <div class="card border-0 shadow-lg rounded-4 h-100">
-        <div class="card-body">
-          <h5 class="card-title text-secondary">Distribución por Zona</h5>
-          <div class="chart-container" style="height: 300px;">
-            <canvas baseChart
-              [data]="horizontalBarChartData"
-              [options]="chartConfigs.horizontalBarChart"
-              [type]="'bar'">
             </canvas>
           </div>
         </div>
