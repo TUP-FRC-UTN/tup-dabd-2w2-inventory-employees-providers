@@ -96,17 +96,15 @@
           <!-- Porcentaje principal y tendencia -->
           <div class="d-flex align-items-center">
             <h2 class="card-title mb-0">{{metrics.activationRate}}%</h2>
-            <div class="ms-2" *ngIf="metrics.activationRateChange !== 0">
-              <span class="badge" 
-                    [ngClass]="{
-                      'bg-success': metrics.activationRateChange > 0,
-                      'bg-danger': metrics.activationRateChange < 0,
-                      'bg-secondary': metrics.activationRateChange === 0
-                    }"
-                    >
+              <div class="ms-2">
+                <span class="badge"
+                [ngClass]="{
+                  'bg-success': !metrics.isNegativeTrendActive,
+                  'bg-danger': metrics.isNegativeTrendActive
+                }">
                 <i class="bi" [ngClass]="{
-                  'bi-arrow-up': metrics.activationRateChange > 2,
-                  'bi-arrow-down': metrics.activationRateChange < 10
+                'bi-arrow-up': !metrics.isNegativeTrendActive,
+                'bi-arrow-down': metrics.isNegativeTrendActive
                 }"></i>
               </span>
             </div>
@@ -184,14 +182,12 @@
         <div class="ms-2" *ngIf="metrics.companiesGrowthCount !== 0">
           <span class="badge"
             [ngClass]="{
-              'bg-success': metrics.companiesGrowthCount > 0,
-              'bg-danger': metrics.companiesGrowthCount < 0,
-              'bg-secondary': metrics.companiesGrowthCount === 0
+              'bg-success': !metrics.isNegativeTrend,
+              'bg-danger': metrics.isNegativeTrend
             }">
             <i class="bi" [ngClass]="{
-              'bi-arrow-up': metrics.companiesGrowthCount > 0,
-              'bi-arrow-down': metrics.companiesGrowthCount < 0,
-              'bi-dash': metrics.companiesGrowthCount === 0
+              'bi-arrow-up': !metrics.isNegativeTrend,
+              'bi-arrow-down': metrics.isNegativeTrend
             }"></i>
             {{metrics.companiesActivationRate | number:'1.0-1'}}%
           </span>
