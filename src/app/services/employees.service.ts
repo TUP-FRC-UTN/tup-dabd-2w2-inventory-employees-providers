@@ -28,6 +28,9 @@ export class EmployeesService {
     return this.http.get<EmployeeSchedule[]>(`${this.apiUrlSHIFT}/employee/${employeeId}`);
   }
   
+  updateSchedule(schedule: EmployeeSchedule): Observable<EmployeeSchedule> {
+    return this.http.put<EmployeeSchedule>(`${this.apiUrlSHIFT}/${schedule.employee_id}`, schedule);
+  }
   
 
   getEmployeesPageable(
