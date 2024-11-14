@@ -550,4 +550,34 @@ export class ProviderDashboardComponent implements OnInit {
     }, {} as { [key: string]: number });
   }
   
+  // Supplierx x mes de registro
+  //metodo para calcular la distribución por mes
+  private getMonthlyRegistrationDistribution(): { [key: string]: number } {
+    // Ordenar los proveedores por fecha de registro
+    const sortedProviders = [...this.providerList].sort((a, b) => {
+      return new Date(a.registration).getTime() - new Date(b.registration).getTime();
+    });
+  
+    // Crear objeto con la distribución
+    const distribution = sortedProviders.reduce((acc, provider) => {
+      const date = new Date(provider.registration);
+      // Formatear la fecha como "MMM YYYY" (ej: "Nov 2024")
+      const monthYear = date.toLocaleDateString('es', { 
+        month: 'short', 
+        year: 'numeric'
+      });
+      
+      acc[monthYear] = (acc[monthYear] || 0) + 1;
+      return acc;
+    }, {} as { [key: string]: number });
+  
+    // Ordenar las entradas por fecha
+    return Object.fromEntries(
+      Object.entries(distribution).sort((a, b) => {
+        const dateA = new Date(a[0]);
+        const dateB = new Date(b[0]);
+        return dateA.getTime() - dateB.getTime();
+      })
+    );
+  }
 }
