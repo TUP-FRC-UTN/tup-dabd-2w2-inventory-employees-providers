@@ -20,6 +20,70 @@ export class EmployeesService {
 
   private apiUrlSHIFT = 'http://localhost:8007/shift'; // URL de la API para empleados
 
+
+  //FILTROS DASHBOARD
+  getFilteredEmployees(filters: any): Observable<Employee[]> {
+    const params = new HttpParams({ fromObject: filters });
+  
+    return this.http.get<any[]>(this.apiUrl, { params }).pipe(
+      map((employees) =>
+        employees.map((employee) => ({
+          ...employee,
+          hiringDate: employee.hiring_date ? new Date(employee.hiring_date) : null // Convertimos a Date o dejamos null
+        }))
+      )
+    );
+  }
+  getAllEmployeesPaged(
+    page: number = 0,
+    size: number = 40,
+    filters?: {
+      firstName?: string;
+      lastName?: string;
+      type?: string;
+      docType?: string;
+      docNumber?: string;
+      state?: string;
+      date?: string;
+      salary?: string;
+    }
+  ): Observable<PaginatedResponse<Employee>> {
+    let params = new HttpParams()
+      .set('page', page.toString())
+      .set('size', size.toString());
+  
+    if (filters) {
+      if (filters.firstName) params = params.set('firstName', filters.firstName);
+      if (filters.lastName) params = params.set('lastName', filters.lastName);
+      if (filters.type) params = params.set('type', filters.type);
+      if (filters.docType) params = params.set('docType', filters.docType);
+      if (filters.docNumber) params = params.set('docNumber', filters.docNumber);
+      if (filters.state) params = params.set('state', filters.state);
+      if (filters.date) params = params.set('date', filters.date);
+      if (filters.salary) params = params.set('salary', filters.salary);
+    }
+  
+    return this.http.get<PaginatedResponse<Employee>>(`${this.apiUrl}/paged`, { params }).pipe(
+      map(response => {
+        // Mapeo los campos de snake_case a camelCase
+        const mappedContent = response.content.map(employee => this.mapperService.toCamelCase(employee));
+        return {
+          ...response,
+          content: mappedContent
+        };
+      }),
+      tap(response => {
+        response.content.forEach(employee => {
+          if (!employee.hiringDate) {
+            console.warn(`Employee with ID ${employee.id} is missing hiringDate.`);
+          }
+        });
+      })
+    );
+  }
+  
+  
+  //fin filtros dashboard
   createSchedule(schedule: EmployeeSchedule): Observable<EmployeeSchedule> {
     return this.http.post<EmployeeSchedule>(this.apiUrlSHIFT, schedule);
   }
@@ -32,7 +96,6 @@ export class EmployeesService {
     return this.http.put<EmployeeSchedule>(`${this.apiUrlSHIFT}/${schedule.employee_id}`, schedule);
   }
   
-
   getEmployeesPageable(
     page: number = 0,
     size: number = 10,
@@ -41,12 +104,37 @@ export class EmployeesService {
     let params = new HttpParams()
       .set('page', page.toString())
       .set('size', size.toString());
-    
+  
     if (type) {
       params = params.set('type', type);
     }
-    return this.http.get<PageResponse<Employee>>(`${this.apiUrl}/pageable`, { params });
+    
+    return this.http.get<PageResponse<Employee>>(`${this.apiUrl}/pageable`, { params }).pipe(
+      tap(response => {
+        // Verificar en la consola si todos los empleados tienen `hiringDate`
+        response.content.forEach(employee => {
+          if (!employee.hiringDate) {
+            console.warn(`Employee with ID ${employee.id} is missing hiringDate`);
+          }
+        });
+      })
+    );
   }
+  
+  // getEmployeesPageable(
+  //   page: number = 0,
+  //   size: number = 10,
+  //   type?: StatusType
+  // ): Observable<PageResponse<Employee>> {
+  //   let params = new HttpParams()
+  //     .set('page', page.toString())
+  //     .set('size', size.toString());
+    
+  //   if (type) {
+  //     params = params.set('type', type);
+  //   }
+  //   return this.http.get<PageResponse<Employee>>(`${this.apiUrl}/pageable`, { params });
+  // }
 
   // Obtener empleados
   getEmployees(): Observable<Employee[]> {
@@ -116,41 +204,41 @@ export class EmployeesService {
   
 
 
-  getAllEmployeesPaged(
-    page: number = 0,
-    size: number = 40,
-    filters?: {
-      firstName?: string;
-      lastName?: string;
-      type?: string;
-      docType?: string;
-      docNumber?: string;
-      state?: string;
-      date?: string;
-      salary?: string;
-    }
+  // getAllEmployeesPaged(
+  //   page: number = 0,
+  //   size: number = 40,
+  //   filters?: {
+  //     firstName?: string;
+  //     lastName?: string;
+  //     type?: string;
+  //     docType?: string;
+  //     docNumber?: string;
+  //     state?: string;
+  //     date?: string;
+  //     salary?: string;
+  //   }
     
-  ): Observable<PaginatedResponse<Employee>> {
-    let params = new HttpParams()
-      .set('page', page.toString())
-      .set('size', size.toString());
+  // ): Observable<PaginatedResponse<Employee>> {
+  //   let params = new HttpParams()
+  //     .set('page', page.toString())
+  //     .set('size', size.toString());
   
-    if (filters) {
-      if (filters.firstName) params = params.set('firstName', filters.firstName);
-      if (filters.lastName) params = params.set('lastName', filters.lastName);
-      if (filters.type) params = params.set('type', filters.type);
-      if (filters.docType) params = params.set('docType', filters.docType);
-      if (filters.docNumber) params = params.set('docNumber', filters.docNumber);
-      if (filters.state) params = params.set('state', filters.state);
-      if (filters.date) params = params.set('date', filters.date);
-      if (filters.salary) params = params.set('salary', filters.salary);
-    }
-    console.log(filters);
-    console.log('filtros de tipo', filters?.type);
-    debugger
-    console.log('params', params);
-    return this.http.get<PaginatedResponse<Employee>>(`${this.apiUrl}/paged`, { params });
-  }
+  //   if (filters) {
+  //     if (filters.firstName) params = params.set('firstName', filters.firstName);
+  //     if (filters.lastName) params = params.set('lastName', filters.lastName);
+  //     if (filters.type) params = params.set('type', filters.type);
+  //     if (filters.docType) params = params.set('docType', filters.docType);
+  //     if (filters.docNumber) params = params.set('docNumber', filters.docNumber);
+  //     if (filters.state) params = params.set('state', filters.state);
+  //     if (filters.date) params = params.set('date', filters.date);
+  //     if (filters.salary) params = params.set('salary', filters.salary);
+  //   }
+  //   console.log(filters);
+  //   console.log('filtros de tipo', filters?.type);
+  //   debugger
+  //   console.log('params', params);
+  //   return this.http.get<PaginatedResponse<Employee>>(`${this.apiUrl}/paged`, { params });
+  // }
 
  /* getAllEmployeesPaged(filters: {
     page?: number;

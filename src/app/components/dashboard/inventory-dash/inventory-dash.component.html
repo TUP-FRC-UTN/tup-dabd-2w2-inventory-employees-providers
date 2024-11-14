@@ -77,15 +77,6 @@
         </div>
       </div>
 
-      <!-- Chart -->
-      <div *ngIf="selectedArticleId && !loading" class="chart-container">
-        <canvas baseChart
-          [data]="chartData"
-          [options]="chartOptions"
-          [type]="'line'">
-        </canvas>
-      </div>
-
       <!-- No Selection State -->
       <div *ngIf="!selectedArticleId" class="text-center py-4">
         <i class="bi bi-arrow-up-circle display-4 text-muted"></i>

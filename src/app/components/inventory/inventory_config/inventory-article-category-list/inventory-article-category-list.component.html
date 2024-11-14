@@ -1,4 +1,4 @@
-<app-main-container title="Lista de categorías de artículos" (infoButtonClick)="showInfo()">
+<app-main-container title="Lista de Categorías" (infoButtonClick)="showInfo()">
   <!-- Barra de búsqueda y botones de acción -->
   <div class="d-flex justify-content-between align-items-center mb-3">
     <div class="input-group w-25">
@@ -59,23 +59,23 @@
           <td class="text-end" style="padding-right: 20px;">
             <div class="d-flex justify-content-end gap-2">
               <!-- Botón de Editar -->
-              <button *ngIf="category.status.toString() === 'ACTIVE'" (click)="onCategoryUpdate(category)" 
+              <button *ngIf="category.status.toString() === 'ACTIVE'" (click)="onCategoryUpdate(category)"
                 class="btn btn-warning btn-sm" title="Editar">
                 <i class="bi bi-pencil"></i>
               </button>
 
               <!-- Botón de Editar -->
-              <button *ngIf="category.status.toString() !== 'ACTIVE'" disabled class="btn btn-warning btn-sm" 
+              <button *ngIf="category.status.toString() !== 'ACTIVE'" disabled class="btn btn-warning btn-sm"
                 class="btn btn-warning btn-sm" title="Editar">
                 <i class="bi bi-pencil"></i>
               </button>
-  
+
               <!-- Botón de Eliminar -->
               <button *ngIf="category.status.toString() === 'ACTIVE'" (click)="deleteCategory(category.id)"
                 class="btn btn-danger btn-sm" title="Eliminar">
                 <i class="bi bi-trash-fill"></i>
               </button>
-  
+
               <!-- Botón de Eliminar (Deshabilitado) -->
               <button *ngIf="category.status.toString() !== 'ACTIVE'" disabled class="btn btn-danger btn-sm" title="Eliminar">
                 <i class="bi bi-trash-fill"></i>
@@ -135,7 +135,7 @@
             <h5 class="alert-heading">¿Qué es esta pantalla?</h5>
             <p class="mb-0 small">Esta pantalla te permite gestionar las diferentes categorías para clasificar los artículos del inventario.</p>
           </div>
-    
+
           <!-- Campos Principales -->
           <div class="card mb-2">
             <div class="card-header py-1">
@@ -152,7 +152,7 @@
               </ul>
             </div>
           </div>
-    
+
           <!-- Acciones -->
           <div class="card mb-2">
             <div class="card-header py-1">
@@ -175,7 +175,7 @@
               </ul>
             </div>
           </div>
-    
+
           <!-- Estados -->
           <div class="card mb-2">
             <div class="card-header py-1">
@@ -194,7 +194,7 @@
               </ul>
             </div>
           </div>
-    
+
           <!-- Nota -->
           <div class="alert alert-warning py-2 mb-0">
             <h5 class="alert-heading">Nota:</h5>
