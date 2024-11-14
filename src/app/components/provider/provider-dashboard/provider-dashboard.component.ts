@@ -345,6 +345,7 @@ export class ProviderDashboardComponent implements OnInit, AfterViewInit {
         //New
         this.dataLoaded = true;
         // Solo actualizar los gráficos si ya están inicializados
+        this.chartsInitialized = true;
         if (this.chartsInitialized) {
           this.updateCharts();
         } else if (this.chart) {
