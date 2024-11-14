@@ -11,7 +11,9 @@ import { NgbModal } from '@ng-bootstrap/ng-bootstrap';
 import { BaseChartDirective } from 'ng2-charts';
 import { Company } from '../../../models/suppliers/company.model';
 import { Service } from '../../../models/suppliers/service.model';
-import { Router } from '@angular/router';
+import { NavigationExtras, Router } from '@angular/router';
+import { ListEmpresasRegComponent } from "../dashboards/list-empresas-reg/list-empresas-reg.component";
+import { ListProviderRegComponent } from "../dashboards/list-provider-reg/list-provider-reg.component";
 
 Chart.register(...registerables);
 
@@ -22,8 +24,10 @@ Chart.register(...registerables);
     CommonModule,
     ReactiveFormsModule,
     MainContainerComponent,
-    BaseChartDirective, FormsModule
-  ],
+    BaseChartDirective, FormsModule,
+    ListEmpresasRegComponent,
+    ListProviderRegComponent
+],
   templateUrl: './provider-dashboard.component.html',
   styleUrls: ['./provider-dashboard.component.css']
 })
@@ -514,7 +518,31 @@ export class ProviderDashboardComponent implements OnInit {
   }
 
 
-  openActiveCompaniesModal(){
-    this.route.navigate(['providers/dashboard/modal/company']);
+
+  @ViewChild(ListEmpresasRegComponent) activeCompaniesModal!: ListEmpresasRegComponent;
+  @ViewChild(ListProviderRegComponent) activeProvidersModal!: ListProviderRegComponent;
+
+  openActiveCompaniesModal() {
+    this.activeCompaniesModal.openModal();
+  }
+
+  openActiveProvidersModal() {
+    this.activeProvidersModal.openModal();
+  }
+
+  navigateToProvidersList() {
+    // Definimos los filtros que queremos aplicar
+    const navigationExtras: NavigationExtras = {
+      queryParams: {
+        page: 0,
+        size: 10,
+        sort: 'registration,desc',
+        enabled: 'true',
+        fromDashboard: 'true'
+      }
+    };
+
+    // Navegar a la lista de proveedores con los filtros
+    this.route.navigate(['providers/list'], navigationExtras);
   }
 }

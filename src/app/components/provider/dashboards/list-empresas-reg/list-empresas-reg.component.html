@@ -1,50 +1,36 @@
-<ng-template #content let-modal>
-    <app-main-container>
-        <div class="modal fade" 
-        [class.show]="showActiveCompaniesModal" 
-        [style.display]="showActiveCompaniesModal ? 'block' : 'none'"
-        tabindex="-1">
-     <div class="modal-dialog modal-lg">
-       <div class="modal-content">
-         <div class="modal-header">
-           <h5 class="modal-title">
-             Empresas Activas
-           </h5>
-           <button type="button" 
-                   class="btn-close" 
-                   (click)="closeActiveCompaniesModal()"
-                   aria-label="Cerrar">
-           </button>
-         </div>
-         <div class="modal-body">
-            <div class="table-container mt-3">
-                <table class="table table-striped">
-                    <thead>
-                        <thead class="bg-light">
-                            <tr>
-                                <th scope="col">Compania</th>
-                                <th scope="col">Estado</th>
-                            </tr>
-                            @for (comp of companies; track $index) {
-                                <tr>
-                                    <td>{{comp.name}}</td>
-                                    <td>{{comp.enabled}}</td>
-                                </tr>
-                            }
-                        </thead>
-                    </thead>
-                </table>
-            </div>
-         </div>  
-         <div class="modal-footer">
-           <button type="button" 
-                   class="btn btn-secondary" 
-                   (click)="closeActiveCompaniesModal()">
-             Cerrar
-           </button>
-         </div>
-       </div>
-     </div>
-</div>
-    </app-main-container>
-</ng-template>
+
+    <ng-template #activeCompaniesModal let-modal>
+      <div class="modal-header">
+        <h4 class="modal-title">Empresas Activas</h4>
+        <button type="button" class="btn-close" (click)="modal.dismiss()"></button>
+      </div>
+      <div class="modal-body">
+        <div class="table-responsive">
+          <table class="table table-striped">
+            <thead class="bg-light">
+              <tr>
+                <th>Empresa</th>
+                <th>Estado</th>
+                <th>Fecha de Actualizacion</th>
+              </tr>
+            </thead>
+            <tbody>
+              @for (company of companies; track company.id) {
+                @if (company.enabled) {
+                  <tr>
+                    <td>{{company.name}}</td>
+                    <td>
+                      <span class="badge bg-success">Activo</span>
+                    </td>
+                    <td>{{company.registration | date:'dd/MM/yyyy' }}</td>
+                  </tr>
+                }
+              }
+            </tbody>
+          </table>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" (click)="modal.close()">Cerrar</button>
+      </div>
+    </ng-template>
