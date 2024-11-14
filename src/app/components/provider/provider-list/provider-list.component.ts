@@ -2,7 +2,7 @@ import { Component, CUSTOM_ELEMENTS_SCHEMA, ElementRef, inject, OnInit, Template
 import { CommonModule, DatePipe } from '@angular/common';
 import { ReactiveFormsModule, FormsModule, FormBuilder, FormControl, FormGroup } from '@angular/forms';
 import { NgbModal, NgbPaginationModule } from '@ng-bootstrap/ng-bootstrap';
-import { Router, RouterModule } from '@angular/router';
+import { ActivatedRoute, Router, RouterModule } from '@angular/router';
 import { ProvidersService } from '../../../services/providers.service';
 import { Supplier } from '../../../models/suppliers/supplier.model';
 import { ToastService, MainContainerComponent, ConfirmAlertComponent } from 'ngx-dabd-grupo01';
@@ -63,6 +63,7 @@ export class ProviderListComponent implements OnInit {
 
   private providerService = inject(ProvidersService);
   private router = inject(Router);
+  private route = inject(ActivatedRoute);
   private modalService = inject(NgbModal);
   private toastService = inject(ToastService);
 
@@ -167,7 +168,23 @@ private filterProviders(searchTerm: string): void {
 }
 
   ngOnInit(): void {
-    this.getProviders();
+    this.route.queryParams.subscribe(params => {
+      if (params['fromDashboard']) {
+        // Actualizar el formulario de filtros con los valores recibidos
+        this.filterForm.patchValue({
+          enabled: params['enabled'] === 'true'
+        });
+
+        // Obtener los proveedores con los filtros
+        this.getProviders(
+          parseInt(params['page'] || '0'), 
+          parseInt(params['size'] || '10')
+        );
+      } else {
+        // Si no venimos del dashboard, cargar normalmente
+        this.getProviders();
+      }
+    });
   }
 
 // Modificar getProviders para guardar la lista original
@@ -177,7 +194,8 @@ getProviders(page: number = 0, size: number = this.pageSize): void {
   const filters = {
       ...this.getFilters(),
       page,
-      size
+      size,
+      sort: this.route.snapshot.queryParams['sort'] || 'registration,desc'
   };
 
   this.providerService.getProviders(filters).subscribe({

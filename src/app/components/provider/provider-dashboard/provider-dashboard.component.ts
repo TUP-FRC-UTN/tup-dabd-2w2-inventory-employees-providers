@@ -1,4 +1,4 @@
-import { Component, Input, OnInit, ViewChild } from '@angular/core';
+import { Component, inject, Inject, Input, OnInit, ViewChild } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { ReactiveFormsModule, FormBuilder, FormControl, FormGroup, Validators, FormsModule } from '@angular/forms';
 import { ProvidersService } from '../../../services/providers.service';
@@ -11,7 +11,13 @@ import { NgbModal } from '@ng-bootstrap/ng-bootstrap';
 import { BaseChartDirective } from 'ng2-charts';
 import { Company } from '../../../models/suppliers/company.model';
 import { Service } from '../../../models/suppliers/service.model';
+
 import { TopProvider, ServicesByCompany } from '../../../models/suppliers/chart-objects.model';
+
+import { NavigationExtras, Router } from '@angular/router';
+import { ListEmpresasRegComponent } from "../dashboards/list-empresas-reg/list-empresas-reg.component";
+import { ListProviderRegComponent } from "../dashboards/list-provider-reg/list-provider-reg.component";
+
 
 Chart.register(...registerables);
 
@@ -22,8 +28,10 @@ Chart.register(...registerables);
     CommonModule,
     ReactiveFormsModule,
     MainContainerComponent,
-    BaseChartDirective, FormsModule
-  ],
+    BaseChartDirective, FormsModule,
+    ListEmpresasRegComponent,
+    ListProviderRegComponent
+],
   templateUrl: './provider-dashboard.component.html',
   styleUrls: ['./provider-dashboard.component.css']
 })
@@ -38,6 +46,8 @@ export class ProviderDashboardComponent implements OnInit {
   companies: Company[] = [];
   services: Service[] = [];
   topProviders: TopProvider[] = [];
+
+  private route = inject(Router);
 
   // KPI metrics
   metrics = {
@@ -612,6 +622,7 @@ export class ProviderDashboardComponent implements OnInit {
     this.showModalFilter = false;
   }
 
+
   // Suppliers x Compania
 
   //metodo para calcular
@@ -848,4 +859,32 @@ private calculateIndependentVsCorporateMetrics(): void {
       }
     };
   }
+  @ViewChild(ListEmpresasRegComponent) activeCompaniesModal!: ListEmpresasRegComponent;
+  @ViewChild(ListProviderRegComponent) activeProvidersModal!: ListProviderRegComponent;
+
+  openActiveCompaniesModal() {
+    this.activeCompaniesModal.openModal();
+  }
+
+  openActiveProvidersModal() {
+    this.activeProvidersModal.openModal();
+  }
+
+  navigateToProvidersList() {
+    // Definimos los filtros que queremos aplicar
+    const navigationExtras: NavigationExtras = {
+      queryParams: {
+        page: 0,
+        size: 10,
+        sort: 'registration,desc',
+        enabled: 'true',
+        fromDashboard: 'true'
+      }
+    };
+
+    // Navegar a la lista de proveedores con los filtros
+    this.route.navigate(['providers/list'], navigationExtras);
+  }
 }
+
+

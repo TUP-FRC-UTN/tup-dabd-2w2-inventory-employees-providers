@@ -11,6 +11,8 @@ import { MapperService } from '../../../services/MapperCamelToSnake/mapper.servi
 import { NgbModal } from '@ng-bootstrap/ng-bootstrap';
 import { EmployeeDashboardInfoComponent } from './employe-dashboard-info/employee-dashboard-info.component';
 import { ChartDataset, ChartOptions } from 'chart.js';
+import { ActiveEmployeesModalComponent } from './employee-enabled-modal/employee-enabled-modal.component';
+import { EmployeeRecentHireModalComponent } from './employee-recent-hire-modal/employee-recent-hire-modal.component';
 
 Chart.register(...registerables);
 
@@ -590,5 +592,35 @@ export class EmployeeDashboardComponent implements OnInit, AfterViewInit {
   }
   formatNumber(value: number): string {
     return value.toFixed(1);
+  }
+
+  // VER MODAL PARA LOS EMPLEADOS ACTIVOS AL HACER CLICK EN LA CARD.
+  showActiveEmployees(): void {
+    const activeEmployees = this.employeeList.filter(emp => emp.state === StatusType.ACTIVE);
+    
+    const modalRef = this.modalService.open(ActiveEmployeesModalComponent, {
+      size: 'lg',
+      centered: true
+    });
+    
+    modalRef.componentInstance.activeEmployees = activeEmployees;
+  }
+  
+  // VER MODAL PARA LOS EMPLEADOS RECIENTEMENTE CONTRATADOS EN LA CARD.
+  showRecentHires(): void {
+    const oneMonthAgo = new Date();
+    oneMonthAgo.setMonth(oneMonthAgo.getMonth() - 1);
+    
+    const recentHires = this.employeeList.filter(emp => {
+      const hiringDate = new Date(emp.hiringDate);
+      return hiringDate >= oneMonthAgo;
+    });
+    
+    const modalRef = this.modalService.open(EmployeeRecentHireModalComponent, {
+      size: 'lg',
+      centered: true
+    });
+    
+    modalRef.componentInstance.recentHires = recentHires;
   }
 }
