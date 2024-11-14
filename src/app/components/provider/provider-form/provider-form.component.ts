@@ -1,10 +1,11 @@
 import { Component, inject, OnInit, TemplateRef, ViewChild } from '@angular/core';
 import { FormBuilder, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
 import { ProvidersService } from '../../../services/providers.service';
-import Swal from 'sweetalert2';
 import { CommonModule } from '@angular/common';
 import { ActivatedRoute, Router } from '@angular/router';
-import {  Supplier } from '../../../models/suppliers/supplier.model';
+import { Supplier } from '../../../models/suppliers/supplier.model';
+import { Service } from '../../../models/suppliers/service.model';
+import { Company } from '../../../models/suppliers/company.model';
 import { NgbModal } from '@ng-bootstrap/ng-bootstrap';
 import { ToastService, MainContainerComponent } from 'ngx-dabd-grupo01';
 
@@ -15,10 +16,12 @@ import { ToastService, MainContainerComponent } from 'ngx-dabd-grupo01';
   templateUrl: './provider-form.component.html',
   styleUrl: './provider-form.component.css'
 })
-export class ProviderFormComponent implements OnInit{
+export class ProviderFormComponent implements OnInit {
   providerForm: FormGroup;
   isEditMode = false;
   currentProviderId: number | null = null;
+  services: Service[] = [];
+  companies: Company[] = [];
 
   private providerService = inject(ProvidersService);
   private fb = inject(FormBuilder);
@@ -30,8 +33,9 @@ export class ProviderFormComponent implements OnInit{
   constructor() {
     this.providerForm = this.fb.group({
       name: ['', Validators.required],
-      cuil: ['', Validators.required],
-      service: ['', Validators.required],
+      cuil: ['', [Validators.required, Validators.minLength(11), Validators.maxLength(11)]],
+      service: [null, Validators.required],
+      company: [null, Validators.required],
       contact: ['', Validators.required],
       address: ['', Validators.required],
       details: ['', Validators.required]
@@ -39,6 +43,9 @@ export class ProviderFormComponent implements OnInit{
   }
 
   ngOnInit(): void {
+    this.loadServices();
+    this.loadCompanies();
+    
     this.route.paramMap.subscribe(params => {
       const id = params.get('id');
       if (id) {
@@ -49,27 +56,88 @@ export class ProviderFormComponent implements OnInit{
     });
   }
 
+  loadServices(): void {
+    this.providerService.getServices().subscribe({
+      next: (services) => {
+        this.services = services;
+      },
+      error: (error) => {
+        this.toastService.sendError('Error al cargar los servicios');
+      }
+    });
+  }
+
+  loadCompanies(): void {
+    this.providerService.getCompany().subscribe({
+      next: (companies) => {
+        this.companies = companies;
+      },
+      error: (error) => {
+        this.toastService.sendError('Error al cargar las compañías');
+      }
+    });
+  }
+
   onSubmit(): void {
     if (this.providerForm.valid) {
-      const formData = { ...this.providerForm.value };
-      
-      // Remover el id si existe, ya que no se debe enviar en el POST
-      if (!this.isEditMode) {
-        delete formData.id;
-      }
+      const formData = this.prepareFormData();
       
       if (this.isEditMode && this.currentProviderId !== null) {
-        formData.id = this.currentProviderId; // Asignar el ID actual al proveedor en modo edición
         this.updateProvider(formData);
       } else {
         this.addProvider(formData);
       }
+    } else {
+      this.markFormGroupTouched(this.providerForm);
     }
+  }
+
+  prepareFormData(): any {
+    const formValue = this.providerForm.value;
+    
+    // Preparar el DTO para el envío
+    const formData: {
+      id?: number;
+      name: string;
+      details: string;
+      cuil: string;
+      company: number;
+      service: number;
+      contact: string;
+      address: string;
+    } = {
+      name: formValue.name,
+      details: formValue.details,
+      cuil: formValue.cuil,
+      company: formValue.company,
+      service: formValue.service,
+      contact: formValue.contact,
+      address: formValue.address
+    };
+
+    if (this.isEditMode && this.currentProviderId) {
+      formData.id = this.currentProviderId;
+    }
+
+    return formData;
+  }
+
+  closeModal(): void {
+    this.modalService.dismissAll();
+  }
+
+  private markFormGroupTouched(formGroup: FormGroup) {
+    Object.values(formGroup.controls).forEach(control => {
+      control.markAsTouched();
+      if (control instanceof FormGroup) {
+        this.markFormGroupTouched(control);
+      }
+    });
   }
   
   @ViewChild('infoModal') infoModal!: TemplateRef<any>;
 
-  addProvider(providerData: Supplier): void {
+  addProvider(providerData: any): void {
     this.providerService.addProvider(providerData).subscribe({
       next: (response) => {
         this.toastService.sendSuccess("El proveedor ha sido creado con éxito.");
@@ -83,10 +151,10 @@ export class ProviderFormComponent implements OnInit{
   }
 
   showInfo(): void {
-    this.modalService.open(this.infoModal, { centered: true });
-  }
+    this.modalService.open(this.infoModal, { centered: true });
+  }
   
-  updateProvider(providerData: Supplier): void {
+  updateProvider(providerData: any): void {
     this.providerService.updateProvider(providerData).subscribe({
       next: (response) => {
         this.toastService.sendSuccess("El proveedor ha sido modificado con éxito.");
@@ -98,7 +166,6 @@ export class ProviderFormComponent implements OnInit{
       }
     });
   }
-  
 
   resetForm() {
     this.providerForm.reset();
@@ -108,16 +175,22 @@ export class ProviderFormComponent implements OnInit{
   }
 
   loadProviderData(id: number): void {
-    this.providerService.getProviderById(id).subscribe(
-      (provider: Supplier) => {
-        this.currentProviderId = provider.id; // Asegúrate de asignar el id
-        this.providerForm.patchValue(provider);
+    this.providerService.getProviderById(id).subscribe({
+      next: (provider: Supplier) => {
+        this.currentProviderId = provider.id;
+        this.providerForm.patchValue({
+          name: provider.name,
+          cuil: provider.cuil,
+          service: provider.service?.id,
+          company: provider.company?.id,
+          contact: provider.contact,
+          address: provider.address,
+          details: provider.details
+        });
       },
-      (error) => {
-        console.error('Error loading provider data:', error);
-        Swal.fire('Error', 'No se pudo cargar los datos del proveedor', 'error');
+      error: (error) => {
+        this.toastService.sendError('No se pudo cargar los datos del proveedor');
       }
-    );
+    });
   }
-  
 }
