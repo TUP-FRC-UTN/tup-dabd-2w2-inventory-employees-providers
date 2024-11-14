@@ -434,6 +434,61 @@
     </div>
   </div>
 
+  <div class="col-md-4">
+    <div class="card border-0 shadow-lg rounded-4">
+      <div class="card-body">
+        <div class="d-flex align-items-center mb-3">
+          <div class="icon-circle bg-info text-white me-3">
+            <i class="bi bi-trophy"></i>
+          </div>
+          <h5 class="card-title text-secondary mb-0">Top 5 Proveedores más Antiguos</h5>
+        </div>
+        
+        <!-- Lista de proveedores -->
+        <div class="top-providers-list">
+          <div *ngFor="let provider of topProviders; let i = index" 
+               class="provider-item p-3 mb-2 rounded-3"
+               [ngClass]="{'bg-light': i % 2 === 0}">
+            <div class="d-flex align-items-center">
+              <!-- Número de ranking -->
+              <div class="ranking-badge me-3">
+                <span class="badge" 
+                      [ngClass]="{
+                        'bg-warning text-dark': i === 0,
+                        'bg-secondary text-white': i === 1,
+                        'bg-bronze text-white': i === 2,
+                        'bg-light text-dark': i > 2
+                      }">
+                  #{{i + 1}}
+                </span>
+              </div>
+              
+              <!-- Información del proveedor -->
+              <div class="provider-info flex-grow-1">
+                <h6 class="mb-1">{{provider.name}}</h6>
+                <div class="small text-muted">
+                  <span class="me-2">
+                    <i class="bi bi-building"></i> {{provider.companyName}}
+                  </span>
+                  <span>
+                    <i class="bi bi-gear"></i> {{provider.serviceName}}
+                  </span>
+                </div>
+              </div>
+              
+              <!-- Tiempo activo -->
+              <div class="time-active text-end">
+                <span class="badge bg-success">
+                  {{provider.timeActive}}
+                </span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
   <!-- Modal de Filtros -->
   <div class="modal" [class.show]="showModalFilter" [style.display]="showModalFilter ? 'block' : 'none'">
     <div class="modal-dialog">

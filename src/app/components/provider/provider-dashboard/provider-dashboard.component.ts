@@ -418,6 +418,9 @@ export class ProviderDashboardComponent implements OnInit {
     metrics.avgProvidersPerCompany = metrics.uniqueCompaniesCount > 0
       ? Math.round(this.providerList.length / metrics.uniqueCompaniesCount)
       : 0;
+
+    // Top antiguedad
+    this.calculateTopProviders();
   }
 
   private getProvidersCountByService(service: string): number {
