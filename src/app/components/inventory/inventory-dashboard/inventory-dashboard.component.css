@@ -1,13 +1,62 @@
 /* Icon Styles */
 .icon-circle {
-    width: 40px;
-    height: 40px;
-    border-radius: 50%;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-  }
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin: 0 auto; /* Centrar el icono */
+}
 
-  .icon-circle i {
-    font-size: 1.25rem;
-  }
+.icon-circle i {
+  font-size: 1.25rem;
+}
+
+:host {
+  display: block;
+  width: 100%;
+}
+
+/* Estilos para la tarjeta */
+.card {
+  height: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+}
+
+/* Ajustes de subtítulos y textos */
+.card-subtitle,
+.card-title,
+small {
+  text-align: center;
+}
+
+/* Estilos adicionales */
+.chart-wrapper {
+  position: relative;
+  flex: 1;
+  min-height: 0;
+  height: 300px;
+}
+
+.chart-info {
+  margin-top: auto;
+  padding-top: 1rem;
+}
+
+canvas {
+  width: 100% !important;
+  height: 100% !important;
+}
+
+.row {
+  margin-right: 0;
+  margin-left: 0;
+}
+
+.container {
+  max-width: 1400px;
+}

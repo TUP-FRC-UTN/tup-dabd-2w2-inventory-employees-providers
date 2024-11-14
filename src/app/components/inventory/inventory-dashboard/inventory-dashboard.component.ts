@@ -1,10 +1,8 @@
 import { ChangeDetectorRef, inject } from '@angular/core';
-// inventory-dashboard.component.ts
-
 import { AfterViewInit, Component, OnInit } from '@angular/core';
 import { BaseChartDirective } from 'ng2-charts';
-import { ChartConfiguration, ChartData } from 'chart.js';
-import { ArticleCateg, ArticleCategory, ArticleCondition } from '../../../models/article.model';
+import { ChartConfiguration, ChartData, registerables } from 'chart.js';
+import { ArticleCateg, ArticleCondition, ArticleType, MeasurementUnit } from '../../../models/article.model';
 import { InventoryService } from '../../../services/inventory.service';
 import { Inventory, Transaction, TransactionType } from '../../../models/inventory.model';
 import { MainContainerComponent } from 'ngx-dabd-grupo01';
@@ -23,6 +21,10 @@ import {
 } from 'chart.js';
 import { Chart } from 'chart.js';
 import { MapperService } from '../../../services/MapperCamelToSnake/mapper.service';
+import ChartDataLabels from 'chartjs-plugin-datalabels';
+import { NgbModal } from '@ng-bootstrap/ng-bootstrap';
+import { InventoryDashboardInfoComponent } from './inventory-dashboard-info/inventory-dashboard-info.component';
+Chart.register(...registerables, ChartDataLabels);
 Chart.register(
   ArcElement,
   CategoryScale,
@@ -32,14 +34,14 @@ Chart.register(
   Title,
   Tooltip,
   Legend,
-  Colors
+  Colors,
 );
 interface InventoryMetrics {
   totalItems: number;
   totalValue: number;
   lowStockItems: number;
   mostArticleUsed: string;
-  stockByCategory: Map<ArticleCateg, number>;
+  stockByCategory: Map<string, number>;
   stockByCondition: Map<ArticleCondition, number>;
   transactionTrends: {
     labels: string[];
@@ -66,6 +68,7 @@ export class InventoryDashboardComponent implements OnInit, AfterViewInit {
   mapperService: MapperService = inject(MapperService);
   inventoryService: InventoryService = inject(InventoryService);
   cdr: ChangeDetectorRef = inject(ChangeDetectorRef);
+  private modalService = inject(NgbModal);
 
   metrics: InventoryMetrics = {
     totalItems: 0,
@@ -81,7 +84,7 @@ export class InventoryDashboardComponent implements OnInit, AfterViewInit {
     }
   };
 
-  // Configuración de los gráficos
+   // Configuración del gráfico de tortas (Stock por Categoría)
   categoryChartData: ChartData<'pie'> = {
     labels: [],
     datasets: [{
@@ -109,9 +112,33 @@ export class InventoryDashboardComponent implements OnInit, AfterViewInit {
   chartOptions: ChartConfiguration['options'] = {
     responsive: true,
     maintainAspectRatio: false,
-    plugins: { legend: { display: true, position: 'top' }, tooltip: { enabled: true, mode: 'index', intersect: false } },
-    scales: { x: { display: true }, y: { display: true, beginAtZero: true } }
+    plugins: {
+      legend: { display: true, position: 'top' },
+      tooltip: { enabled: true, mode: 'index', intersect: false },
+      datalabels: {
+        display: false // Desactivar datalabels globalmente
+      }
+    }
   };
+
+categoryChartOptions: ChartConfiguration['options'] = {
+  responsive: true,
+  plugins: {
+    legend: { display: true, position: 'top' },
+    tooltip: { enabled: true },
+    datalabels: {
+      display: true,
+      color: '#000000',
+      anchor: 'center',
+      align: 'center',
+      font: {
+        weight: 'bold',
+        size: 14 // Ajusta el tamaño según tus necesidades
+      },
+      formatter: (value) => `${value}` // Formato de la etiqueta
+    }
+  }
+};
 
   constructor() { }
 
@@ -147,8 +174,12 @@ export class InventoryDashboardComponent implements OnInit, AfterViewInit {
   }
 
   private calculateMetrics(inventories: Inventory[]): void {
-    // Total items
-    this.metrics.totalItems = inventories.reduce((sum, inv) => sum + (inv.stock || 0), 0);
+     // Filtrar y contar solo artículos registrables con unidad de medida en "unidades"
+  this.metrics.totalItems = inventories
+  .filter(inv => inv.article?.articleType === ArticleType.REGISTRABLE || inv.article.measurementUnit === MeasurementUnit.UNITS)
+  .reduce((sum, inv) => sum + (inv.stock || 0), 0);
+
+console.log("Total de artículos registrables en 'unidades':", this.metrics.totalItems);
 
     // Total value
     this.metrics.totalValue = inventories.reduce((sum, inv) => {
@@ -157,46 +188,57 @@ export class InventoryDashboardComponent implements OnInit, AfterViewInit {
       return sum + ((inv.stock || 0) * price);
     }, 0);
 
-
     // Low stock items
-    this.metrics.lowStockItems = inventories.filter(inv => inv.stock !== null && inv.minStock !== null && inv.stock <= inv.minStock && inv.stock > 0).length;
+    const lowStockItems = inventories.filter(inv => {
+      console.log(`Artículo: ${inv.article?.name || 'Sin nombre'}`);
+      console.log(`Stock actual: ${inv.stock}, Stock mínimo: ${inv.minStock}`);
+      const isLowStock = inv.stock !== null && inv.minStock !== null && inv.stock <= inv.minStock && inv.stock > 0;
+      console.log(`¿Es stock bajo? ${isLowStock}`);
+      return isLowStock;
+    });
+    this.metrics.lowStockItems = lowStockItems.length;
 
-    // Most used article - Artículo con mayor cantidad de movimientos (entradas y salidas)
-  const usageMap = new Map<string, { name: string, usage: number }>();
+    console.log("Total de artículos con stock bajo:", this.metrics.lowStockItems);
 
-  inventories.forEach(inv => {
-    if (inv.article?.name && inv.transactions?.length > 0) {
-      // Sumar todas las transacciones (entradas y salidas)
-      const totalMovements = inv.transactions.reduce((sum, t) => sum + (t.quantity || 0), 0);
-
-      // Solo añadir al mapa si tiene movimientos
-      if (totalMovements > 0) {
-        const currentUsage = usageMap.get(inv.article.name)?.usage || 0;
-        usageMap.set(inv.article.name, { name: inv.article.name, usage: currentUsage + totalMovements });
-      }
-    }
-  });
-
-  // Ordenar los artículos por movimientos totales y seleccionar el que tiene más
-  const sortedUsage = Array.from(usageMap.values()).sort((a, b) => b.usage - a.usage);
-  this.metrics.mostArticleUsed = sortedUsage.length > 0 ? sortedUsage[0].name : 'Sin movimientos';
-
-
-    // Stock by category and condition
-    this.metrics.stockByCategory = new Map();
-    this.metrics.stockByCondition = new Map();
+    // Agrupar el stock total por categoría
+    this.metrics.stockByCategory = new Map<string, number>();
     inventories.forEach(inv => {
       const category = inv.article?.articleCategory;
-      const condition = inv.article?.articleCondition;
-      if (category) {
-        const currentStock = this.metrics.stockByCategory.get(category) || 0;
-        this.metrics.stockByCategory.set(category, currentStock + (inv.stock || 0));
+      if (category && category.denomination) {
+        const currentStock = this.metrics.stockByCategory.get(category.denomination) || 0;
+        this.metrics.stockByCategory.set(category.denomination, currentStock + (inv.stock || 0));
       }
+    });
+
+    // Agrupar el stock total por condición
+    this.metrics.stockByCondition = new Map();
+    inventories.forEach(inv => {
+      const condition = inv.article?.articleCondition;
       if (condition) {
         const currentStock = this.metrics.stockByCondition.get(condition) || 0;
         this.metrics.stockByCondition.set(condition, currentStock + (inv.stock || 0));
       }
     });
+
+    // Mapa para contar transacciones por artículo
+    const transactionCountMap = new Map<string, { name: string; count: number }>();
+
+    inventories.forEach(inv => {
+      if (inv.article?.name && inv.transactions) {
+        const totalTransactions = inv.transactions.reduce((sum, t) => sum + (t.quantity || 0), 0);
+        const currentCount = transactionCountMap.get(inv.article.name)?.count || 0;
+        transactionCountMap.set(inv.article.name, { name: inv.article.name, count: currentCount + totalTransactions });
+      }
+    });
+
+    // Mostrar detalles de las transacciones por artículo
+    console.log("Detalles de transacciones por artículo:", Array.from(transactionCountMap.entries()));
+
+    // Determinar el artículo más transaccionado
+    const sortedTransactions = Array.from(transactionCountMap.values()).sort((a, b) => b.count - a.count);
+    this.metrics.mostArticleUsed = sortedTransactions.length > 0 ? sortedTransactions[0].name : 'Sin transacciones';
+
+    console.log("Artículo más transaccionado:", this.metrics.mostArticleUsed);
   }
 
   private calculateTransactionTrends(transactions: Transaction[]): void {
@@ -221,17 +263,23 @@ export class InventoryDashboardComponent implements OnInit, AfterViewInit {
   }
 
   private updateCharts(): void {
-    const categoryEntries = Array.from(this.metrics.stockByCategory.entries());
-    // Generar colores adicionales en tonos pastel solo si son necesarios
-    const colors = this.getColorsForData(categoryEntries.length);
+  // Convertir el mapa de categorías a un arreglo de entradas para el gráfico de tortas
+  const categoryEntries = Array.from(this.metrics.stockByCategory.entries());
+  console.log("categoryEntries:", categoryEntries); // Verifica el contenido de categoryEntries
 
-    this.categoryChartData = {
-      labels: categoryEntries.map(([category]) => category.denomination),
-      datasets: [{
-        data: categoryEntries.map(([_, value]) => value),
-        backgroundColor: colors
-      }]
-    };
+  // Generar colores adicionales en tonos pastel solo si son necesarios
+  const colors = this.getColorsForData(categoryEntries.length);
+  console.log("colors:", colors); // Verifica los colores generados
+
+  // Asignar los datos agrupados al gráfico de tortas
+  this.categoryChartData = {
+    labels: categoryEntries.map(([category]) => category),
+    datasets: [{
+      data: categoryEntries.map(([_, value]) => value),
+      backgroundColor: colors
+    }]
+  };
+  console.log("categoryChartData:", this.categoryChartData); // Verifica la estructura final de categoryChartData
 
     const conditionEntries = Array.from(this.metrics.stockByCondition.entries());
     this.conditionChartData = {
@@ -289,5 +337,15 @@ export class InventoryDashboardComponent implements OnInit, AfterViewInit {
     const g = Math.floor((Math.random() * 127) + 127);
     const b = Math.floor((Math.random() * 127) + 127);
     return `rgba(${r}, ${g}, ${b}, 0.8)`;
+  }
+
+  showInfo(): void {
+    this.modalService.open(InventoryDashboardInfoComponent, {
+      size: 'lg',
+      backdrop: 'static',
+      keyboard: false,
+      centered: true,
+      scrollable: true
+    });
   }
 }
