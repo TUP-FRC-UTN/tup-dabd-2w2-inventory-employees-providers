@@ -158,6 +158,18 @@ export class ProviderDashboardComponent implements OnInit {
     }]
   };
 
+  // Prov. Independintes vs Corporativos
+  independentVsCorporateChartData: ChartData<'doughnut'> = {
+    labels: ['Independientes', 'Corporativos'],
+    datasets: [{
+      data: [0, 0],
+      backgroundColor: ['#4CAF50', '#2196F3'],  // Verde para independientes, Azul para corporativos
+      borderWidth: 1,
+      borderColor: ['#388E3C', '#1976D2']
+    }]
+  };
+
+
   constructor(
     private fb: FormBuilder,
     private providerService: ProvidersService,
