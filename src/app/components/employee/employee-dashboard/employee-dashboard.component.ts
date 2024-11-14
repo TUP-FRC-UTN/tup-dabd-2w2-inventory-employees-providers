@@ -755,15 +755,14 @@ getDataFilteredByDateRange(startDate: Date, endDate: Date): void {
     const tenureRanges = this.calculateTenureRanges();
 
     this.charts.lineChart = new Chart(ctx, {
-      type: 'line',
+      type: 'bar',
       data: {
         labels: ['0-1 año', '1-2 años', '2-5 años', '5+ años'],
         datasets: [{
           label: 'Distribución de Antigüedad',
           data: tenureRanges,
-          fill: false,
           borderColor: '#3F51B5',
-          tension: 0.1
+          borderWidth: 0.1
         }]
       },
       options: {
