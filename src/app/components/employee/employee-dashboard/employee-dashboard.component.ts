@@ -594,6 +594,7 @@ export class EmployeeDashboardComponent implements OnInit, AfterViewInit {
     return value.toFixed(1);
   }
 
+  // VER MODAL PARA LOS EMPLEADOS ACTIVOS AL HACER CLICK EN LA CARD.
   showActiveEmployees(): void {
     const activeEmployees = this.employeeList.filter(emp => emp.state === StatusType.ACTIVE);
     
@@ -605,4 +606,21 @@ export class EmployeeDashboardComponent implements OnInit, AfterViewInit {
     modalRef.componentInstance.activeEmployees = activeEmployees;
   }
   
+  // VER MODAL PARA LOS EMPLEADOS RECIENTEMENTE CONTRATADOS EN LA CARD.
+  showRecentHires(): void {
+    const oneMonthAgo = new Date();
+    oneMonthAgo.setMonth(oneMonthAgo.getMonth() - 1);
+    
+    const recentHires = this.employeeList.filter(emp => {
+      const hiringDate = new Date(emp.hiringDate);
+      return hiringDate >= oneMonthAgo;
+    });
+    
+    const modalRef = this.modalService.open(EmployeeRecentHireModalComponent, {
+      size: 'lg',
+      centered: true
+    });
+    
+    modalRef.componentInstance.recentHires = recentHires;
+  }
 }
