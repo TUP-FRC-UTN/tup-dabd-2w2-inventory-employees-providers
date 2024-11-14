@@ -44,6 +44,13 @@ export class EmployeeDashboardComponent implements OnInit, AfterViewInit {
   filterForm: FormGroup;
   searchFilterAll = new FormControl('');
   
+  //Filtrado graficos
+  showDropdown = false;
+  selectedPeriod: string = '7';
+  fromDate: string | null = null;
+  toDate: string | null = null;
+  chartData: any[] = []; // Datos actuales para los gráficos
+
   // Charts
   charts: any = {};
   employeeTypesBar = Object.values(EmployeeType);
@@ -78,14 +85,11 @@ export class EmployeeDashboardComponent implements OnInit, AfterViewInit {
     private cdr: ChangeDetectorRef
   ) {
     this.filterForm = this.fb.group({
-      name: [''],
-      cuil: [''],
-      'service.name': [''],
-      'company.name': [''],
-      contact: [''],
-      enabled: ['']
+      selectedPeriod: ['7'], // Inicializa con un valor predeterminado si es necesario
+      fromDate: [null],
+      toDate: [null]
     });
-
+    this.applyFilter();
     this.searchFilterAll.valueChanges
       .pipe(
         debounceTime(300),
@@ -101,11 +105,97 @@ export class EmployeeDashboardComponent implements OnInit, AfterViewInit {
     if (!this.dataLoaded) {
       this.loadEmployeeData();
     }
+    this.applyFilter();
   }
+
   ngAfterViewInit(): void {
-    // Ya no llamamos a loadEmployeeData aquí
-    // Solo aseguramos que los gráficos se inicialicen cuando haya datos
+    // Aseguramos que los gráficos se inicialicen cuando haya datos
     this.cdr.detectChanges();
+  }
+
+  toggleDropdown() {
+    this.showDropdown = !this.showDropdown;
+  }
+
+  applyFilter() {
+    const selectedPeriod = this.filterForm.get('selectedPeriod')?.value;
+    const fromDate = this.filterForm.get('fromDate')?.value;
+    const toDate = this.filterForm.get('toDate')?.value;
+
+    // Verifica si el período seleccionado no es personalizado
+    if (selectedPeriod !== 'custom') {
+        const days = parseInt(selectedPeriod);
+        const endDate = new Date();
+        const startDate = new Date();
+        startDate.setDate(endDate.getDate() - days);
+        
+        // Llama al método de filtrado con el rango calculado
+        this.getDataFilteredByDateRange(startDate, endDate);
+    } else if (fromDate && toDate) {
+        // Convierte las fechas a objetos Date
+        const startDate = new Date(fromDate);
+        const endDate = new Date(toDate);
+
+        // Llama al método de filtrado con el rango personalizado
+        this.getDataFilteredByDateRange(startDate, endDate);
+    } else {
+        console.warn("Fechas de rango personalizadas no establecidas correctamente");
+        this.toastService.sendError("Por favor, selecciona fechas válidas para el rango personalizado.");
+    }
+}
+
+  getDataFilteredByDateRange(startDate: Date, endDate: Date): void {
+    this.employeesService.getEmployeesPageable(0, 100).subscribe(
+        (response) => {
+            // Filtra empleados con una fecha de contratación dentro del rango
+            this.chartData = response.content.filter(employee => {
+                if (!employee.hiringDate) {
+                    console.warn(`Employee with ID ${employee.id} is missing hiringDate.`);
+                    return false;
+                }
+
+                const employeeDate = new Date(employee.hiringDate);
+                return employeeDate.getTime() >= startDate.getTime() && employeeDate.getTime() <= endDate.getTime();
+            });
+
+            if (this.chartData.length > 0) {
+                this.calculateMetrics();
+                this.updateCharts(this.chartData);
+            } else {
+                console.warn('No hay datos disponibles para el rango seleccionado');
+                this.toastService.sendError('No hay datos disponibles para el rango seleccionado');
+            }
+        },
+        (error) => {
+            console.error('Error fetching data:', error);
+            this.toastService.sendError('Error al obtener los datos.');
+        }
+    );
+} 
+  
+  
+ // Método para actualizar los gráficos
+ updateCharts(data: Employee[]): void {
+  if (data.length > 0) {
+      this.initializeCharts();
+  } else {
+      console.warn('No hay datos disponibles para el rango seleccionado');
+      this.toastService.sendError('No hay datos disponibles para el rango seleccionado');
+  }
+}
+
+
+  formatChartData(data: any[]): any {
+    // Transformación de `data` para adaptarlo al formato del gráfico
+    return {
+      labels: data.map(item => item.name), // Ejemplo: usar nombres de empleados como etiquetas
+      datasets: [
+        {
+          label: 'Métricas',
+          data: data.map(item => item.value) // Ejemplo: el valor de cada métrica
+        }
+      ]
+    };
   }
 
   loadDashboardData(): void {
@@ -530,22 +620,30 @@ export class EmployeeDashboardComponent implements OnInit, AfterViewInit {
     return new Map([...monthlyTotals.entries()].sort());
   }
 
-  loadEmployeeData(): void {
-    this.employeesService.getAllEmployeesPaged().subscribe({
-      next: (response) => {
-        this.employeeList = this.mapperService.toCamelCase(response.content);
-        this.calculateMetrics();
-        
-        // Inicializar gráficos una sola vez después de cargar los datos
-        this.destroyExistingCharts();
-        this.initializeCharts();
-      },
-      error: (error) => {
-        console.error('Error al cargar empleados:', error);
-        this.toastService.sendError('Error al cargar empleados.');
-      }
-    });
-  }
+ // Cargar datos iniciales con validación de `hiringDate`
+ loadEmployeeData(): void {
+  this.employeesService.getAllEmployeesPaged().subscribe({
+    next: (response) => {
+      this.employeeList = this.mapperService.toCamelCase(response.content);
+      
+      // Verifica si todos los empleados tienen `hiringDate` y si es un objeto Date
+      this.employeeList.forEach(emp => {
+        if (!emp.hiringDate || !(emp.hiringDate instanceof Date)) {
+          console.warn(`Employee with ID ${emp.id} has invalid hiringDate:`, emp.hiringDate);
+        }
+      });
+
+      this.calculateMetrics();
+      this.initializeCharts();
+    },
+    error: (error) => {
+      console.error('Error al cargar empleados:', error);
+      this.toastService.sendError('Error al cargar empleados.');
+    }
+  });
+}
+
+
 
   private initializeAllCharts(): void {
     if (!this.employeeList.length) {

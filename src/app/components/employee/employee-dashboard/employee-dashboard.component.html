@@ -1,4 +1,24 @@
 <app-main-container title="Dashboard de Empleados" (infoButtonClick)="showInfo()">
+
+  <div class="filter-container">
+    <button (click)="toggleDropdown()" class="filter-button">Filtros</button>
+    <div *ngIf="showDropdown" class="dropdown-content" [formGroup]="filterForm">
+        <label for="period">Período:</label>
+        <select id="period" formControlName="selectedPeriod" (change)="applyFilter()">
+            <option value="7">Últimos 7 días</option>
+            <option value="30">Últimos 30 días</option>
+            <option value="custom">Personalizado</option>
+        </select>
+        <div *ngIf="filterForm.get('selectedPeriod')?.value === 'custom'">
+            <label for="fromDate">Desde:</label>
+            <input type="date" id="fromDate" formControlName="fromDate" (change)="applyFilter()">
+            <label for="toDate">Hasta:</label>
+            <input type="date" id="toDate" formControlName="toDate" (change)="applyFilter()">
+        </div>
+    </div>
+</div>
+
+
   <!-- Primera fila de KPIs -->
   <div class="row mb-4">
     <!-- Empleados Contratados Último Mes -->
