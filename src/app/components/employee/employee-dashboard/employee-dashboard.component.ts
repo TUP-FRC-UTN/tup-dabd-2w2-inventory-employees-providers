@@ -136,14 +136,18 @@ export class EmployeeDashboardComponent implements OnInit, AfterViewInit {
   }
   applyDateFilters(): void {
     const dateFilters = this.getDateFilters();
-    
-    // Verificar que haya fechas válidas antes de aplicar el filtro
-    if (dateFilters.startDate && dateFilters.endDate) {
+  
+    // Si no hay filtros de fecha seleccionados, cargamos todos los empleados
+    if (!dateFilters.startDate && !dateFilters.endDate) {
+      this.getEmployees(); // Llama al método para obtener todos los empleados sin filtros
+    } else if (dateFilters.startDate && dateFilters.endDate) {
+      // Verificamos que haya fechas válidas antes de aplicar el filtro
       this.getEmployeesWithDateFilter();
     } else {
       this.toastService.sendError('Por favor, selecciona fechas válidas para aplicar el filtro.');
     }
   }
+  
   
   private initializePredefinedRanges(): void {
     // Función auxiliar para formatear fechas en formato ISO
@@ -225,16 +229,15 @@ export class EmployeeDashboardComponent implements OnInit, AfterViewInit {
     this.employeesService.getAllEmployeesPaged().subscribe({
       next: (response) => {
         let filteredEmployees = this.mapperService.toCamelCase(response.content);
-        
+  
         // Aplicar filtros de fecha solo si `startDate` y `endDate` no son `null`
         if (dateFilters.startDate && dateFilters.endDate) {
           const startDate = this.toUTCDate(dateFilters.startDate);
           const endDate = this.toUTCDate(dateFilters.endDate);
-          
-          filteredEmployees = filteredEmployees.filter((emp: Employee)=> {
-            // Verificamos si `hiringDate` es una instancia de `Date`, si no, lo convertimos
+  
+          filteredEmployees = filteredEmployees.filter((emp: Employee) => {
             let hiringDate: Date;
-          
+  
             if (emp.hiringDate instanceof Date) {
               hiringDate = emp.hiringDate;
             } else if (typeof emp.hiringDate === 'string') {
@@ -243,20 +246,31 @@ export class EmployeeDashboardComponent implements OnInit, AfterViewInit {
               console.warn(`Employee with ID ${emp.id} has an invalid hiringDate format.`);
               return false;
             }
-          
-            // Comparamos las fechas
+  
             return hiringDate >= startDate && hiringDate <= endDate;
           });
         }
   
+        // Mostrar mensaje de error si no hay empleados en el rango
+      if (filteredEmployees.length === 0) {
+        this.toastService.sendError('No hay datos disponibles para el rango seleccionado');
+        this.dateFilterForm.reset(); // Restablecer el formulario de fecha
+        this.getEmployees(); // Llamar a getEmployees para obtener todos los empleados
+      } else {
         this.employeeList = filteredEmployees;
         this.calculateMetrics();
         this.updateChartsWithFilteredData();
-      },
-      error: () => {
-        this.toastService.sendError('Error al cargar empleados.');
       }
-    });
+    },
+    error: () => {
+      this.toastService.sendError('Error al cargar empleados.');
+    }
+  });
+  }
+
+  public LimpiarGraficos() : void {
+    this.dateFilterForm.reset(); // Restablecer el formulario de fecha
+    this.getEmployees();
   }
   
 
