@@ -1,16 +1,16 @@
 <app-main-container title="Dashboard de Inventario" (infoButtonClick)="showInfo()">
 <!-- Primera fila de KPIs -->
 <div class="row mb-4">
-  <!-- Total Artículos -->
+  <!-- Total Artículos medidos en unidad -->
   <div class="col-md-3 mb-3">
     <div class="card shadow-sm">
       <div class="card-body">
         <div class="icon-circle bg-primary text-white mb-2">
           <i class="bi bi-box"></i>
         </div>
-        <h5 class="card-subtitle mb-2">Artículos Totales</h5>
+        <h5 class="card-subtitle mb-2">Artículos Unitarios</h5>
         <h5 class="card-title mb-0 fw-bold">{{ metrics.totalItems }}</h5>
-        <small class="text-muted">Unidades en inventario</small>
+        <small class="text-muted">Artículos con medida en unidades</small>
       </div>
     </div>
   </div>
@@ -50,7 +50,7 @@
         <div class="icon-circle bg-warning text-white mb-2">
           <i class="bi bi-star"></i>
         </div>
-        <h5 class="card-subtitle mb-2">Más Utilizado</h5>
+        <h5 class="card-subtitle mb-2">Mayor Movimiento</h5>
         <h5 class="card-title mb-0 fw-bold text-truncate" style="max-width: 180px;">
           {{ metrics.mostArticleUsed }}
         </h5>
@@ -64,17 +64,17 @@
   <div class="container mt-4">
     <h5 class="text-center text-secondary mb-4">Métricas de Inventario</h5>
     <div class="row g-4">
-      <!-- Tendencias de Movimientos (Line) -->
-      <div class="col-md-6">
-        <div class="card border-0 shadow-lg rounded-4">
-          <div class="card-body fixed-height">
-            <h5 class="card-title text-secondary mb-3">Tendencias de Movimientos</h5>
-            <div class="chart-wrapper">
-              <canvas baseChart [type]="'line'" [data]="transactionTrendsChartData" [options]="chartOptions"></canvas>
-            </div>
-          </div>
-        </div>
+   <!-- Tendencias de Movimientos (Bar) -->
+<div class="col-md-6">
+  <div class="card border-0 shadow-lg rounded-4">
+    <div class="card-body fixed-height">
+      <h5 class="card-title text-secondary mb-3">Tendencias de Movimientos</h5>
+      <div class="chart-wrapper">
+        <canvas baseChart [type]="'bar'" [data]="transactionTrendsChartData" [options]="barChartOptions"></canvas>
       </div>
+    </div>
+  </div>
+</div>
 
       <!-- Stock por Categoría (Pie) -->
       <div class="col-md-6">

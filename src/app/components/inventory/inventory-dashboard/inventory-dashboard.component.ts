@@ -101,14 +101,6 @@ export class InventoryDashboardComponent implements OnInit, AfterViewInit {
     }]
   };
 
-  transactionTrendsChartData: ChartData<'line'> = {
-    labels: [],
-    datasets: [
-      { label: 'Entradas', data: [], borderColor: 'rgba(76, 175, 80, 1)', backgroundColor: 'rgba(76, 175, 80, 0.1)', tension: 0.4, fill: true },
-      { label: 'Salidas', data: [], borderColor: 'rgba(244, 67, 54, 1)', backgroundColor: 'rgba(244, 67, 54, 0.1)', tension: 0.4, fill: true }
-    ]
-  };
-
   chartOptions: ChartConfiguration['options'] = {
     responsive: true,
     maintainAspectRatio: false,
@@ -138,6 +130,26 @@ categoryChartOptions: ChartConfiguration['options'] = {
       formatter: (value) => `${value}` // Formato de la etiqueta
     }
   }
+};
+
+barChartOptions: ChartConfiguration<'bar'>['options'] = {
+  responsive: true,
+  maintainAspectRatio: false,
+  plugins: {
+    legend: { display: true, position: 'top' },
+    tooltip: { enabled: true, mode: 'index', intersect: false }
+  },
+  scales: {
+    x: { display: true, stacked: true },
+    y: { display: true, stacked: true, beginAtZero: true }
+  }
+};
+transactionTrendsChartData: ChartData<'bar'> = {
+  labels: [], // Se actualizará con los meses de las transacciones
+  datasets: [
+    { label: 'Entradas', data: [], backgroundColor: 'rgba(76, 175, 80, 0.8)', borderColor: 'rgba(76, 175, 80, 1)', borderWidth: 1 },
+    { label: 'Salidas', data: [], backgroundColor: 'rgba(244, 67, 54, 0.8)', borderColor: 'rgba(244, 67, 54, 1)', borderWidth: 1 }
+  ]
 };
 
   constructor() { }
@@ -294,8 +306,8 @@ console.log("Total de artículos registrables en 'unidades':", this.metrics.tota
       this.transactionTrendsChartData = {
         labels: this.metrics.transactionTrends.labels,
         datasets: [
-          { label: 'Entradas', data: this.metrics.transactionTrends.entries, borderColor: 'rgba(76, 175, 80, 1)', backgroundColor: 'rgba(76, 175, 80, 0.1)', tension: 0.4, fill: true },
-          { label: 'Salidas', data: this.metrics.transactionTrends.outputs, borderColor: 'rgba(244, 67, 54, 1)', backgroundColor: 'rgba(244, 67, 54, 0.1)', tension: 0.4, fill: true }
+          { label: 'Entradas', data: this.metrics.transactionTrends.entries, backgroundColor: 'rgba(76, 175, 80, 0.8)', borderColor: 'rgba(76, 175, 80, 1)', borderWidth: 1 },
+          { label: 'Salidas', data: this.metrics.transactionTrends.outputs, backgroundColor: 'rgba(244, 67, 54, 0.8)', borderColor: 'rgba(244, 67, 54, 1)', borderWidth: 1 }
         ]
       };
     }
