@@ -154,35 +154,37 @@ export class ProviderListComponent implements OnInit {
       });
   }
   
-  searchProviders(searchTerm: string) {
-    if (!searchTerm) {
+  earchProviders(searchTerm:string){
+    if (!this.searchFilterAll.value||this.searchFilterAll.value==null) {
       this.getProviders();
-      return;
-    }
+   }
 
-    const filters = {
-      search: searchTerm
-    };
-
-    this.getProviders(0, this.pageSize, filters);
-  }
+   this.providerList = this.providerList.filter(p =>
+     p.name.toLowerCase().includes(searchTerm.toLowerCase() ?? '')
+     ||p.details?.toLowerCase().includes(searchTerm.toLowerCase() ?? '')
+     ||p.service.name.toLowerCase().includes(searchTerm.toLowerCase() ?? '')
+   );  }
 
   // Nuevo método para filtrado local
   private filterProviders(searchTerm: string): void {
     if (!searchTerm) {
-      this.getProviders(); // Volver a cargar todos los proveedores
+      this.providerList = [...this.originalProviders]; // Volver a cargar todos los proveedores
       return;
     }
 
     const term = searchTerm.toLowerCase().trim();
-    
-    // Crear filtro de búsqueda
-    const searchFilter = {
-      search: term
-    };
+      this.providerList = this.originalProviders.filter(provider => 
+      // Buscar en todos los campos visibles
+      provider.name.toLowerCase().includes(term) ||
+      provider.cuil.toLowerCase().includes(term) ||
+      provider.service?.name.toLowerCase().includes(term) ||
+      provider.company?.name.toLowerCase().includes(term) ||
+      provider.contact.toLowerCase().includes(term) ||
+      provider.address.toLowerCase().includes(term)
+  );
 
     // Llamar al servicio con el filtro de búsqueda
-    this.getProviders(0, this.pageSize, searchFilter);
+    this.getProviders(0, this.pageSize, term);
   }
 
   ngOnInit(): void {
@@ -210,14 +212,10 @@ getProviders(page: number = 0, size: number = this.pageSize, additionalFilters: 
   this.isLoading = true;
   
   const filters = {
-
-   /* page,
-    size,
-    ...additionalFilters*/
-
       ...this.getFilters(),
       page,
       size,
+      ...additionalFilters,
       sort: this.route.snapshot.queryParams['sort'] || 'registration,desc'
 
   };
@@ -230,7 +228,7 @@ getProviders(page: number = 0, size: number = this.pageSize, additionalFilters: 
       this.isLoading = false;
       
       // Actualizar métricas después de cargar los datos
-      this.calculateMetrics();
+      //this.calculateMetrics();
     },
     error: (error) => {
       console.error('Error fetching providers:', error);

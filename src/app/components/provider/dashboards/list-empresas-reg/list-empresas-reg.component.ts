@@ -21,7 +21,7 @@ export class ListEmpresasRegComponent {
 
   get sortedCompanies(): Company[] {
     return [...this.companies].sort((a, b) => 
-      new Date(b.registration).getTime() - new Date(a.registration).getTime()
+      new Date(a.registration).getTime() - new Date(b.registration).getTime()
     );
   }
   constructor(

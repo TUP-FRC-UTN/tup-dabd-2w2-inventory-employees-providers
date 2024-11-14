@@ -47,7 +47,8 @@ export class ProviderDashboardComponent implements OnInit, AfterViewInit {
   companies: Company[] = [];
   services: Service[] = [];
   topProviders: TopProvider[] = [];
-
+  private chartsInitialized = false;
+  dataLoaded = false;
   private route = inject(Router);
 
   pieChartType: ChartType = 'pie';
@@ -115,54 +116,55 @@ export class ProviderDashboardComponent implements OnInit, AfterViewInit {
   }
   // Chart configurations
 
- /*readonly chartConfigs = {
-    pieChart: {
-      responsive: true,
-      maintainAspectRatio: false,
-      plugins: {
-        legend: { position: 'right' as const
-          //, onClick: null 
-        },
-        title: { display: true, text: 'Estado de Proveedores' }
-      },
-      animation: {
-        duration : 500
-      }
-    },
-    barChart: {
-      responsive: true,
-      maintainAspectRatio: false,
-      plugins: {
-        legend: { 
-          position: 'top' as const,
-          //onClick: null  // Deshabilitar clicks en la leyenda
-        },
-        title: { display: true, text: 'Distribución por Servicio' }
-      },
-      scales: {
-        y: {
-          beginAtZero: true,
-          ticks: { stepSize: 1 }
-        }
-      },
-      animation: {
-        duration: 500
-      }
-    },
-    doughnutChart: {
-      responsive: true,
-      maintainAspectRatio: false,
-      plugins: {
-        legend: { 
-          position: 'right' as const
-          //onClick: null  // Deshabilitar clicks en la leyenda
-        },
-        title: { display: true, text: 'Tipos de Servicios' }
-      },
-      animation: {
-        duration: 500
-      }
-    }*/
+//  readonly chartConfigs = {
+//     pieChart: {
+//       responsive: true,
+//       maintainAspectRatio: false,
+//       plugins: {
+//         legend: { position: 'right' as const
+//           //, onClick: null 
+//         },
+//         title: { display: true, text: 'Estado de Proveedores' }
+//       },
+//       animation: {
+//         duration : 500
+//       }
+//     },
+//     barChart: {
+//       responsive: true,
+//       maintainAspectRatio: false,
+//       plugins: {
+//         legend: { 
+//           position: 'top' as const,
+//           //onClick: null  // Deshabilitar clicks en la leyenda
+//         },
+//         title: { display: true, text: 'Distribución por Servicio' }
+//       },
+//       scales: {
+//         y: {
+//           beginAtZero: true,
+//           ticks: { stepSize: 1 }
+//         }
+//       },
+//       animation: {
+//         duration: 500
+//       }
+//     },
+//     doughnutChart: {
+//       responsive: true,
+//       maintainAspectRatio: false,
+//       plugins: {
+//         legend: { 
+//           position: 'right' as const
+//           //onClick: null  // Deshabilitar clicks en la leyenda
+//         },
+//         title: { display: true, text: 'Tipos de Servicios' }
+//       },
+//       animation: {
+//         duration: 500
+//       }
+//     }
+//   }
 
   readonly chartConfigs = {
     pieChart: this.getChartConfig('pie', 'Estado de Proveedores'),
@@ -259,6 +261,43 @@ export class ProviderDashboardComponent implements OnInit, AfterViewInit {
     datasets: []
   };
 
+  private getChartConfig(
+    type: string, 
+    title: string, 
+    showAxes = false, 
+    legendPosition: 'top' | 'right' = 'top'
+  ): ChartConfiguration['options'] {
+    const config: ChartConfiguration['options'] = {
+      responsive: true,
+      maintainAspectRatio: false,
+      plugins: {
+        legend: { 
+          position: legendPosition,
+          display: true 
+        },
+        title: {
+          display: true,
+          text: title
+        }
+      }
+    };
+
+    if (showAxes) {
+      config.scales = {
+        x: { 
+          title: { display: true, text: 'Servicios' },
+          ticks: { maxRotation: 45, minRotation: 45 }
+        },
+        y: { 
+          title: { display: true, text: 'Cantidad' },
+          beginAtZero: true,
+          ticks: { stepSize: 1 }
+        }
+      };
+    }
+
+    return config;
+  }
 
   constructor(
     private fb: FormBuilder,
@@ -650,7 +689,41 @@ export class ProviderDashboardComponent implements OnInit, AfterViewInit {
   closeModalFilter(): void {
     this.showModalFilter = false;
   }
+  private initializeCharts(): void {
+    if (!this.chart || !this.dataLoaded) return;
 
+    // Configuración inicial de los gráficos
+    this.pieChartData = {
+      labels: ['Activos', 'Inactivos'],
+      datasets: [{
+        data: [this.metrics.activeCount, this.metrics.inactiveCount],
+        backgroundColor: ['#28a745', '#dc3545']
+      }]
+    };
+  }
+  private getServiceDistribution(): { [key: string]: number } {
+    const distribution: { [key: string]: number } = {};
+    
+    // Agrupar proveedores por servicio
+    this.providerList.forEach(provider => {
+      const serviceName = provider.service?.name || 'Sin categorizar';
+      distribution[serviceName] = (distribution[serviceName] || 0) + 1;
+    });
+
+    // Ordenar por cantidad de proveedores (opcional)
+    return Object.fromEntries(
+      Object.entries(distribution)
+        .sort(([,a], [,b]) => b - a)
+        .slice(0, 6) // Limitar a los 6 servicios más comunes
+    );
+  }
+
+  ngAfterViewInit() {
+    // Si los datos ya están cargados, inicializar los gráficos
+    if (this.dataLoaded) {
+      this.initializeCharts();
+    }
+  }
 
  /* private providerListasGraficas : Supplier[] = [];
   calculateCharsGraphics() {
@@ -738,17 +811,7 @@ export class ProviderDashboardComponent implements OnInit, AfterViewInit {
       this.initializeCharts();
     }
   }
-  private initializeCharts(): void {
-    if (!this.chart || !this.dataLoaded) return;
-
-    // Configuración inicial de los gráficos
-    this.pieChartData = {
-      labels: ['Activos', 'Inactivos'],
-      datasets: [{
-        data: [this.metrics.activeCount, this.metrics.inactiveCount],
-        backgroundColor: ['#28a745', '#dc3545']
-      }]
-    };
+  
 
     this.barChartData = {
       labels: [],
@@ -786,7 +849,7 @@ export class ProviderDashboardComponent implements OnInit, AfterViewInit {
 
 
   // Suppliers x Compania
-
+  
   //metodo para calcular
   private getCompanyDistribution(): { [key: string]: number } {
     return this.providerList.reduce((acc, provider) => {
