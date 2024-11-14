@@ -1,4 +1,4 @@
-import { Component, Input, OnInit, ViewChild } from '@angular/core';
+import { Component, inject, Inject, Input, OnInit, ViewChild } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { ReactiveFormsModule, FormBuilder, FormControl, FormGroup, Validators, FormsModule } from '@angular/forms';
 import { ProvidersService } from '../../../services/providers.service';
@@ -11,6 +11,7 @@ import { NgbModal } from '@ng-bootstrap/ng-bootstrap';
 import { BaseChartDirective } from 'ng2-charts';
 import { Company } from '../../../models/suppliers/company.model';
 import { Service } from '../../../models/suppliers/service.model';
+import { Router } from '@angular/router';
 
 Chart.register(...registerables);
 
@@ -36,6 +37,8 @@ export class ProviderDashboardComponent implements OnInit {
   showModalFilter = false;
   companies: Company[] = [];
   services: Service[] = [];
+
+  private route = inject(Router);
 
   // KPI metrics
   metrics = {
@@ -497,5 +500,10 @@ export class ProviderDashboardComponent implements OnInit {
 
   closeModalFilter(): void {
     this.showModalFilter = false;
+  }
+
+
+  openActiveCompaniesModal(){
+    this.route.navigate(['providers/dashboard/modal/company']);
   }
 }

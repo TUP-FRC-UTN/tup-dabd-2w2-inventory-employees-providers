@@ -1,5 +1,50 @@
 <ng-template #content let-modal>
     <app-main-container>
-               
+        <div class="modal fade" 
+        [class.show]="showActiveCompaniesModal" 
+        [style.display]="showActiveCompaniesModal ? 'block' : 'none'"
+        tabindex="-1">
+     <div class="modal-dialog modal-lg">
+       <div class="modal-content">
+         <div class="modal-header">
+           <h5 class="modal-title">
+             Empresas Activas
+           </h5>
+           <button type="button" 
+                   class="btn-close" 
+                   (click)="closeActiveCompaniesModal()"
+                   aria-label="Cerrar">
+           </button>
+         </div>
+         <div class="modal-body">
+            <div class="table-container mt-3">
+                <table class="table table-striped">
+                    <thead>
+                        <thead class="bg-light">
+                            <tr>
+                                <th scope="col">Compania</th>
+                                <th scope="col">Estado</th>
+                            </tr>
+                            @for (comp of companies; track $index) {
+                                <tr>
+                                    <td>{{comp.name}}</td>
+                                    <td>{{comp.enabled}}</td>
+                                </tr>
+                            }
+                        </thead>
+                    </thead>
+                </table>
+            </div>
+         </div>  
+         <div class="modal-footer">
+           <button type="button" 
+                   class="btn btn-secondary" 
+                   (click)="closeActiveCompaniesModal()">
+             Cerrar
+           </button>
+         </div>
+       </div>
+     </div>
+</div>
     </app-main-container>
 </ng-template>
