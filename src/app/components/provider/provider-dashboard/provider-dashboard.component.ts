@@ -11,7 +11,7 @@ import { NgbModal } from '@ng-bootstrap/ng-bootstrap';
 import { BaseChartDirective } from 'ng2-charts';
 import { Company } from '../../../models/suppliers/company.model';
 import { Service } from '../../../models/suppliers/service.model';
-import { TopProvider } from '../../../models/suppliers/top-provider.model';
+import { TopProvider, ServicesByCompany } from '../../../models/suppliers/chart-objects.model';
 
 Chart.register(...registerables);
 
@@ -183,6 +183,11 @@ export class ProviderDashboardComponent implements OnInit {
     }]
   };
 
+  // Servicios agrupados x compania
+  servicesByCompanyChartData: ChartData<'bar'> = {
+    labels: [],
+    datasets: []
+  };
 
   constructor(
     private fb: FormBuilder,
