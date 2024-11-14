@@ -49,16 +49,6 @@ export class EmployeeAssistanceListComponent {
       '',
       'yyyy-MM-dd'
     )
-    .selectFilter(
-      'Tipo de Acceso',
-      'actionType',
-      'Seleccione un Tipo',
-      [
-        { value: '', label: 'Todos' },
-        { value: 'ENTRY', label: 'Entradas' },
-        { value: 'EXIT', label: 'Salidas' },
-      ]
-    )
     .build();
 
     constructor(private fb: FormBuilder) {
@@ -70,7 +60,9 @@ export class EmployeeAssistanceListComponent {
     filterChange($event: Record<string, any>) {
       const filters = $event;
       this.currentFilters = filters;
-      this.getEmployees();
+      if(this.currentEmployee!=undefined){
+        this.getEmployees();
+      }    
     }
   
   // Pagination
@@ -96,10 +88,6 @@ export class EmployeeAssistanceListComponent {
       if (id) {
         this.getById(id);
       }});
-      this.getEmployees();
-    if(this.currentEmployee!=undefined){
-      this.getEmployees();
-    }
   }
 
   getEmployees(page: number = this.currentPage, size: number = this.pageSize, searchTerm?: string): void {
@@ -111,6 +99,7 @@ export class EmployeeAssistanceListComponent {
     filters['textFilter'] = this.currentEmployee?.docNumber;
     filters['docType'] = 'CUIL';
     filters['visitorType'] = 'EMPLOYEE';
+    filters['actionType'] = 'ENTRY';
 
     this.assistanceService.getAllEmployeesPaged(this.currentPage,this.pageSize,filters).subscribe({
       next:(response) => {
@@ -123,7 +112,7 @@ export class EmployeeAssistanceListComponent {
       },
       error: (error) => {
         console.error('Error trayendo asistencia:', error);
-        this.toastService.sendError('Error al cargar horarios.');
+        this.toastService.sendError('Error al cargar asistencias.');
         this.isLoading = false;
       }
     })
@@ -131,7 +120,7 @@ export class EmployeeAssistanceListComponent {
   }
 
   getById(id: number) {
-    this.employeeService.getEmployeeById(this.currentEmployeeId).subscribe({
+    this.employeeService.getEmployee(id).subscribe({
       next: (response) => {
         console.log(response);
         this.currentEmployee = this.mapperService.toCamelCase(response);
@@ -141,27 +130,36 @@ export class EmployeeAssistanceListComponent {
         console.error(error);
       }
     })
+    this.getEmployees();
   }
 
   applyFilters(): void {
     this.currentPage = 0;
-    this.getEmployees();
+    if(this.currentEmployee!=undefined){
+      this.getEmployees();
+    }
   }
 
   clearFilters(): void {
     this.searchFilter.setValue('');
     this.currentPage = 0;
-    this.getEmployees();
+    if(this.currentEmployee!=undefined){
+      this.getEmployees();
+    }  
   }
 
   onPageChange(page: number): void {
     this.currentPage = page - 1; // Convert to 0-based for backend
-    this.getEmployees();
+    if(this.currentEmployee!=undefined){
+      this.getEmployees();
+    }
   }
 
   onItemsPerPageChange(): void {
     this.currentPage = 0;
-    this.getEmployees();
+    if(this.currentEmployee!=undefined){
+      this.getEmployees();
+    }  
   }
 
   // Export methods
@@ -197,14 +195,18 @@ export class EmployeeAssistanceListComponent {
   goToPreviousPage() {
     if (this.currentPage > 0) {
       this.currentPage--;
-      this.getEmployees();
+      if(this.currentEmployee!=undefined){
+        this.getEmployees();
+      }
     }
   }
   
   goToNextPage() {
     if (this.currentPage < this.totalPages - 1) {
       this.currentPage++;
-      this.getEmployees();
+      if(this.currentEmployee!=undefined){
+        this.getEmployees();
+      }    
     }
   }
 
