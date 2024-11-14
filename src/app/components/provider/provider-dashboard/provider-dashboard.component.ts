@@ -725,24 +725,26 @@ private calculateIndependentVsCorporateMetrics(): void {
   // PROVEEDORES POR SERVICIOS GROUP BY COMPANY
 
   // Colores para los diferentes servicios
-  private readonly serviceColors: { [key: string]: string } = {
-    'Electricidad': '#2196F3',    // Azul
-    'Agua': '#00BCD4',           // Celeste
-    'Plomería': '#3F51B5',       // Índigo
-    'Refrigeración': '#9C27B0',  // Púrpura
-    'Ingeniería Civil': '#E91E63', // Rosa
-    'Seguridad e Higiene': '#F44336', // Rojo
-    'Jardinería': '#4CAF50',     // Verde
-    'Mantenimiento General': '#FF9800', // Naranja
-    'Seguridad Privada': '#795548', // Marrón
-    'Pintura': '#607D8B',        // Gris azulado
-    'Limpieza': '#FFEB3B',       // Amarillo
-    'Control de Plagas': '#8BC34A', // Verde claro
-    'Reparación de Piscinas': '#03A9F4', // Azul claro
-    'Cerrajería': '#FF5722',     // Naranja oscuro
-    'Carpintería': '#9E9E9E',    // Gris
-    'Arquitectura': '#673AB7'    // Violeta
-  };
+  private getColorForIndex(index: number): string {
+    // Lista de colores agradables predefinidos
+    const colors = [
+      '#2196F3', // Azul
+      '#4CAF50', // Verde
+      '#F44336', // Rojo
+      '#FFC107', // Ámbar
+      '#9C27B0', // Púrpura
+      '#00BCD4', // Cyan
+      '#FF5722', // Naranja profundo
+      '#3F51B5', // Índigo
+      '#E91E63', // Rosa
+      '#009688', // Verde azulado
+      '#673AB7', // Violeta profundo
+      '#795548', // Marrón
+      '#607D8B'  // Gris azulado
+    ];
+    
+    return colors[index % colors.length];
+  }
 
   // Método para procesar los datos
   private calculateServicesByCompany(): void {
@@ -771,12 +773,12 @@ private calculateIndependentVsCorporateMetrics(): void {
 
     // Preparar los datos para el gráfico
     this.servicesByCompanyChartData.labels = Object.keys(servicesByCompany);
-    this.servicesByCompanyChartData.datasets = allServices.map(service => ({
+    this.servicesByCompanyChartData.datasets = allServices.map((service, index) => ({
       label: service,
       data: Object.keys(servicesByCompany).map(company => 
         servicesByCompany[company][service] || 0
       ),
-      backgroundColor: this.serviceColors[service] || '#999999', // Color por defecto
+      backgroundColor: this.getColorForIndex(index),
       borderColor: 'white',
       borderWidth: 1
     }));

@@ -328,45 +328,37 @@
   </div>
 
   <!-- Gráficos -->
-  <div class="row g-4 mb-4">
-    <div class="col-md-6">
-      <div class="card border-0 shadow-lg rounded-4 h-100">
-        <div class="card-body">
-          <h5 class="card-title text-secondary">Proveedores por Compañía</h5>
-          <div class="chart-container" style="height: 300px;">
-            <canvas baseChart
-              [data]="companyBarChartData"
-              [options]="chartConfigs.companyBarChart"
-              [type]="'bar'">
-            </canvas>
-          </div>
-        </div>
-      </div>
-    </div>
-  
-    <!-- Proveedores registrados x mes -->
-    <div class="col-md-6">
-      <div class="card border-0 shadow-lg rounded-4 h-100">
-        <div class="card-body">
-          <div class="d-flex align-items-center mb-2">
-            <div class="icon-circle bg-indigo text-white me-3">
-              <i class="bi bi-calendar3"></i>
-            </div>
-            <h5 class="card-title text-secondary mb-0">Registro Mensual de Proveedores</h5>
-          </div>
-          <div class="chart-container" style="height: 300px;">
-            <canvas baseChart
-              [data]="monthlyRegistrationChartData"
-              [options]="chartConfigs.monthlyRegistrationChart"
-              [type]="'bar'">
-            </canvas>
-          </div>
-        </div>
-      </div>
-    </div>
-  </div>
 
-  <div class="row g-4 mb-4">
+    <!-- PROVEEDORES POR SERVICIO PERO GROUPBY COMPANY -->
+    <div class="col-md-12 mb-4 g-4">
+      <div class="card border-0 shadow-lg rounded-4">
+        <div class="card-body">
+          <!-- Título con icono -->
+          <div class="d-flex align-items-center mb-3">
+            <div class="icon-circle bg-gradient-primary text-white me-3">
+              <i class="bi bi-bar-chart-steps"></i>
+            </div>
+            <h5 class="card-title text-secondary mb-0">Distribución de Servicios por Compañía</h5>
+            <button class="btn btn-link ms-auto text-decoration-none" 
+                    placement="left"
+                    ngbTooltip="Cada barra muestra la distribución de servicios dentro de una compañía">
+              <i class="bi bi-info-circle"></i>
+            </button>
+          </div>
+    
+          <!-- Gráfico -->
+          <div class="chart-container" style="height: 400px;"> <!-- Altura aumentada para mejor visualización -->
+            <canvas baseChart
+              [data]="servicesByCompanyChartData"
+              [options]="chartConfigs.servicesByCompanyChart"
+              [type]="'bar'">
+            </canvas>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="row g-4 mb-4"> 
       <!-- TOP PROVEEDORES ANTIGUOS -->
     <div class="col-md-6">
       <div class="card border-0 shadow-lg rounded-4">
@@ -482,31 +474,40 @@
       </div>
     </div>
   </div>
-  
-  <!-- PROVEEDORES POR SERVICIO PERO GROUPBY COMPANY -->
-  <div class="col-md-12">
-    <div class="card border-0 shadow-lg rounded-4">
-      <div class="card-body">
-        <!-- Título con icono -->
-        <div class="d-flex align-items-center mb-3">
-          <div class="icon-circle bg-gradient-primary text-white me-3">
-            <i class="bi bi-bar-chart-steps"></i>
+
+  <div class="row g-4 mb-4">
+    <div class="col-md-6">
+      <div class="card border-0 shadow-lg rounded-4 h-100">
+        <div class="card-body">
+          <h5 class="card-title text-secondary">Proveedores por Compañía</h5>
+          <div class="chart-container" style="height: 300px;">
+            <canvas baseChart
+              [data]="companyBarChartData"
+              [options]="chartConfigs.companyBarChart"
+              [type]="'bar'">
+            </canvas>
           </div>
-          <h5 class="card-title text-secondary mb-0">Distribución de Servicios por Compañía</h5>
-          <button class="btn btn-link ms-auto text-decoration-none" 
-                  placement="left"
-                  ngbTooltip="Cada barra muestra la distribución de servicios dentro de una compañía">
-            <i class="bi bi-info-circle"></i>
-          </button>
         </div>
+      </div>
+    </div>
   
-        <!-- Gráfico -->
-        <div class="chart-container" style="height: 400px;"> <!-- Altura aumentada para mejor visualización -->
-          <canvas baseChart
-            [data]="servicesByCompanyChartData"
-            [options]="chartConfigs.servicesByCompanyChart"
-            [type]="'bar'">
-          </canvas>
+    <!-- Proveedores registrados x mes -->
+    <div class="col-md-6">
+      <div class="card border-0 shadow-lg rounded-4 h-100">
+        <div class="card-body">
+          <div class="d-flex align-items-center mb-2">
+            <div class="icon-circle bg-indigo text-white me-3">
+              <i class="bi bi-calendar3"></i>
+            </div>
+            <h5 class="card-title text-secondary mb-0">Registro Mensual de Proveedores</h5>
+          </div>
+          <div class="chart-container" style="height: 300px;">
+            <canvas baseChart
+              [data]="monthlyRegistrationChartData"
+              [options]="chartConfigs.monthlyRegistrationChart"
+              [type]="'bar'">
+            </canvas>
+          </div>
         </div>
       </div>
     </div>
