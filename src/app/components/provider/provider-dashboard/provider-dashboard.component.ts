@@ -541,6 +541,10 @@ export class ProviderDashboardComponent implements OnInit {
     // Calcular de independientes vs corporativos
     this.calculateIndependentVsCorporateMetrics();
 
+    // Calcular servicios groupby company
+    this.calculateServicesByCompany();
+
+
     // Force chart update
     this.chart?.update();
   }

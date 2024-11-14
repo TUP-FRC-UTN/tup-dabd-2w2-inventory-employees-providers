@@ -548,6 +548,35 @@
     </div>
   </div>
 
+  <!-- PROVEEDORES POR SERVICIO PERO GROUPBY COMPANY -->
+  <div class="col-md-12">
+    <div class="card border-0 shadow-lg rounded-4">
+      <div class="card-body">
+        <!-- Título con icono -->
+        <div class="d-flex align-items-center mb-3">
+          <div class="icon-circle bg-gradient-primary text-white me-3">
+            <i class="bi bi-bar-chart-steps"></i>
+          </div>
+          <h5 class="card-title text-secondary mb-0">Distribución de Servicios por Compañía</h5>
+          <button class="btn btn-link ms-auto text-decoration-none" 
+                  placement="left"
+                  ngbTooltip="Cada barra muestra la distribución de servicios dentro de una compañía">
+            <i class="bi bi-info-circle"></i>
+          </button>
+        </div>
+  
+        <!-- Gráfico -->
+        <div class="chart-container" style="height: 400px;"> <!-- Altura aumentada para mejor visualización -->
+          <canvas baseChart
+            [data]="servicesByCompanyChartData"
+            [options]="chartConfigs.servicesByCompanyChart"
+            [type]="'bar'">
+          </canvas>
+        </div>
+      </div>
+    </div>
+  </div>
+  
   <!-- Modal de Filtros -->
   <div class="modal" [class.show]="showModalFilter" [style.display]="showModalFilter ? 'block' : 'none'">
     <div class="modal-dialog">
