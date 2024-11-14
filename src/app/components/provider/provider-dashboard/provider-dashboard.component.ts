@@ -717,4 +717,105 @@ private calculateIndependentVsCorporateMetrics(): void {
     corporateProviders.length
     ];
   }
+
+  // PROVEEDORES POR SERVICIOS GROUP BY COMPANY
+
+  // Colores para los diferentes servicios
+  private readonly serviceColors: { [key: string]: string } = {
+    'Electricidad': '#2196F3',    // Azul
+    'Agua': '#00BCD4',           // Celeste
+    'Plomería': '#3F51B5',       // Índigo
+    'Refrigeración': '#9C27B0',  // Púrpura
+    'Ingeniería Civil': '#E91E63', // Rosa
+    'Seguridad e Higiene': '#F44336', // Rojo
+    'Jardinería': '#4CAF50',     // Verde
+    'Mantenimiento General': '#FF9800', // Naranja
+    'Seguridad Privada': '#795548', // Marrón
+    'Pintura': '#607D8B',        // Gris azulado
+    'Limpieza': '#FFEB3B',       // Amarillo
+    'Control de Plagas': '#8BC34A', // Verde claro
+    'Reparación de Piscinas': '#03A9F4', // Azul claro
+    'Cerrajería': '#FF5722',     // Naranja oscuro
+    'Carpintería': '#9E9E9E',    // Gris
+    'Arquitectura': '#673AB7'    // Violeta
+  };
+
+  // Método para procesar los datos
+  private calculateServicesByCompany(): void {
+    // Solo considerar proveedores activos
+    const activeProviders = this.providerList.filter(p => p.enabled);
+
+    // Agrupar por compañía y servicio
+    const servicesByCompany: ServicesByCompany = {};
+    
+    activeProviders.forEach(provider => {
+      const companyName = provider.company?.name || 'Sin Compañía';
+      const serviceName = provider.service?.name || 'Sin Servicio';
+
+      if (!servicesByCompany[companyName]) {
+        servicesByCompany[companyName] = {};
+      }
+      
+      servicesByCompany[companyName][serviceName] = 
+        (servicesByCompany[companyName][serviceName] || 0) + 1;
+    });
+
+    // Obtener todos los servicios únicos
+    const allServices = Array.from(new Set(
+      activeProviders.map(p => p.service?.name || 'Sin Servicio')
+    ));
+
+    // Preparar los datos para el gráfico
+    this.servicesByCompanyChartData.labels = Object.keys(servicesByCompany);
+    this.servicesByCompanyChartData.datasets = allServices.map(service => ({
+      label: service,
+      data: Object.keys(servicesByCompany).map(company => 
+        servicesByCompany[company][service] || 0
+      ),
+      backgroundColor: this.serviceColors[service] || '#999999', // Color por defecto
+      borderColor: 'white',
+      borderWidth: 1
+    }));
+
+    // Configurar opciones específicas
+    if (this.chartConfigs.servicesByCompanyChart && this.chartConfigs.servicesByCompanyChart.scales) {
+      this.chartConfigs.servicesByCompanyChart.scales['x'] = {
+        stacked: true,
+        title: {
+          display: true,
+          text: 'Compañías'
+        }
+      };
+      this.chartConfigs.servicesByCompanyChart.scales['y'] = {
+        stacked: true,
+        title: {
+          display: true,
+          text: 'Cantidad de Proveedores'
+        },
+        ticks: {
+          stepSize: 1
+        }
+      };
+    }
+
+    // Configurar plugins
+    this.chartConfigs.servicesByCompanyChart.plugins = {
+      ...this.chartConfigs.servicesByCompanyChart.plugins,
+      tooltip: {
+        callbacks: {
+          footer: (tooltipItems: any[]) => {
+            const total = tooltipItems.reduce((sum, item) => sum + item.parsed.y, 0);
+            return `Total: ${total} proveedores`;
+          }
+        }
+      },
+      legend: {
+        position: 'right',
+        labels: {
+          usePointStyle: true,
+          padding: 20
+        }
+      }
+    };
+  }
 }
