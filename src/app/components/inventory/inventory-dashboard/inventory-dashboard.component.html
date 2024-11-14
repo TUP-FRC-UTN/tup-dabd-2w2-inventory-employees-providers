@@ -1,93 +1,136 @@
 <app-main-container title="Dashboard de Inventario" (infoButtonClick)="showInfo()">
-<!-- Primera fila de KPIs -->
-<div class="row mb-4">
-  <!-- Total Artículos medidos en unidad -->
-  <div class="col-md-3 mb-3">
-    <div class="card shadow-sm">
-      <div class="card-body">
-        <div class="icon-circle bg-primary text-white mb-2">
-          <i class="bi bi-box"></i>
-        </div>
-        <h5 class="card-subtitle mb-2">Artículos Unitarios</h5>
-        <h5 class="card-title mb-0 fw-bold">{{ metrics.totalItems }}</h5>
-        <small class="text-muted">Artículos con medida en unidades</small>
-      </div>
-    </div>
-  </div>
+  <!-- KPIs Principales -->
+  <div class="row g-4 mb-4">
+    <!-- Total Artículos -->
+    <div class="col-md-3">
+      <div class="card shadow-sm" (click)="showInventoryItems()" style="cursor: pointer;">
+        <div class="card-body">
+          <div class="d-flex align-items-center mb-2">
+            <div class="icon-circle bg-primary text-white me-3">
+              <i class="bi bi-box"></i>
+            </div>
+            <h6 class="card-subtitle mb-2">Artículos Unitarios</h6>
+          </div>
+          
+          <div class="d-flex align-items-baseline mt-2">
+            <h2 class="card-title mb-0">{{ metrics.totalItems }}</h2>
+          </div>
 
-  <!-- Valor de Inventario -->
-  <div class="col-md-3 mb-3">
-    <div class="card shadow-sm">
-      <div class="card-body">
-        <div class="icon-circle bg-success text-white mb-2">
-          <i class="bi bi-currency-dollar"></i>
+          <div class="mt-2">
+            <small class="text-muted">Artículos con medida en unidades</small>
+          </div>
         </div>
-        <h5 class="card-subtitle mb-2">Valor del Inventario</h5>
-        <h5 class="card-title mb-0 fw-bold">$ {{ metrics.totalValue.toFixed(2) }}</h5>
-        <small class="text-muted">Valor total actual</small>
       </div>
     </div>
-  </div>
 
-  <!-- Stock Bajo -->
-  <div class="col-md-3 mb-3">
-    <div class="card shadow-sm">
-      <div class="card-body">
-        <div class="icon-circle bg-danger text-white mb-2">
-          <i class="bi bi-exclamation-triangle"></i>
-        </div>
-        <h5 class="card-subtitle mb-2">Stock Bajo</h5>
-        <h5 class="card-title mb-0 fw-bold">{{ metrics.lowStockItems }}</h5>
-        <small class="text-muted">Artículos en mínimo</small>
-      </div>
-    </div>
-  </div>
+    <!-- Valor de Inventario -->
+    <div class="col-md-3">
+      <div class="card shadow-sm">
+        <div class="card-body">
+          <div class="d-flex align-items-center mb-2">
+            <div class="icon-circle bg-success text-white me-3">
+              <i class="bi bi-currency-dollar"></i>
+            </div>
+            <h6 class="card-subtitle mb-2">Valor del Inventario</h6>
+          </div>
+          
+          <div class="d-flex align-items-baseline mt-2">
+            <h2 class="card-title mb-0">$ {{ metrics.totalValue.toFixed(2) }}</h2>
+          </div>
 
-  <!-- Artículo Más Utilizado -->
-  <div class="col-md-3 mb-3">
-    <div class="card shadow-sm">
-      <div class="card-body">
-        <div class="icon-circle bg-warning text-white mb-2">
-          <i class="bi bi-star"></i>
+          <div class="mt-2">
+            <small class="text-muted">Valor total actual</small>
+          </div>
         </div>
-        <h5 class="card-subtitle mb-2">Mayor Movimiento</h5>
-        <h5 class="card-title mb-0 fw-bold text-truncate" style="max-width: 180px;">
-          {{ metrics.mostArticleUsed }}
-        </h5>
-        <small class="text-muted">Mayor rotación</small>
+      </div>
+    </div>
+
+    <!-- Stock Bajo -->
+    <div class="col-md-3">
+      <div class="card shadow-sm">
+        <div class="card-body">
+          <div class="d-flex align-items-center mb-2">
+            <div class="icon-circle bg-danger text-white me-3">
+              <i class="bi bi-exclamation-triangle"></i>
+            </div>
+            <h6 class="card-subtitle mb-2">Stock Bajo</h6>
+          </div>
+          
+          <div class="d-flex align-items-baseline mt-2">
+            <h2 class="card-title mb-0">{{ metrics.lowStockItems }}</h2>
+          </div>
+
+          <div class="mt-2">
+            <small class="text-muted">Artículos en mínimo</small>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Artículo Más Utilizado -->
+    <div class="col-md-3">
+      <div class="card shadow-sm">
+        <div class="card-body">
+          <div class="d-flex align-items-center mb-2">
+            <div class="icon-circle bg-warning text-white me-3">
+              <i class="bi bi-star"></i>
+            </div>
+            <h6 class="card-subtitle mb-2">Mayor Movimiento</h6>
+          </div>
+          
+          <div class="d-flex align-items-baseline mt-2">
+            <h2 class="card-title mb-0 text-truncate" style="max-width: 180px;">
+              {{ metrics.mostArticleUsed }}
+            </h2>
+          </div>
+
+          <div class="mt-2">
+            <small class="text-muted">Mayor rotación</small>
+          </div>
+        </div>
       </div>
     </div>
   </div>
-</div>
 
   <!-- Gráficos -->
-  <div class="container mt-4">
-    <h5 class="text-center text-secondary mb-4">Métricas de Inventario</h5>
-    <div class="row g-4">
-   <!-- Tendencias de Movimientos (Bar) -->
-<div class="col-md-6">
-  <div class="card border-0 shadow-lg rounded-4">
-    <div class="card-body fixed-height">
-      <h5 class="card-title text-secondary mb-3">Tendencias de Movimientos</h5>
-      <div class="chart-wrapper">
-        <canvas baseChart [type]="'bar'" [data]="transactionTrendsChartData" [options]="barChartOptions"></canvas>
+  <div class="row g-4 mb-4">
+    <!-- Tendencias de Movimientos -->
+    <div class="col-md-6">
+      <div class="card border-0 shadow-lg rounded-4 h-100">
+        <div class="card-body">
+          <div class="d-flex align-items-center mb-3">
+            <div class="icon-circle bg-gradient-primary text-white me-3">
+              <i class="bi bi-bar-chart-steps"></i>
+            </div>
+            <h5 class="card-title text-secondary mb-0">Tendencias de Movimientos</h5>
+          </div>
+          <div class="chart-container" style="height: 300px; position: relative;">
+            <canvas baseChart 
+              [type]="'bar'" 
+              [data]="transactionTrendsChartData" 
+              [options]="barChartOptions">
+            </canvas>
+          </div>
+        </div>
       </div>
     </div>
-  </div>
-</div>
 
-      <!-- Stock por Categoría (Pie) -->
-      <div class="col-md-6">
-        <div class="card border-0 shadow-lg rounded-4">
-          <div class="card-body fixed-height">
-            <h5 class="card-title text-secondary mb-3">Stock por Categoría</h5>
-            <div class="chart-wrapper">
-              <canvas baseChart
-              [type]="'pie'"
-              [data]="categoryChartData"
-              [options]="categoryChartOptions"> <!-- Usa categoryChartOptions aquí -->
-            </canvas>
+    <!-- Stock por Categoría -->
+    <div class="col-md-6">
+      <div class="card border-0 shadow-lg rounded-4 h-100">
+        <div class="card-body">
+          <div class="d-flex align-items-center mb-3">
+            <div class="icon-circle bg-primary text-white me-3">
+              <i class="bi bi-pie-chart-fill"></i>
             </div>
+            <h5 class="card-title text-secondary mb-0">Stock por Categoría</h5>
+          </div>
+          <div class="chart-container" style="height: 400px; position: relative;">
+            <canvas baseChart 
+              [type]="'pie'" 
+              [data]="categoryChartData" 
+              [options]="categoryChartOptions">
+            </canvas>
           </div>
         </div>
       </div>
