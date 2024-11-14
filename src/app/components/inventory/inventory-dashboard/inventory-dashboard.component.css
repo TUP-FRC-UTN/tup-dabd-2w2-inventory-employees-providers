@@ -1,3 +1,4 @@
+/* Icon Styles */
 .icon-circle {
   width: 40px;
   height: 40px;
@@ -5,12 +6,32 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  margin: 0 auto; /* Centrar el icono */
-}
-
-.icon-circle i {
+  }
+  
+  .icon-circle i {
   font-size: 1.25rem;
-}
+  }
+  :host {
+  display: block;
+  width: 100%;
+  }
+  
+  .card {
+  height: 100%;
+  
+  .card-body.fixed-height {
+    height: 400px;
+    display: flex;
+    flex-direction: column;
+  }
+  }
+  
+  .chart-wrapper {
+  position: relative;
+  flex: 1;
+  min-height: 0; 
+  height: 300px; 
+  }
 
 :host {
   display: block;
@@ -22,9 +43,6 @@
   transition: transform 0.2s;
   height: 100%;
   display: flex;
-  align-items: center;
-  justify-content: center;
-  text-align: center;
 }
 
 .card:hover {
@@ -45,10 +63,6 @@ small {
   height: 300px;
 }
 
-.chart-info {
-  margin-top: auto;
-  padding-top: 1rem;
-}
 
 canvas {
   width: 100% !important;
