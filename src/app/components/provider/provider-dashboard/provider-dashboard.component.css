@@ -74,3 +74,25 @@ background-color: #fd7e14; /* Color naranja */
 .bg-gray{
 background-color: #6c757d; /* Color gris */
 }
+
+.icon-circle {
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.progress {
+  background-color: #f0f0f0;
+  border-radius: 0.5rem;
+}
+
+.card {
+  transition: transform 0.2s;
+}
+
+.card:hover {
+  transform: translateY(-5px);
+}

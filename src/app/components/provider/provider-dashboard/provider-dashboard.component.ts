@@ -1,6 +1,6 @@
-import { Component, OnInit, ViewChild } from '@angular/core';
+import { Component, Input, OnInit, ViewChild } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { ReactiveFormsModule, FormBuilder, FormControl, FormGroup, Validators } from '@angular/forms';
+import { ReactiveFormsModule, FormBuilder, FormControl, FormGroup, Validators, FormsModule } from '@angular/forms';
 import { ProvidersService } from '../../../services/providers.service';
 import { Supplier } from '../../../models/suppliers/supplier.model';
 import { ToastService, MainContainerComponent } from 'ngx-dabd-grupo01';
@@ -21,7 +21,7 @@ Chart.register(...registerables);
     CommonModule,
     ReactiveFormsModule,
     MainContainerComponent,
-    BaseChartDirective
+    BaseChartDirective, FormsModule
   ],
   templateUrl: './provider-dashboard.component.html',
   styleUrls: ['./provider-dashboard.component.css']
@@ -58,8 +58,16 @@ export class ProviderDashboardComponent implements OnInit {
     companiesGrowthCount: 0,
     previousProvidersCount: 0,
     providersGrowthCount: 0,
-    currentMonthCount: 0
+    currentMonthCount: 0,
+    activationRateChange: 0,
+    //Compañias 
+    activeCompaniesCount: 0,
+    inactiveCompaniesCount: 0,
+    companiesActivationRate: 0,
+    companiesActivationRateChange: 0
   };
+  previousProviderList: Supplier[] = [];
+  previousCompaniesCount: number = 0;
 
   getMonthName(offset: number = 0): string {
     const date = new Date();
@@ -265,17 +273,52 @@ export class ProviderDashboardComponent implements OnInit {
 
   private calculateMetrics(): void {
     const metrics = this.metrics;
-    
-    metrics.activeCount = this.providerList.filter(p => p.enabled).length;
-    metrics.inactiveCount = this.providerList.length - metrics.activeCount;
-    metrics.activationRate = this.providerList.length > 0 
-      ? Math.round((metrics.activeCount / this.providerList.length) * 100)
-      : 0;
 
     // Cálculo de crecimiento
     const currentDate = new Date();
     const currentMonth = currentDate.getMonth();
     const currentYear = currentDate.getFullYear();
+    
+    // Cálculo de proveedores activos e inactivos
+    metrics.activeCount = this.providerList.filter(p => p.enabled).length;
+    metrics.inactiveCount = this.providerList.length - metrics.activeCount;
+    // Cálculo del porcentaje de activación
+    metrics.activationRate = this.providerList.length > 0 
+      ? Math.round((metrics.activeCount / this.providerList.length) * 100)
+      : 0;
+
+      metrics.activationRateChange = this.providerList.length > 0
+      ? Math.round((metrics.activeCount / this.providerList.length) * 100)
+      : 0;
+
+    // Cálculo de proveedores activos e inactivos
+    metrics.activeCount = this.providerList.filter(p => p.enabled).length;
+    metrics.inactiveCount = this.providerList.length - metrics.activeCount;
+    // Cálculo del porcentaje de activación
+    metrics.activationRate = this.providerList.length > 0 
+      ? Math.round((metrics.activeCount / this.providerList.length) * 100)
+      : 0;
+
+    // Calculo de unicas compañias
+    const uniqueCompanies = new Set(
+      this.companies.map(c => c.name).filter(Boolean)
+    );
+    metrics.uniqueCompaniesCount = uniqueCompanies.size;
+
+    // Cálculo de empresas activas e inactivas
+    metrics.activeCompaniesCount = this.companies.filter(c => c.enabled).length;
+    metrics.inactiveCompaniesCount = this.companies.length - metrics.activeCompaniesCount;
+
+    // Cálculo del porcentaje de activación de empresas
+    metrics.companiesActivationRate = this.companies.length > 0 
+      ? Math.round((metrics.activeCompaniesCount / this.companies.length) * 100)
+      : 0;
+
+    // Cálculo del porcentaje de crecimiento de empresas
+    metrics.companiesGrowthCount = metrics.activeCompaniesCount - this.previousCompaniesCount;
+    metrics.companiesGrowthRate = this.previousCompaniesCount > 0
+      ? Math.round(((metrics.activeCompaniesCount - this.previousCompaniesCount) / this.previousCompaniesCount) * 100)
+      : metrics.activeCompaniesCount > 0 ? 100 : 0;
 
     // Calcular proveedores del mes actual y anterior
     const currentMonthProviders = this.providerList.filter(provider => {
@@ -293,51 +336,19 @@ export class ProviderDashboardComponent implements OnInit {
       return isPreviousMonth;
     });
 
-  // Actualizar métricas
-  metrics.currentMonthCount = currentMonthProviders.length;
-  metrics.previousProvidersCount = previousMonthProviders.length;
-  metrics.providersGrowthCount = currentMonthProviders.length - previousMonthProviders.length;
+    metrics.currentMonthCount = currentMonthProviders.length;
+    metrics.previousProvidersCount = previousMonthProviders.length;
+    metrics.providersGrowthCount = currentMonthProviders.length - previousMonthProviders.length;
   
-  // Calcular tasa de crecimiento mensual
-  metrics.monthlyGrowthRate = previousMonthProviders.length > 0
-  ? ((currentMonthProviders.length - previousMonthProviders.length) / previousMonthProviders.length * 100)
-  : currentMonthProviders.length > 0 ? 100 : 0;
+    // Calcular tasa de crecimiento mensual
+    metrics.monthlyGrowthRate = previousMonthProviders.length > 0
+      ? ((currentMonthProviders.length - previousMonthProviders.length) / previousMonthProviders.length * 100)
+      : currentMonthProviders.length > 0 ? 100 : 0;
 
-      // Cálculo de empresas únicas
-      const uniqueCompanies = new Set(
-        this.companies.map(p => p.name).filter(Boolean)
-      );
-      metrics.uniqueCompaniesCount = uniqueCompanies.size;
-
-      const uniqueServicess = new Set(
-        this.services.map(p => p.name).filter(Boolean)
-      );
-      metrics.uniqueServicesCount = uniqueServicess.size;
-
-      
-  
-    // Filtrar proveedores del mes anterior
-    //No funciona AUN
-    const lastMonthProviders = this.providerList.filter(provider => {
-      const providerDate = new Date(provider.registration);
-      const isLastMonth = (currentMonth === 0 
-        ? providerDate.getMonth() === 11 && providerDate.getFullYear() === currentYear - 1
-        : providerDate.getMonth() === currentMonth - 1 && providerDate.getFullYear() === currentYear
-      );
-      return isLastMonth;
-    });
-  
-    // Calcular empresas únicas del mes anterior
-    const lastMonthCompanies = new Set(
-      lastMonthProviders.map(p => p.company?.name).filter(Boolean)
+    const uniqueServicess = new Set(
+      this.services.map(p => p.name).filter(Boolean)
     );
-    metrics.previousCompaniesCount = lastMonthCompanies.size;
-  
-    // Calcular métricas de crecimiento
-    metrics.companiesGrowthCount = metrics.uniqueCompaniesCount - metrics.previousCompaniesCount;
-    metrics.companiesGrowthRate = metrics.previousCompaniesCount > 0
-      ? ((metrics.uniqueCompaniesCount - metrics.previousCompaniesCount) / metrics.previousCompaniesCount * 100)
-      : metrics.uniqueCompaniesCount > 0 ? 100 : 0;
+    metrics.uniqueServicesCount = uniqueServicess.size;
 
     // Service-specific counts
     metrics.securityProvidersCount = this.getProvidersCountByService('seguridad');
@@ -352,13 +363,8 @@ export class ProviderDashboardComponent implements OnInit {
     console.log('Estas son las de limpieza', metrics.cleaningProvidersCount);
 
     // Unique counts
-    //const uniqueServices = new Set(this.providerList.map(p => p.service?.name).filter(Boolean));
-    //const uniqueCompanies = new Set(this.providerList.map(p => p.company?.name).filter(Boolean));
     const uniqueServices = new Set(this.services.map(p => p.name).filter(Boolean));
-
-    
     metrics.uniqueServicesCount = uniqueServices.size;
-    //metrics.uniqueCompaniesCount = uniqueCompaniess.size;
 
     // Essential vs Specialized services
     metrics.essentialServicesCount = 
@@ -381,6 +387,27 @@ export class ProviderDashboardComponent implements OnInit {
     return this.providerList.filter(p => 
       p.service?.name?.toLowerCase().includes(service)
     ).length;
+  }
+
+
+  getBadgeClass(): string {
+    if (this.metrics.providersGrowthCount > 0) {
+      return 'bg-success';
+    } else if (this.metrics.providersGrowthCount < 0) {
+      return 'bg-danger';
+    } else {
+      return 'bg-secondary';
+    }
+  }
+
+  getArrowClass(): string {
+    if (this.metrics.providersGrowthCount > 0) {
+      return 'bi-arrow-up';
+    } else if (this.metrics.providersGrowthCount < 0) {
+      return 'bi-arrow-down';
+    } else {
+      return 'bi-dash';
+    }
   }
 
   private updateCharts(): void {

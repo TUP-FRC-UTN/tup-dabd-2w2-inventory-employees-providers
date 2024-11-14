@@ -41,6 +41,7 @@ export class ProviderTypeUpdateComponent implements OnInit {
       const companyData: Company = {
         id: this.company?.id ?? 0,
         name: this.companyForm.value.name ?? '',
+        registration: this.company?.registration ?? new Date(),
         enabled: this.companyForm.value.enabled ?? true
       };
 
