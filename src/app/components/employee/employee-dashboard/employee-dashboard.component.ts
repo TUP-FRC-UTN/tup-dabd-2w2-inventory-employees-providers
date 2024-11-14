@@ -12,6 +12,7 @@ import { NgbModal } from '@ng-bootstrap/ng-bootstrap';
 import { EmployeeDashboardInfoComponent } from './employe-dashboard-info/employee-dashboard-info.component';
 import { ChartDataset, ChartOptions } from 'chart.js';
 import { ActiveEmployeesModalComponent } from './employee-enabled-modal/employee-enabled-modal.component';
+import { EmployeeRecentHireModalComponent } from './employee-recent-hire-modal/employee-recent-hire-modal.component';
 
 Chart.register(...registerables);
 
