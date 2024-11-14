@@ -11,6 +11,7 @@ import { NgbModal } from '@ng-bootstrap/ng-bootstrap';
 import { BaseChartDirective } from 'ng2-charts';
 import { Company } from '../../../models/suppliers/company.model';
 import { Service } from '../../../models/suppliers/service.model';
+import { TopProvider } from '../../../models/suppliers/top-provider.model';
 
 Chart.register(...registerables);
 
@@ -36,6 +37,7 @@ export class ProviderDashboardComponent implements OnInit {
   showModalFilter = false;
   companies: Company[] = [];
   services: Service[] = [];
+  topProviders: TopProvider[] = [];
 
   // KPI metrics
   metrics = {
@@ -606,5 +608,19 @@ export class ProviderDashboardComponent implements OnInit {
         return dateA.getTime() - dateB.getTime();
       })
     );
+  }
+
+  // PROVEEDORES MAS ANTIGUOS
+  // Calc tiempo activo
+  private calculateTimeActive(registrationDate: Date): string {
+    const now = new Date();
+    const diffTime = Math.abs(now.getTime() - registrationDate.getTime());
+    const years = Math.floor(diffTime / (1000 * 60 * 60 * 24 * 365));
+    const months = Math.floor((diffTime % (1000 * 60 * 60 * 24 * 365)) / (1000 * 60 * 60 * 24 * 30));
+    
+    if (years > 0) {
+      return `${years} año${years > 1 ? 's' : ''} ${months} mes${months > 1 ? 'es' : ''}`;
+    }
+    return `${months} mes${months > 1 ? 'es' : ''}`;
   }
 }
