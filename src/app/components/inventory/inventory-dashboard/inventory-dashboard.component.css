@@ -11,3 +11,11 @@
   .icon-circle i {
     font-size: 1.25rem;
   }
+
+  .card {
+    transition: transform 0.2s;
+  }
+  
+  .card:hover {
+    transform: translateY(-5px);
+  }

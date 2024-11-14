@@ -16,8 +16,13 @@
     width: 100%;
   }
   
+  .card:hover {
+    transform: translateY(-5px);
+  }
+  
   .card {
     height: 100%;
+    transition: transform 0.2s;
     
     .card-body.fixed-height {
       height: 400px;
