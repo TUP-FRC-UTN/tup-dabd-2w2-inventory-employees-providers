@@ -1,11 +1,12 @@
-import { Component, inject, Inject, Input, OnInit, ViewChild } from '@angular/core';
+
+import { AfterViewInit, ChangeDetectorRef, Component, OnInit, Provider, ViewChild, inject, Input } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { ReactiveFormsModule, FormBuilder, FormControl, FormGroup, Validators, FormsModule } from '@angular/forms';
 import { ProvidersService } from '../../../services/providers.service';
 import { Supplier } from '../../../models/suppliers/supplier.model';
 import { ToastService, MainContainerComponent } from 'ngx-dabd-grupo01';
 import { debounceTime, distinctUntilChanged } from 'rxjs';
-import { Chart, ChartConfiguration, ChartData, registerables } from 'chart.js';
+import { Chart, ChartConfiguration, ChartData, ChartType, registerables } from 'chart.js';
 import { ProviderDashboardInfoComponent } from './provider-dashboard-info/provider-dashboard-info.component';
 import { NgbModal } from '@ng-bootstrap/ng-bootstrap';
 import { BaseChartDirective } from 'ng2-charts';
@@ -35,7 +36,7 @@ Chart.register(...registerables);
   templateUrl: './provider-dashboard.component.html',
   styleUrls: ['./provider-dashboard.component.css']
 })
-export class ProviderDashboardComponent implements OnInit {
+export class ProviderDashboardComponent implements OnInit, AfterViewInit {
   @ViewChild(BaseChartDirective) chart?: BaseChartDirective;
 
   // Form controls
@@ -48,6 +49,10 @@ export class ProviderDashboardComponent implements OnInit {
   topProviders: TopProvider[] = [];
 
   private route = inject(Router);
+
+  pieChartType: ChartType = 'pie';
+  barChartType: ChartType = 'bar';
+  doughnutChartType: ChartType = 'doughnut';
 
   // KPI metrics
   metrics = {
@@ -109,6 +114,56 @@ export class ProviderDashboardComponent implements OnInit {
     return `Disminución de ${decrease} proveedores`;
   }
   // Chart configurations
+
+ /*readonly chartConfigs = {
+    pieChart: {
+      responsive: true,
+      maintainAspectRatio: false,
+      plugins: {
+        legend: { position: 'right' as const
+          //, onClick: null 
+        },
+        title: { display: true, text: 'Estado de Proveedores' }
+      },
+      animation: {
+        duration : 500
+      }
+    },
+    barChart: {
+      responsive: true,
+      maintainAspectRatio: false,
+      plugins: {
+        legend: { 
+          position: 'top' as const,
+          //onClick: null  // Deshabilitar clicks en la leyenda
+        },
+        title: { display: true, text: 'Distribución por Servicio' }
+      },
+      scales: {
+        y: {
+          beginAtZero: true,
+          ticks: { stepSize: 1 }
+        }
+      },
+      animation: {
+        duration: 500
+      }
+    },
+    doughnutChart: {
+      responsive: true,
+      maintainAspectRatio: false,
+      plugins: {
+        legend: { 
+          position: 'right' as const
+          //onClick: null  // Deshabilitar clicks en la leyenda
+        },
+        title: { display: true, text: 'Tipos de Servicios' }
+      },
+      animation: {
+        duration: 500
+      }
+    }*/
+
   readonly chartConfigs = {
     pieChart: this.getChartConfig('pie', 'Estado de Proveedores'),
     barChart: this.getChartConfig('bar', 'Distribución por Tipo de Servicio', true),
@@ -130,12 +185,13 @@ export class ProviderDashboardComponent implements OnInit {
 
     // Proveedores con servicios groupby company basicamente
     servicesByCompanyChart: this.getChartConfig('bar', 'Distribución de Servicios por Compañía', true)
+
   };
 
-  // Chart data
+  // Datos de los gráficos
   pieChartData: ChartData<'pie'> = {
     labels: ['Activos', 'Inactivos'],
-    datasets: [{ 
+    datasets: [{
       data: [0, 0],
       backgroundColor: ['#28a745', '#dc3545']
     }]
@@ -146,7 +202,7 @@ export class ProviderDashboardComponent implements OnInit {
     datasets: [{
       data: [],
       label: 'Cantidad de Proveedores',
-      backgroundColor: '#007bff'
+      backgroundColor: ['#007bff', '#28a745', '#ffc107', '#17a2b8', '#dc3545', '#6610f2']
     }]
   };
 
@@ -157,6 +213,7 @@ export class ProviderDashboardComponent implements OnInit {
       backgroundColor: ['#17a2b8', '#ffc107']
     }]
   };
+
 
   horizontalBarChartData: ChartData<'bar'> = {
     labels: ['Zona Norte', 'Zona Sur', 'Zona Este', 'Zona Oeste', 'Zona Central'],
@@ -202,11 +259,13 @@ export class ProviderDashboardComponent implements OnInit {
     datasets: []
   };
 
+
   constructor(
     private fb: FormBuilder,
     private providerService: ProvidersService,
     private toastService: ToastService,
-    private modalService: NgbModal
+    private modalService: NgbModal,
+    private changeDetector: ChangeDetectorRef
   ) {
     this.filterForm = this.fb.group({
       serviceName: ['', Validators.maxLength(100)],
@@ -244,7 +303,18 @@ export class ProviderDashboardComponent implements OnInit {
         console.log('Estos son los proveedores', response);
         this.providerList = response;
         this.calculateMetrics();
-        this.updateCharts();
+        //New
+        this.dataLoaded = true;
+        // Solo actualizar los gráficos si ya están inicializados
+        if (this.chartsInitialized) {
+          this.updateCharts();
+        } else if (this.chart) {
+          // Si el chart existe pero no está inicializado, inicializarlo
+          this.initializeCharts();
+        }
+        
+        // Forzar la detección de cambios
+        this.changeDetector.detectChanges();
       },
       error: () => {
         this.toastService.sendError('Error al cargar proveedores.');
@@ -291,43 +361,7 @@ export class ProviderDashboardComponent implements OnInit {
       });
   }
 
-  private getChartConfig(
-    type: string, 
-    title: string, 
-    showAxes = false, 
-    legendPosition: 'top' | 'right' = 'top'
-  ): ChartConfiguration['options'] {
-    const config: ChartConfiguration['options'] = {
-      responsive: true,
-      maintainAspectRatio: false,
-      plugins: {
-        legend: { 
-          position: legendPosition,
-          display: true 
-        },
-        title: {
-          display: true,
-          text: title
-        }
-      }
-    };
-
-    if (showAxes) {
-      config.scales = {
-        x: { 
-          title: { display: true, text: 'Servicios' },
-          ticks: { maxRotation: 45, minRotation: 45 }
-        },
-        y: { 
-          title: { display: true, text: 'Cantidad' },
-          beginAtZero: true,
-          ticks: { stepSize: 1 }
-        }
-      };
-    }
-
-    return config;
-  }
+  
 
   getProviders(searchTerm?: string): void {
     const filters = this.getFilters(searchTerm);
@@ -474,6 +508,7 @@ export class ProviderDashboardComponent implements OnInit {
   }
 
 
+
   getBadgeClass(): string {
     if (this.metrics.providersGrowthCount > 0) {
       return 'bg-success';
@@ -559,13 +594,7 @@ export class ProviderDashboardComponent implements OnInit {
     this.chart?.update();
   }
 
-  private getServiceDistribution(): { [key: string]: number } {
-    return this.providerList.reduce((acc, provider) => {
-      const serviceName = provider.service?.name || 'Sin categorizar';
-      acc[serviceName] = (acc[serviceName] || 0) + 1;
-      return acc;
-    }, {} as { [key: string]: number });
-  }
+
 
   private getZoneDistribution(): number[] {
     const total = this.providerList.length;
@@ -621,6 +650,139 @@ export class ProviderDashboardComponent implements OnInit {
   closeModalFilter(): void {
     this.showModalFilter = false;
   }
+
+
+ /* private providerListasGraficas : Supplier[] = [];
+  calculateCharsGraphics() {
+    this.providerService.getAllProvider().subscribe({
+      next: (response) => {
+        this.providerListasGraficas = response;
+        this.updateCharts();
+      },
+      error: () => {
+        this.toastService.sendError('Error al cargar proveedores.');
+      }
+    })
+  }
+  // private updateCharts(): void {
+  //   // Actualizar gráfico de estado de proveedores
+  //   this.pieChartData.datasets[0].data = [
+  //     this.metrics.activeCount,
+  //     this.metrics.inactiveCount
+  //   ];
+
+  //   // Actualizar gráfico de distribución por servicio
+  //   const serviceDistribution = this.getServiceDistribution();
+  //   this.barChartData.labels = Object.keys(serviceDistribution);
+  //   this.barChartData.datasets[0].data = Object.values(serviceDistribution);
+
+  //   // Actualizar gráfico de tipos de servicios
+  //   this.doughnutChartData.datasets[0].data = [
+  //     this.metrics.essentialServicesCount,
+  //     this.metrics.specializedServicesCount
+  //   ];
+
+  //   // Forzar actualización de los gráficos
+  //   if (this.chart) {
+  //     this.chart.update();
+  //   }
+  // }
+  private updateCharts(): void {
+    if (!this.chart || !this.chartsInitialized) return;
+
+    // Actualizar los datos
+    this.pieChartData.datasets[0].data = [
+      this.metrics.activeCount,
+      this.metrics.inactiveCount
+    ];
+
+    const serviceDistribution = this.getServiceDistribution();
+    this.barChartData.labels = Object.keys(serviceDistribution);
+    this.barChartData.datasets[0].data = Object.values(serviceDistribution);
+
+    this.doughnutChartData.datasets[0].data = [
+      this.metrics.essentialServicesCount,
+      this.metrics.specializedServicesCount
+    ];
+
+    // Forzar la actualización de los gráficos
+    setTimeout(() => {
+      this.chart?.update();
+      this.changeDetector.detectChanges();
+    }, 0);
+  }
+
+  private getServiceDistribution(): { [key: string]: number } {
+    const distribution: { [key: string]: number } = {};
+    
+    // Agrupar proveedores por servicio
+    this.providerList.forEach(provider => {
+      const serviceName = provider.service?.name || 'Sin categorizar';
+      distribution[serviceName] = (distribution[serviceName] || 0) + 1;
+    });
+
+    // Ordenar por cantidad de proveedores (opcional)
+    return Object.fromEntries(
+      Object.entries(distribution)
+        .sort(([,a], [,b]) => b - a)
+        .slice(0, 6) // Limitar a los 6 servicios más comunes
+    );
+  }
+
+  private dataLoaded = false;
+  private chartsInitialized = false;
+  
+  ngAfterViewInit() {
+    // Si los datos ya están cargados, inicializar los gráficos
+    if (this.dataLoaded) {
+      this.initializeCharts();
+    }
+  }
+  private initializeCharts(): void {
+    if (!this.chart || !this.dataLoaded) return;
+
+    // Configuración inicial de los gráficos
+    this.pieChartData = {
+      labels: ['Activos', 'Inactivos'],
+      datasets: [{
+        data: [this.metrics.activeCount, this.metrics.inactiveCount],
+        backgroundColor: ['#28a745', '#dc3545']
+      }]
+    };
+
+    this.barChartData = {
+      labels: [],
+      datasets: [{
+        data: [],
+        label: 'Cantidad de Proveedores',
+        backgroundColor: ['#007bff', '#28a745', '#ffc107', '#17a2b8', '#dc3545', '#6610f2']
+      }]
+    };
+
+    this.doughnutChartData = {
+      labels: ['Servicios Esenciales', 'Servicios Especializados'],
+      datasets: [{
+        data: [this.metrics.essentialServicesCount, this.metrics.specializedServicesCount],
+        backgroundColor: ['#17a2b8', '#ffc107']
+      }]
+    };
+
+    // Actualizar los datos de los gráficos
+    const serviceDistribution = this.getServiceDistribution();
+    this.barChartData.labels = Object.keys(serviceDistribution);
+    this.barChartData.datasets[0].data = Object.values(serviceDistribution);
+
+    // Marcar los gráficos como inicializados
+    this.chartsInitialized = true;
+
+    // Forzar la actualización inicial
+    setTimeout(() => {
+      this.chart?.update();
+      this.changeDetector.detectChanges();
+    }, 0);
+  }
+
+}*/
 
 
   // Suppliers x Compania
@@ -886,5 +1048,4 @@ private calculateIndependentVsCorporateMetrics(): void {
     this.route.navigate(['providers/list'], navigationExtras);
   }
 }
-
 

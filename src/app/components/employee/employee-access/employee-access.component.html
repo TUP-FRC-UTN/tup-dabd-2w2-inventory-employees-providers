@@ -1,5 +1,5 @@
 <div class="container-fluid my-4">
-  <form [formGroup]="accessForm" (ngSubmit)="saveSchedule()">
+  <form [formGroup]="accessForm" (ngSubmit)="isEditMode ? updateSchedule() : saveSchedule()">
     <!-- Header -->
     <div class="d-flex align-items-center mb-4">
       <h3>Horarios de Acceso</h3>

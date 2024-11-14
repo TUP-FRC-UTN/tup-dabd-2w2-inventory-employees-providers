@@ -80,12 +80,17 @@ export class ProviderListComponent implements OnInit {
   )
   .textFilter(
     'Servicio',
-    'service',
+    'service.name',
     ''
   )
   .textFilter(
-    'Número de Teléfono',
-    'phone',
+    'Compañía',
+    'company.name',
+    ''
+  )
+  .textFilter(
+    'Contacto',
+    'contact',
     ''
   )
   .selectFilter(
@@ -101,9 +106,26 @@ export class ProviderListComponent implements OnInit {
   .build();
 
   filterChange($event: Record<string, any>) {
-    const filters = $event;
-    this.currentFilters = filters;
-    this.getProviders();
+    this.currentFilters = $event;
+    
+    // Crear objeto de filtros con la estructura correcta
+    const filters: any = {};
+    
+    Object.entries(this.currentFilters).forEach(([key, value]) => {
+      if (value !== '' && value !== null && value !== undefined) {
+        // Manejar casos especiales como service.name y company.name
+        if (key.includes('.')) {
+          const [parent, child] = key.split('.');
+          if (!filters[parent]) filters[parent] = {};
+          filters[parent][child] = value;
+        } else {
+          filters[key] = value;
+        }
+      }
+    });
+
+    // Llamar al servicio con los filtros estructurados
+    this.getProviders( 0 ,this.pageSize , filters);
   }
 
   constructor(private fb: FormBuilder) {
@@ -132,40 +154,36 @@ export class ProviderListComponent implements OnInit {
       });
   }
   
-  searchProviders(searchTerm:string){
-    if (!this.searchFilterAll.value||this.searchFilterAll.value==null) {
+  searchProviders(searchTerm: string) {
+    if (!searchTerm) {
       this.getProviders();
-   }
-
-   this.providerList = this.providerList.filter(p =>
-     p.name.toLowerCase().includes(searchTerm.toLowerCase() ?? '')
-     ||p.details?.toLowerCase().includes(searchTerm.toLowerCase() ?? '')
-     ||p.service.name.toLowerCase().includes(searchTerm.toLowerCase() ?? '')
-   );  }
-
-  // Nuevo método para filtrado local
-private filterProviders(searchTerm: string): void {
-  if (!searchTerm) {
-      this.providerList = [...this.originalProviders];
       return;
+    }
+
+    const filters = {
+      search: searchTerm
+    };
+
+    this.getProviders(0, this.pageSize, filters);
   }
 
-  const term = searchTerm.toLowerCase().trim();
-  this.providerList = this.originalProviders.filter(provider => 
-      // Buscar en todos los campos visibles
-      provider.name.toLowerCase().includes(term) ||
-      provider.cuil.toLowerCase().includes(term) ||
-      provider.service?.name.toLowerCase().includes(term) ||
-      provider.company?.name.toLowerCase().includes(term) ||
-      provider.contact.toLowerCase().includes(term) ||
-      provider.address.toLowerCase().includes(term)
-  );
+  // Nuevo método para filtrado local
+  private filterProviders(searchTerm: string): void {
+    if (!searchTerm) {
+      this.getProviders(); // Volver a cargar todos los proveedores
+      return;
+    }
 
-  // Actualizar métricas y gráficos con los datos filtrados
-  this.calculateMetrics();
-  // this.createPieChart();
-  this.createBarChart();
-}
+    const term = searchTerm.toLowerCase().trim();
+    
+    // Crear filtro de búsqueda
+    const searchFilter = {
+      search: term
+    };
+
+    // Llamar al servicio con el filtro de búsqueda
+    this.getProviders(0, this.pageSize, searchFilter);
+  }
 
   ngOnInit(): void {
     this.route.queryParams.subscribe(params => {
@@ -188,40 +206,47 @@ private filterProviders(searchTerm: string): void {
   }
 
 // Modificar getProviders para guardar la lista original
-getProviders(page: number = 0, size: number = this.pageSize): void {
+getProviders(page: number = 0, size: number = this.pageSize, additionalFilters: any = {}): void {
   this.isLoading = true;
   
   const filters = {
+
+   /* page,
+    size,
+    ...additionalFilters*/
+
       ...this.getFilters(),
       page,
       size,
       sort: this.route.snapshot.queryParams['sort'] || 'registration,desc'
+
   };
 
   this.providerService.getProviders(filters).subscribe({
-      next: (response) => {
-          this.originalProviders = response.content;  // Guardar la lista original
-          this.providerList = [...this.originalProviders];  // Copia inicial
-          this.totalItems = response.totalElements;
-          this.totalPages = Math.ceil(this.totalItems / this.pageSize);
-          this.isLoading = false;
-          
-          this.calculateMetrics();
-          // this.createPieChart();
-          this.createBarChart();
-      },
-      error: (error) => {
-          console.error('Error fetching providers:', error);
-          this.toastService.sendError('Error al cargar proveedores.');
-          this.isLoading = false;
-      }
+    next: (response) => {
+      this.providerList = response.content;
+      this.totalItems = response.totalElements;
+      this.totalPages = response.totalPages;
+      this.isLoading = false;
+      
+      // Actualizar métricas después de cargar los datos
+      this.calculateMetrics();
+    },
+    error: (error) => {
+      console.error('Error fetching providers:', error);
+      this.toastService.sendError('Error al cargar proveedores.');
+      this.isLoading = false;
+    }
   });
 }
 
   private getFilters(): any {
+    console.log('Este es el metodo de filtros')
     const formValues = this.filterForm.value;
     const filters: any = {};
-
+    console.log('Form values:', formValues);
+    console.log('Filters:', filters);
+    
     // Only add non-empty values to the filters
     Object.keys(formValues).forEach(key => {
       const value = formValues[key];
@@ -230,31 +255,32 @@ getProviders(page: number = 0, size: number = this.pageSize): void {
       }
     });
 
+    console.log('Final Filters:', filters);
     return filters;
   }
 
   applyFilters(): void {
-    const filters = this.filterForm.value;
-    
-    // Solo incluir fechas si ambas están presentes y son válidas
-    if (filters.start && filters.end) {
-        const startDate = new Date(filters.start);
-        const endDate = new Date(filters.end);
-        
-        if (endDate < startDate) {
-            this.toastService.sendError('La fecha final no puede ser anterior a la fecha inicial');
-            return;
+    const formFilters = this.filterForm.value;
+    const filters: any = {};
+
+    Object.entries(formFilters).forEach(([key, value]) => {
+      if (value !== '' && value !== null && value !== undefined) {
+        if (key === 'start' || key === 'end') {
+          filters[key] = new Date().toISOString();
+        } else {
+          filters[key] = value;
         }
-    }
-    
-    this.currentPage = 1;
-    this.getProviders(0, this.pageSize);
+      }
+    });
+
+    this.getProviders(0, this.pageSize, filters);
     this.closeModalFilter();
-}
+  }
   clearFilters(): void {
     this.filterForm.reset();
-    this.currentPage = 1;
-    this.getProviders(0, this.pageSize);
+    this.searchFilterAll.reset();
+    this.currentFilters = {};
+    this.getProviders();
     this.showModalFilter = false;
   }
 

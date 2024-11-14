@@ -1,4 +1,46 @@
 <app-main-container title="Dashboard de Empleados" (infoButtonClick)="showInfo()">
+    <!-- Filtros de fecha -->
+  <div class="row mb-4">
+    <div class="col-12">
+      <div class="card shadow-sm">
+        <div class="card-body">
+          <h5 class="card-title mb-3">Filtros de Período</h5>
+          <form [formGroup]="dateFilterForm" class="row g-3 align-items-end">
+            <div class="col-md-5">
+              <label class="form-label">Fecha desde</label>
+              <input 
+                type="datetime-local" 
+                class="form-control" 
+                formControlName="startDate">
+            </div>
+            <div class="col-md-5">
+              <label class="form-label">Fecha hasta</label>
+              <input 
+                type="datetime-local" 
+                class="form-control" 
+                formControlName="endDate">
+            </div>
+            <div class="col-md-2 d-flex justify-content-end">
+              <button 
+                type="button" 
+                class="btn btn-outline-danger me-2"
+                (click)="dateFilterForm.reset()">
+                <i class="bi bi-trash"></i>
+              </button>
+              <button 
+                type="button" 
+                class="btn btn-primary"
+                (click)="applyDateFilters()">
+                Aplicar filtros
+              </button>
+            </div>
+          </form>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  
   <!-- Primera fila de KPIs -->
   <div class="row mb-4">
     <!-- Empleados Contratados Último Mes -->
