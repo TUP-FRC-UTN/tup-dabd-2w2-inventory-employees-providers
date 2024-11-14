@@ -467,10 +467,37 @@ export class ProviderDashboardComponent implements OnInit {
     // Update horizontal bar chart
     this.horizontalBarChartData.datasets[0].data = this.getZoneDistribution();
 
-      // Actualizar nuevo gráfico de compañías
+    // Actualizar nuevo gráfico de compañías
     const companyDistribution = this.getCompanyDistribution();
     this.companyBarChartData.labels = Object.keys(companyDistribution);
     this.companyBarChartData.datasets[0].data = Object.values(companyDistribution);
+
+      // Actualizar gráfico de registro mensual
+    const monthlyDistribution = this.getMonthlyRegistrationDistribution();
+    this.monthlyRegistrationChartData.labels = Object.keys(monthlyDistribution);
+    this.monthlyRegistrationChartData.datasets[0].data = Object.values(monthlyDistribution);
+
+    // opciones especificas para el grafico de registro mensual
+    const monthlyChartOptions = this.chartConfigs.monthlyRegistrationChart;
+    if (monthlyChartOptions && monthlyChartOptions.scales) {
+      monthlyChartOptions.scales['y'] = {
+        beginAtZero: true,
+        ticks: {
+          stepSize: 1,
+          precision: 0 // Solo números enteros
+        },
+        title: {
+          display: true,
+          text: 'Cantidad de Proveedores'
+        }
+      };
+      monthlyChartOptions.scales['x'] = {
+        title: {
+          display: true,
+          text: 'Mes y Año'
+        }
+      };
+    }
 
     // Force chart update
     this.chart?.update();
