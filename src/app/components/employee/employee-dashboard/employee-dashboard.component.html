@@ -45,7 +45,7 @@
   <div class="row mb-4">
     <!-- Empleados Contratados Último Mes -->
     <div class="col-md-3 mb-3">
-      <div class="card shadow-sm">
+      <div class="card shadow-sm" (click)="showRecentHires()" style="cursor: pointer;">
         <div class="card-body">
           <div class="d-flex align-items-center mb-2">
             <div class="icon-circle bg-primary text-white me-3">
@@ -61,7 +61,7 @@
 
     <!-- Empleados Activos -->
     <div class="col-md-3 mb-3">
-      <div class="card shadow-sm">
+      <div class="card shadow-sm" (click)="showActiveEmployees()" style="cursor: pointer;">
         <div class="card-body">
           <div class="d-flex align-items-center mb-2">
             <div class="icon-circle bg-success text-white me-3">

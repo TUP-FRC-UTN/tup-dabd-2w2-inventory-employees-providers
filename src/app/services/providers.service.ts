@@ -40,7 +40,9 @@ export class ProvidersService {
             return;
           }
           params = params.append(key, value.toString());
+          console.log('Parametros', params);
         }
+        console.log('Valor', value);
       });
     }
     return this.http.get<PaginatedResponse<Supplier>>(`${this.apiUrl}/pageable`, { params });
