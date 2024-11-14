@@ -67,7 +67,10 @@ export class ProviderDashboardComponent implements OnInit {
     activeCompaniesCount: 0,
     inactiveCompaniesCount: 0,
     companiesActivationRate: 0,
-    companiesActivationRateChange: 0
+    companiesActivationRateChange: 0,
+    isNegativeTrend: false,
+    isNegativeTrendActive: false,
+    uniqueSuppliersCount: 0
   };
   previousProviderList: Supplier[] = [];
   previousCompaniesCount: number = 0;
@@ -290,9 +293,16 @@ export class ProviderDashboardComponent implements OnInit {
       ? Math.round((metrics.activeCount / this.providerList.length) * 100)
       : 0;
 
-      metrics.activationRateChange = this.providerList.length > 0
-      ? Math.round((metrics.activeCount / this.providerList.length) * 100)
+    // Determinar si hay más inactivos que activos (como en empresas)
+    this.metrics.isNegativeTrendActive = metrics.inactiveCount > metrics.activeCount;
+
+    // Cálculo del cambio en la tasa de activación (solo para referencia)
+    const previousActiveCount = this.previousProviderList.filter(p => p.enabled).length;
+    const previousTotalCount = this.previousProviderList.length;
+    const previousActivationRate = previousTotalCount > 0 
+      ? Math.round((previousActiveCount / previousTotalCount) * 100)
       : 0;
+    metrics.activationRateChange = metrics.activationRate - previousActivationRate;
 
     // Cálculo de proveedores activos e inactivos
     metrics.activeCount = this.providerList.filter(p => p.enabled).length;
@@ -317,6 +327,7 @@ export class ProviderDashboardComponent implements OnInit {
       ? Math.round((metrics.activeCompaniesCount / this.companies.length) * 100)
       : 0;
 
+    metrics.isNegativeTrend = this.metrics.inactiveCompaniesCount > this.metrics.activeCompaniesCount;
     // Cálculo del porcentaje de crecimiento de empresas
     metrics.companiesGrowthCount = metrics.activeCompaniesCount - this.previousCompaniesCount;
     metrics.companiesGrowthRate = this.previousCompaniesCount > 0
