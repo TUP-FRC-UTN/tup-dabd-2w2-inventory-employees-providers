@@ -677,4 +677,33 @@ export class ProviderDashboardComponent implements OnInit {
       }));
   }
   
+  // PROVEEDORES INDEPENDIENTES VS CORPORATIVOS
+  // Agregar este método para calcular las métricas de independientes vs corporativos
+private calculateIndependentVsCorporateMetrics(): void {
+  const independentId = 1; // ID de la compañía "Independiente"
+  
+  // Contar proveedores activos independientes y corporativos
+  const activeProviders = this.providerList.filter(p => p.enabled);
+  const independentProviders = activeProviders.filter(p => p.company?.id === independentId);
+  const corporateProviders = activeProviders.filter(p => p.company?.id !== independentId);
+
+  // Actualizar métricas
+  this.metrics.independentProvidersCount = independentProviders.length;
+  this.metrics.corporateProvidersCount = corporateProviders.length;
+  
+  // Calcular porcentajes
+  const total = activeProviders.length;
+  this.metrics.independentPercentage = total > 0 
+    ? Math.round((independentProviders.length / total) * 100) 
+    : 0;
+  this.metrics.corporatePercentage = total > 0 
+    ? Math.round((corporateProviders.length / total) * 100) 
+    : 0;
+
+  // Actualizar datos del gráfico
+  this.independentVsCorporateChartData.datasets[0].data = [
+    independentProviders.length,
+    corporateProviders.length
+    ];
+  }
 }
