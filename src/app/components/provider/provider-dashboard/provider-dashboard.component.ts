@@ -95,7 +95,9 @@ export class ProviderDashboardComponent implements OnInit {
     pieChart: this.getChartConfig('pie', 'Estado de Proveedores'),
     barChart: this.getChartConfig('bar', 'Distribución por Tipo de Servicio', true),
     doughnutChart: this.getChartConfig('doughnut', 'Distribución de Servicios', false, 'right'),
-    horizontalBarChart: this.getChartConfig('horizontalBar', 'Distribución por Zona')
+    horizontalBarChart: this.getChartConfig('horizontalBar', 'Distribución por Zona'),
+    // config para proveedores x compania
+    companyBarChart: this.getChartConfig('bar', 'Proveedores por Compañía', true)
   };
 
   // Chart data
