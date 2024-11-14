@@ -454,6 +454,11 @@ export class ProviderDashboardComponent implements OnInit {
     // Update horizontal bar chart
     this.horizontalBarChartData.datasets[0].data = this.getZoneDistribution();
 
+      // Actualizar nuevo gráfico de compañías
+    const companyDistribution = this.getCompanyDistribution();
+    this.companyBarChartData.labels = Object.keys(companyDistribution);
+    this.companyBarChartData.datasets[0].data = Object.values(companyDistribution);
+
     // Force chart update
     this.chart?.update();
   }
