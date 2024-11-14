@@ -13,7 +13,7 @@
                 <i class="bi bi-box text-primary fs-4"></i>
               </div>
               <div>
-                <h6 class="card-subtitle mb-2">Total Items</h6>
+                <h6 class="card-subtitle mb-2">Total Artículos</h6>
                 <h2 class="card-title mb-0 fw-bold">{{metrics.totalItems}}</h2>
                 <small class="text-muted">Unidades en inventario</small>
               </div>
@@ -40,7 +40,7 @@
         </div>
       </div>
 
-      <!-- Items con Stock Bajo -->
+      <!-- Articulos con Stock Bajo -->
       <div class="col-md-3 mb-3">
         <div class="card h-100 shadow-sm border-0">
           <div class="card-body">
@@ -51,7 +51,7 @@
               <div>
                 <h6 class="card-subtitle mb-2">Stock Bajo</h6>
                 <h2 class="card-title mb-0 fw-bold">{{metrics.lowStockItems}}</h2>
-                <small class="text-muted">Items bajo mínimo</small>
+                <small class="text-muted">Artículos bajo mínimo</small>
               </div>
             </div>
           </div>
@@ -81,53 +81,34 @@
 
     <!-- Charts Row -->
     <div class="row mt-4">
-      <!-- Stock por Categoría -->
-      <div class="col-md-4 mb-4">
+
+      <!-- Tendencias de Movimientos -->
+      <div class="col-md-6 mb-4">
         <div class="card shadow-sm border-0 h-100">
           <div class="card-body">
-            <h5 class="card-title mb-4">Stock por Categoría</h5>
+            <h5 class="card-title mb-4">Tendencias de Movimientos</h5>
             <div class="chart-container" style="position: relative; height: 300px;">
-              <canvas baseChart
-                [type]="'pie'"
-                [data]="categoryChartData"
-                [options]="chartOptions">
+              <canvas baseChart [type]="'line'" [data]="transactionTrendsChartData" [options]="chartOptions">
               </canvas>
             </div>
           </div>
         </div>
       </div>
 
-      <!-- Estado de Items -->
-      <div class="col-md-4 mb-4">
+      <!-- Stock por Categoría -->
+      <div class="col-md-6 mb-4">
         <div class="card shadow-sm border-0 h-100">
           <div class="card-body">
-            <h5 class="card-title mb-4">Estado de Items</h5>
-              <div class="chart-container" style="position: relative; height: 300px;">
-                <canvas baseChart
-                  [type]="'doughnut'"
-                  [data]="conditionChartData"
-                  [options]="chartOptions">
-                </canvas>
-              </div>
-            </div>
-          </div>
-        </div>
-  
-        <!-- Tendencias de Movimientos -->
-        <div class="col-md-4 mb-4">
-          <div class="card shadow-sm border-0 h-100">
-            <div class="card-body">
-              <h5 class="card-title mb-4">Tendencias de Movimientos</h5>
-              <div class="chart-container" style="position: relative; height: 300px;">
-                <canvas baseChart
-                  [type]="'line'"
-                  [data]="transactionTrendsChartData"
-                  [options]="chartOptions">
-                </canvas>
-              </div>
+            <h5 class="card-title mb-4">Stock por Categoría</h5>
+            <div class="chart-container" style="position: relative; height: 300px;">
+              <canvas baseChart [type]="'pie'" [data]="categoryChartData" [options]="chartOptions">
+              </canvas>
             </div>
           </div>
         </div>
       </div>
+
+
     </div>
-  </app-main-container>
+  </div>
+</app-main-container>
