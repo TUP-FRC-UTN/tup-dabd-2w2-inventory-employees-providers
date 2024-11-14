@@ -102,7 +102,15 @@ export class ProviderDashboardComponent implements OnInit {
     companyBarChart: this.getChartConfig('bar', 'Proveedores por Compañía', true),
 
     //config proveedores por mes de registro
-    monthlyRegistrationChart: this.getChartConfig('bar', 'Registro Mensual de Proveedores', true)
+    monthlyRegistrationChart: this.getChartConfig('bar', 'Registro Mensual de Proveedores', true),
+
+    //config prov independientes vs corpo
+    independentVsCorporateChart: this.getChartConfig(
+      'doughnut', 
+      'Distribución de Proveedores', 
+      false, 
+      'right'
+    )
   };
 
   // Chart data
