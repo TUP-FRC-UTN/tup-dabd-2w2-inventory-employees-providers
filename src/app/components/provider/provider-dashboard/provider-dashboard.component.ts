@@ -530,6 +530,9 @@ export class ProviderDashboardComponent implements OnInit {
       };
     }
 
+    // Calcular de independientes vs corporativos
+    this.calculateIndependentVsCorporateMetrics();
+
     // Force chart update
     this.chart?.update();
   }
