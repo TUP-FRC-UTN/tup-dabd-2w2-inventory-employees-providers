@@ -441,5 +441,9 @@ export class EmployeeListComponent implements OnInit {
       console.error('Employee access component not found');
     }
   }
+  showEmployeeAssistance(employeeId: number) {
+    // Usar el Router para navegar a la vista de asistencias con el ID del empleado
+    this.router.navigate(['/employees/assistance', employeeId]);
+  }
 }
 
