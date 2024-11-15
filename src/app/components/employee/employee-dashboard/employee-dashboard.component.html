@@ -69,8 +69,49 @@
           </div>
           <h6 class="card-subtitle mb-2">Empleados Activos</h6>
         </div>
-        <h3 class="card-title mb-0">{{ inServiceCount }}</h3>
-        <small class="text-muted">Actualmente activos</small>
+
+        <div class="d-flex align-items-center">
+          <h3 class="card-title mb-0">{{ inServiceCount }}</h3>
+          <div class="ms-2" *ngIf="employeesGrowthCount !== 0">
+            <span class="badge"
+              [ngClass]="{
+                'bg-success': !isNegativeTrend,
+                'bg-danger': isNegativeTrend
+              }">
+              <i class="bi"
+                [ngClass]="{
+                  'bi-arrow-up': !isNegativeTrend,
+                  'bi-arrow-down': isNegativeTrend
+                }"></i>
+            </span>
+          </div>
+        </div>
+
+        <div class="progress mt-2" style="height: 10px;">
+          <div class="progress-bar bg-success"
+            role="progressbar"
+            [style.width]="employeesActivationRate + '%'"
+            [attr.aria-valuenow]="employeesActivationRate"
+            aria-valuemin="0"
+            aria-valuemax="100">
+          </div>
+          <div class="progress-bar bg-danger"
+            role="progressbar"
+            [style.width]="(100 - employeesActivationRate) + '%'"
+            [attr.aria-valuenow]="100 - employeesActivationRate"
+            aria-valuemin="0"
+            aria-valuemax="100">
+          </div>
+        </div>
+
+        <div class="mt-2 d-flex justify-content-between">
+          <small class="text-success">
+            {{ inServiceCount }} activos
+          </small>
+          <small class="text-danger">
+            {{ inactiveCount }} inactivos
+          </small>
+        </div>
       </div>
     </div>
   </div>
