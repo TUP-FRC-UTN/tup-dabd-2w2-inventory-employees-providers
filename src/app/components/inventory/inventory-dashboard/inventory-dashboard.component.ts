@@ -1,4 +1,4 @@
-import { ChangeDetectorRef, inject } from '@angular/core';
+import { ChangeDetectorRef, ElementRef, inject, ViewChild } from '@angular/core';
 import { AfterViewInit, Component, OnInit } from '@angular/core';
 import { BaseChartDirective } from 'ng2-charts';
 import { ChartConfiguration, ChartData, registerables } from 'chart.js';
@@ -68,6 +68,9 @@ interface InventoryMetrics {
 })
 export class InventoryDashboardComponent implements OnInit {
 
+  @ViewChild('categoryPieChart') categoryPieChart!: ElementRef<HTMLCanvasElement>;
+  private chartInstance: Chart<'pie'> | null = null;
+
   mapperService: MapperService = inject(MapperService);
   inventoryService: InventoryService = inject(InventoryService);
   cdr: ChangeDetectorRef = inject(ChangeDetectorRef);
@@ -96,7 +99,6 @@ export class InventoryDashboardComponent implements OnInit {
     return date.toISOString().split('T')[0]; // Formato: YYYY-MM-DD
   }
 
-
   metrics: InventoryMetrics = {
     totalItems: 0,
     totalValue: 0,
@@ -111,7 +113,7 @@ export class InventoryDashboardComponent implements OnInit {
     }
   };
 
-   // Configuración del gráfico de tortas (Stock por Categoría)
+  // Configuración del gráfico de tortas (Stock por Categoría)
   categoryChartData: ChartData<'pie'> = {
     labels: [],
     datasets: [{
@@ -132,44 +134,44 @@ export class InventoryDashboardComponent implements OnInit {
     }
   };
 
-categoryChartOptions: ChartConfiguration['options'] = {
-  responsive: true,
-  plugins: {
-    legend: { display: true, position: 'top' },
-    tooltip: { enabled: true },
-    datalabels: {
-      display: true,
-      color: '#000000',
-      anchor: 'center',
-      align: 'center',
-      font: {
-        weight: 'bold',
-        size: 14 // Ajusta el tamaño según tus necesidades
-      },
-      formatter: (value) => `${value}` // Formato de la etiqueta
+  categoryChartOptions: ChartConfiguration['options'] = {
+    responsive: true,
+    plugins: {
+      legend: { display: true, position: 'top' },
+      tooltip: { enabled: true },
+      datalabels: {
+        display: true,
+        color: '#000000',
+        anchor: 'center',
+        align: 'center',
+        font: {
+          weight: 'bold',
+          size: 14 // Ajusta el tamaño según tus necesidades
+        },
+        formatter: (value) => `${value}` // Formato de la etiqueta
+      }
     }
-  }
-};
+  };
 
-barChartOptions: ChartConfiguration<'bar'>['options'] = {
-  responsive: true,
-  maintainAspectRatio: false,
-  plugins: {
-    legend: { display: true, position: 'top' },
-    tooltip: { enabled: true, mode: 'index', intersect: false }
-  },
-  scales: {
-    x: { display: true, stacked: true },
-    y: { display: true, stacked: true, beginAtZero: true }
-  }
-};
-transactionTrendsChartData: ChartData<'bar'> = {
-  labels: [], // Se actualizará con los meses de las transacciones
-  datasets: [
-    { label: 'Entradas', data: [], backgroundColor: 'rgba(76, 175, 80, 0.8)', borderColor: 'rgba(76, 175, 80, 1)', borderWidth: 1 },
-    { label: 'Salidas', data: [], backgroundColor: 'rgba(244, 67, 54, 0.8)', borderColor: 'rgba(244, 67, 54, 1)', borderWidth: 1 }
-  ]
-};
+  barChartOptions: ChartConfiguration<'bar'>['options'] = {
+    responsive: true,
+    maintainAspectRatio: false,
+    plugins: {
+      legend: { display: true, position: 'top' },
+      tooltip: { enabled: true, mode: 'index', intersect: false }
+    },
+    scales: {
+      x: { display: true, stacked: true },
+      y: { display: true, stacked: true, beginAtZero: true }
+    }
+  };
+  transactionTrendsChartData: ChartData<'bar'> = {
+    labels: [], // Se actualizará con los meses de las transacciones
+    datasets: [
+      { label: 'Entradas', data: [], backgroundColor: 'rgba(76, 175, 80, 0.8)', borderColor: 'rgba(76, 175, 80, 1)', borderWidth: 1 },
+      { label: 'Salidas', data: [], backgroundColor: 'rgba(244, 67, 54, 0.8)', borderColor: 'rgba(244, 67, 54, 1)', borderWidth: 1 }
+    ]
+  };
 
   constructor() { }
 
@@ -179,50 +181,49 @@ transactionTrendsChartData: ChartData<'bar'> = {
 
   private updateMetricsAndCharts(selectedUnit: string): void {
     forkJoin({
-        inventories: this.inventoryService.getInventories(),
-        transactions: this.inventoryService.getTransactions()
+      inventories: this.inventoryService.getInventories(),
+      transactions: this.inventoryService.getTransactions()
     }).subscribe(({ inventories }) => {
-        const camelCaseInventories = inventories.map(inv => this.mapperService.toCamelCase(inv));
+      const camelCaseInventories = inventories.map(inv => this.mapperService.toCamelCase(inv));
 
-        // Calcular métricas considerando todos los inventarios
-        this.calculateMetrics(camelCaseInventories);
+      // Calcular métricas considerando todos los inventarios
+      this.calculateMetrics(camelCaseInventories);
 
-        // Filtrar inventarios solo para las métricas específicas de la unidad seleccionada
-        const filteredInventories = camelCaseInventories.filter(inv => inv.article.measurementUnit === selectedUnit);
+      // Filtrar inventarios solo para las métricas específicas de la unidad seleccionada
+      const filteredInventories = camelCaseInventories.filter(inv => inv.article.measurementUnit === selectedUnit);
 
-        // Actualizar gráficos
-        this.updateCharts(filteredInventories);
+      // Actualizar gráficos
+      this.updateCharts(filteredInventories);
     });
-}
-
-applyFilters(): void {
-  const { unit, startDate, endDate } = this.filtersForm.value;
-
-  if (unit) {
-    // Actualizar el subtítulo dinámico del KPI
-    this.unitLabel = this.getUnitLabel(unit);
-
-    // Actualizar métricas globales y gráficos
-    this.updateMetricsAndCharts(unit);
-
-    // Cargar tendencias de transacciones basadas en las fechas y unidad seleccionada
-    this.inventoryService.getFilteredInventory(unit, startDate, endDate).subscribe({
-      next: (filteredInventories: Inventory[]) => {
-        console.log('Respuesta del backend:', filteredInventories);
-
-        const camelCaseInventories = filteredInventories.map(inv => this.mapperService.toCamelCase(inv));
-        console.log('Datos mapeados a camelCase:', camelCaseInventories);
-
-        // Actualizar métricas específicas de transacciones
-        this.calculateTransactionMetrics(camelCaseInventories);
-      },
-      error: (error) => console.error('Error al cargar las tendencias de transacciones:', error)
-    });
-  } else {
-    console.warn('Unidad no seleccionada en los filtros.');
   }
-}
 
+  applyFilters(): void {
+    const { unit, startDate, endDate } = this.filtersForm.value;
+
+    if (unit) {
+      // Actualizar el subtítulo dinámico del KPI
+      this.unitLabel = this.getUnitLabel(unit);
+
+      // Actualizar métricas globales y gráficos
+      this.updateMetricsAndCharts(unit);
+
+      // Cargar tendencias de transacciones basadas en las fechas y unidad seleccionada
+      this.inventoryService.getFilteredInventory(unit, startDate, endDate).subscribe({
+        next: (filteredInventories: Inventory[]) => {
+          console.log('Respuesta del backend:', filteredInventories);
+
+          const camelCaseInventories = filteredInventories.map(inv => this.mapperService.toCamelCase(inv));
+          console.log('Datos mapeados a camelCase:', camelCaseInventories);
+
+          // Actualizar métricas específicas de transacciones
+          this.calculateTransactionMetrics(camelCaseInventories);
+        },
+        error: (error) => console.error('Error al cargar las tendencias de transacciones:', error)
+      });
+    } else {
+      console.warn('Unidad no seleccionada en los filtros.');
+    }
+  }
 
   resetFilters(): void {
     this.filtersForm.reset({
@@ -234,31 +235,6 @@ applyFilters(): void {
     this.applyFilters();
   }
 
-
-  private loadInventoryData(): void {
-    console.log('Cargando datos iniciales...');
-    forkJoin({
-      inventories: this.inventoryService.getInventories(),
-      transactions: this.inventoryService.getTransactions()
-    }).subscribe({
-      next: ({ inventories, transactions }) => {
-        console.log('Datos de inventarios recibidos:', inventories);
-        console.log('Datos de transacciones recibidos:', transactions);
-
-        const camelCaseInventories = inventories.map(inv => this.mapperService.toCamelCase(inv));
-        const camelCaseTransactions = transactions.map(trans => this.mapperService.toCamelCase(trans));
-
-        console.log('Inventarios procesados:', camelCaseInventories);
-        console.log('Transacciones procesadas:', camelCaseTransactions);
-
-        this.calculateMetrics(camelCaseInventories);
-        this.updateCharts(camelCaseInventories);
-      },
-      error: (error) => console.error('Error al cargar los datos:', error)
-    });
-  }
-
-
   private calculateMetrics(allInventories: Inventory[]): void {
     console.log('Calculando métricas para inventarios:', allInventories);
 
@@ -267,24 +243,24 @@ applyFilters(): void {
 
     // Calcular total de artículos solo para la unidad seleccionada
     this.metrics.totalItems = allInventories
-        .filter(inv => inv.article?.measurementUnit === selectedUnit)
-        .reduce((sum, inv) => sum + (inv.stock || 0), 0);
+      .filter(inv => inv.article?.measurementUnit === selectedUnit)
+      .reduce((sum, inv) => sum + (inv.stock || 0), 0);
 
     console.log('Total de artículos:', this.metrics.totalItems);
 
     // Calcular el valor total del inventario sin importar la unidad
     this.metrics.totalValue = allInventories.reduce((sum, inv) => {
-        const lastTransactionWithPrice = inv.transactions?.slice().reverse().find(t => t.price !== null && t.price !== undefined);
-        const price = lastTransactionWithPrice?.price || 0;
-        return sum + ((inv.stock || 0) * price);
+      const lastTransactionWithPrice = inv.transactions?.slice().reverse().find(t => t.price !== null && t.price !== undefined);
+      const price = lastTransactionWithPrice?.price || 0;
+      return sum + ((inv.stock || 0) * price);
     }, 0);
 
     console.log('Valor total del inventario:', this.metrics.totalValue);
 
     // Identificar los artículos con bajo stock
     const lowStockItems = allInventories.filter(inv => {
-        const isLowStock = inv.stock !== null && inv.minStock !== null && inv.stock <= inv.minStock && inv.stock > 0;
-        return isLowStock;
+      const isLowStock = inv.stock !== null && inv.minStock !== null && inv.stock <= inv.minStock && inv.stock > 0;
+      return isLowStock;
     });
     this.metrics.lowStockItems = lowStockItems.length;
 
@@ -293,11 +269,11 @@ applyFilters(): void {
     // Agrupar por categoría
     this.metrics.stockByCategory = new Map<string, number>();
     allInventories.forEach(inv => {
-        const category = inv.article?.articleCategory;
-        if (category && category.denomination) {
-            const currentStock = this.metrics.stockByCategory.get(category.denomination) || 0;
-            this.metrics.stockByCategory.set(category.denomination, currentStock + (inv.stock || 0));
-        }
+      const category = inv.article?.articleCategory;
+      if (category && category.denomination) {
+        const currentStock = this.metrics.stockByCategory.get(category.denomination) || 0;
+        this.metrics.stockByCategory.set(category.denomination, currentStock + (inv.stock || 0));
+      }
     });
 
     console.log('Stock por categoría:', Array.from(this.metrics.stockByCategory.entries()));
@@ -306,77 +282,114 @@ applyFilters(): void {
     this.calculateMostMovedArticle(allInventories);
 
     console.log('Artículo con más movimiento:', this.metrics.mostArticleUsed);
-}
+  }
 
 
-private calculateTransactionMetrics(inventories: Inventory[]): void {
-  console.log('Inventarios para métricas de transacciones:', inventories);
+  private calculateTransactionMetrics(inventories: Inventory[]): void {
+    console.log('Inventarios para métricas de transacciones:', inventories);
 
-  const transactionTrends = new Map<string, { entries: number; outputs: number }>();
+    const transactionTrends = new Map<string, { entries: number; outputs: number }>();
 
-  inventories.forEach(inv => {
-    inv.transactions.forEach(trans => {
-      console.log('Procesando transacción:', trans);
+    inventories.forEach(inv => {
+      inv.transactions.forEach(trans => {
+        console.log('Procesando transacción:', trans);
 
-      if (trans.transactionDate) {
-        const date = new Date(trans.transactionDate);
-        const monthKey = `${date.getFullYear()}-${(date.getMonth() + 1).toString().padStart(2, '0')}`;
-        const current = transactionTrends.get(monthKey) || { entries: 0, outputs: 0 };
+        if (trans.transactionDate) {
+          const date = new Date(trans.transactionDate);
+          const monthKey = `${date.getFullYear()}-${(date.getMonth() + 1).toString().padStart(2, '0')}`;
+          const current = transactionTrends.get(monthKey) || { entries: 0, outputs: 0 };
 
-        if (trans.transactionType === TransactionType.ENTRY) {
-          current.entries += trans.quantity || 0;
-        } else if (trans.transactionType === TransactionType.OUTPUT) {
-          current.outputs += trans.quantity || 0;
+          if (trans.transactionType === TransactionType.ENTRY) {
+            current.entries += trans.quantity || 0;
+          } else if (trans.transactionType === TransactionType.OUTPUT) {
+            current.outputs += trans.quantity || 0;
+          }
+
+          transactionTrends.set(monthKey, current);
         }
-
-        transactionTrends.set(monthKey, current);
-      }
+      });
     });
-  });
 
-  this.metrics.transactionTrends = {
-    labels: Array.from(transactionTrends.keys()),
-    entries: Array.from(transactionTrends.values()).map(v => v.entries),
-    outputs: Array.from(transactionTrends.values()).map(v => v.outputs)
-  };
+    this.metrics.transactionTrends = {
+      labels: Array.from(transactionTrends.keys()),
+      entries: Array.from(transactionTrends.values()).map(v => v.entries),
+      outputs: Array.from(transactionTrends.values()).map(v => v.outputs)
+    };
 
-  console.log('Tendencias de transacciones calculadas:', this.metrics.transactionTrends);
-}
+    console.log('Tendencias de transacciones calculadas:', this.metrics.transactionTrends);
+  }
 
 
-private updateCharts(inventories: Inventory[]): void {
-  const stockByCategory = new Map<string, number>();
-  inventories.forEach(inv => {
-    const category = inv.article?.articleCategory?.denomination;
-    if (category) {
+  private updateCharts(inventories: Inventory[]): void {
+    const stockByCategory = new Map<string, number>();
+    inventories.forEach(inv => {
+      const category = inv.article?.articleCategory?.denomination || 'Sin Categoría';
       const currentStock = stockByCategory.get(category) || 0;
       stockByCategory.set(category, currentStock + (inv.stock || 0));
+    });
+
+    const categoryEntries = Array.from(stockByCategory.entries());
+    const colors = this.getColorsForData(categoryEntries.length);
+
+    // Actualizar la lógica para el gráfico de pie
+    this.initializeCategoryPieChart(categoryEntries, colors);
+  }
+
+  private initializeCategoryPieChart(data: [string, number][], colors: string[]): void {
+    if (this.chartInstance) {
+      this.chartInstance.destroy(); // Destruir el gráfico existente si hay uno
     }
-  });
 
-  const categoryEntries = Array.from(stockByCategory.entries());
-  const colors = this.getColorsForData(categoryEntries.length);
+    if (!this.categoryPieChart || data.length === 0) {
+      console.warn('No hay datos para el gráfico de pie.');
+      return;
+    }
 
-  this.categoryChartData = {
-    labels: categoryEntries.map(([category]) => category),
-    datasets: [{
-      data: categoryEntries.map(([_, value]) => value),
-      backgroundColor: colors
-    }]
-  };
+    const ctx = this.categoryPieChart.nativeElement.getContext('2d');
+    if (!ctx) {
+      console.error('No se pudo obtener el contexto del canvas.');
+      return;
+    }
 
-  this.transactionTrendsChartData = {
-    labels: this.metrics.transactionTrends.labels,
-    datasets: [
-      { label: 'Entradas', data: this.metrics.transactionTrends.entries, backgroundColor: 'rgba(76, 175, 80, 0.8)' },
-      { label: 'Salidas', data: this.metrics.transactionTrends.outputs, backgroundColor: 'rgba(244, 67, 54, 0.8)' }
-    ]
-  };
+    this.transactionTrendsChartData = {
+      labels: this.metrics.transactionTrends.labels,
+      datasets: [
+        { label: 'Entradas', data: this.metrics.transactionTrends.entries, backgroundColor: 'rgba(76, 175, 80, 0.8)' },
+        { label: 'Salidas', data: this.metrics.transactionTrends.outputs, backgroundColor: 'rgba(244, 67, 54, 0.8)' }
+      ]
+    };
 
-  console.log('Datos finales del gráfico de transacciones:', this.transactionTrendsChartData);
-}
-
-
+    this.chartInstance = new Chart<'pie'>(ctx, {
+      type: 'pie',
+      data: {
+        labels: data.map(([label]) => label),
+        datasets: [
+          {
+            data: data.map(([, value]) => value),
+            backgroundColor: colors,
+          },
+        ],
+      },
+      options: {
+        responsive: true,
+        maintainAspectRatio: false,
+        plugins: {
+          legend: {
+            position: 'top',
+          },
+          tooltip: {
+            callbacks: {
+              label: (tooltipItem) => {
+                const label = tooltipItem.label || '';
+                const value = data[tooltipItem.dataIndex][1] || 0;
+                return `${label}: ${value}`;
+              },
+            },
+          },
+        },
+      },
+    });
+  }
 
 
   // Método para obtener una lista de colores, manteniendo los iniciales y generando tonos pastel si es necesario
@@ -407,19 +420,19 @@ private updateCharts(inventories: Inventory[]): void {
     return `rgba(${r}, ${g}, ${b}, 0.8)`;
   }
 
-    // Método para obtener la etiqueta dinámica del KPI
-    private getUnitLabel(unit: string): string {
-      switch (unit) {
-        case MeasurementUnit.UNITS:
-          return 'unidades';
-        case MeasurementUnit.KILOS:
-          return 'kilos';
-        case MeasurementUnit.LITERS:
-          return 'litros';
-        default:
-          return 'medida desconocida';
-      }
+  // Método para obtener la etiqueta dinámica del KPI
+  private getUnitLabel(unit: string): string {
+    switch (unit) {
+      case MeasurementUnit.UNITS:
+        return 'unidades';
+      case MeasurementUnit.KILOS:
+        return 'kilos';
+      case MeasurementUnit.LITERS:
+        return 'litros';
+      default:
+        return 'medida desconocida';
     }
+  }
 
   public capitalizeFirstLetter(text: string): string {
     if (!text) return '';
@@ -431,15 +444,15 @@ private updateCharts(inventories: Inventory[]): void {
     let maxTransactions = 0;
 
     inventories.forEach(inv => {
-        const transactionCount = inv.transactions?.length || 0;
-        if (transactionCount > maxTransactions) {
-            maxTransactions = transactionCount;
-            mostMovedArticle = inv.article?.name || ''; // Asume que el artículo tiene un campo `name`
-        }
+      const transactionCount = inv.transactions?.length || 0;
+      if (transactionCount > maxTransactions) {
+        maxTransactions = transactionCount;
+        mostMovedArticle = inv.article?.name || ''; // Asume que el artículo tiene un campo `name`
+      }
     });
 
     this.metrics.mostArticleUsed = mostMovedArticle;
-}
+  }
 
 
   showInfo(): void {
@@ -452,7 +465,7 @@ private updateCharts(inventories: Inventory[]): void {
     });
   }
 
-  showInventoryItems(){
+  showInventoryItems() {
     this.router.navigate(['/inventories']);
   }
 }
