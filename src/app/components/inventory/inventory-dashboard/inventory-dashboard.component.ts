@@ -92,7 +92,7 @@ export class InventoryDashboardComponent implements OnInit {
 
   private getDateOneMonthAgo(): string {
     const date = new Date();
-    date.setMonth(date.getMonth() - 1);
+    date.setMonth(date.getMonth() - 12);
     return date.toISOString().split('T')[0]; // Formato: YYYY-MM-DD
   }
 
@@ -174,12 +174,7 @@ transactionTrendsChartData: ChartData<'bar'> = {
   constructor() { }
 
   ngOnInit(): void {
-    this.loadInventoryData();
-
-    // Cargar gráfico inicial basado en la unidad seleccionada
-    const initialUnit = this.filtersForm.get('unit')?.value;
-    this.unitLabel = this.getUnitLabel(initialUnit); // Configurar subtítulo inicial
-    this.updateMetricsAndCharts(initialUnit);
+    this.applyFilters();
   }
 
   private updateMetricsAndCharts(selectedUnit: string): void {
@@ -199,8 +194,6 @@ transactionTrendsChartData: ChartData<'bar'> = {
         this.updateCharts(filteredInventories);
     });
 }
-
-
 
 applyFilters(): void {
   const { unit, startDate, endDate } = this.filtersForm.value;
