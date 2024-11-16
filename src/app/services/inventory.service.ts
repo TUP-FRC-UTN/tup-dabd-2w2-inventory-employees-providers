@@ -169,6 +169,15 @@ export class InventoryService {
 
     return this.http.get<Page<Inventory>>(`${this.apiInventoriesUrl}/paginated`, { params });
   }
+
+  getFilteredInventory(unit: string, startDate: string, endDate: string): Observable<Inventory[]> {
+    const params = new HttpParams()
+      .set('unit', unit)
+      .set('startDate', startDate)
+      .set('endDate', endDate);
+
+    return this.http.get<Inventory[]>(`${this.apiInventoriesUrl}/filtered`, { params });
+  }
 }
 
 
