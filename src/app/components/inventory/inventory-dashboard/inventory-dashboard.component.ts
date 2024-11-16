@@ -317,10 +317,14 @@ applyFilters(): void {
 
 
 private calculateTransactionMetrics(inventories: Inventory[]): void {
+  console.log('Inventarios para métricas de transacciones:', inventories);
+
   const transactionTrends = new Map<string, { entries: number; outputs: number }>();
 
   inventories.forEach(inv => {
     inv.transactions.forEach(trans => {
+      console.log('Procesando transacción:', trans);
+
       if (trans.transactionDate) {
         const date = new Date(trans.transactionDate);
         const monthKey = `${date.getFullYear()}-${(date.getMonth() + 1).toString().padStart(2, '0')}`;
@@ -337,21 +341,14 @@ private calculateTransactionMetrics(inventories: Inventory[]): void {
     });
   });
 
-  const sortedMonths = Array.from(transactionTrends.entries())
-    .sort((a, b) => a[0].localeCompare(b[0]));
-
   this.metrics.transactionTrends = {
-    labels: sortedMonths.map(([month]) => month),
-    entries: sortedMonths.map(([_, data]) => data.entries),
-    outputs: sortedMonths.map(([_, data]) => data.outputs)
+    labels: Array.from(transactionTrends.keys()),
+    entries: Array.from(transactionTrends.values()).map(v => v.entries),
+    outputs: Array.from(transactionTrends.values()).map(v => v.outputs)
   };
 
-  // Actualizar la bandera
-  this.noDataBar = sortedMonths.length === 0; // Si no hay transacciones, no hay datos
-  console.log('No hay datos para el gráfico de barras:', this.noDataBar);
+  console.log('Tendencias de transacciones calculadas:', this.metrics.transactionTrends);
 }
-
-
 
 
 private updateCharts(inventories: Inventory[]): void {
@@ -375,9 +372,15 @@ private updateCharts(inventories: Inventory[]): void {
     }]
   };
 
-  // Actualizar la bandera
-  this.noData = categoryEntries.length === 0; // Si no hay categorías, no hay datos
-  console.log('No hay datos para el gráfico de tortas:', this.noData);
+  this.transactionTrendsChartData = {
+    labels: this.metrics.transactionTrends.labels,
+    datasets: [
+      { label: 'Entradas', data: this.metrics.transactionTrends.entries, backgroundColor: 'rgba(76, 175, 80, 0.8)' },
+      { label: 'Salidas', data: this.metrics.transactionTrends.outputs, backgroundColor: 'rgba(244, 67, 54, 0.8)' }
+    ]
+  };
+
+  console.log('Datos finales del gráfico de transacciones:', this.transactionTrendsChartData);
 }
 
 
