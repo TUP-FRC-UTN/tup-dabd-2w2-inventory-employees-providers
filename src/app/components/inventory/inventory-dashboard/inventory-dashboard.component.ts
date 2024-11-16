@@ -25,6 +25,7 @@ import ChartDataLabels from 'chartjs-plugin-datalabels';
 import { NgbModal } from '@ng-bootstrap/ng-bootstrap';
 import { InventoryDashboardInfoComponent } from './inventory-dashboard-info/inventory-dashboard-info.component';
 import { Router } from '@angular/router';
+import { ReactiveFormsModule, UntypedFormControl, UntypedFormGroup } from '@angular/forms';
 Chart.register(...registerables, ChartDataLabels);
 Chart.register(
   ArcElement,
@@ -58,6 +59,7 @@ interface InventoryMetrics {
     BaseChartDirective,
     MainContainerComponent,
     DecimalPipe,
+    ReactiveFormsModule
   ],
   providers: [DecimalPipe],
   selector: 'app-inventory-dashboard',
@@ -71,6 +73,27 @@ export class InventoryDashboardComponent implements OnInit {
   cdr: ChangeDetectorRef = inject(ChangeDetectorRef);
   private modalService = inject(NgbModal);
   private router = inject(Router);
+
+  // Propiedad para la etiqueta dinámica del KPI
+  unitLabel: string = 'unidades'; // Valor inicial
+
+  filtersForm = new UntypedFormGroup({
+    unit: new UntypedFormControl(MeasurementUnit.UNITS),
+    startDate: new UntypedFormControl(this.getDateOneMonthAgo()),
+    endDate: new UntypedFormControl(this.getToday()),
+  });
+
+  private getToday(): string {
+    const today = new Date();
+    return today.toISOString().split('T')[0]; // Formato: YYYY-MM-DD
+  }
+
+  private getDateOneMonthAgo(): string {
+    const date = new Date();
+    date.setMonth(date.getMonth() - 1);
+    return date.toISOString().split('T')[0]; // Formato: YYYY-MM-DD
+  }
+
 
   metrics: InventoryMetrics = {
     totalItems: 0,
@@ -150,121 +173,196 @@ transactionTrendsChartData: ChartData<'bar'> = {
 
   ngOnInit(): void {
     this.loadInventoryData();
+
+    // Cargar gráfico inicial basado en la unidad seleccionada
+    const initialUnit = this.filtersForm.get('unit')?.value;
+    this.unitLabel = this.getUnitLabel(initialUnit); // Configurar subtítulo inicial
+    this.updateMetricsAndCharts(initialUnit);
   }
 
+  private updateMetricsAndCharts(selectedUnit: string): void {
+    forkJoin({
+        inventories: this.inventoryService.getInventories(),
+        transactions: this.inventoryService.getTransactions()
+    }).subscribe(({ inventories }) => {
+        const camelCaseInventories = inventories.map(inv => this.mapperService.toCamelCase(inv));
+
+        // Calcular métricas considerando todos los inventarios
+        this.calculateMetrics(camelCaseInventories);
+
+        // Filtrar inventarios solo para las métricas específicas de la unidad seleccionada
+        const filteredInventories = camelCaseInventories.filter(inv => inv.article.measurementUnit === selectedUnit);
+
+        // Actualizar gráficos
+        this.updateCharts(filteredInventories);
+    });
+}
+
+
+
+  applyFilters(): void {
+    const selectedUnit = this.filtersForm.get('unit')?.value;
+
+    if (selectedUnit) {
+      // Actualizar el subtítulo dinámico del KPI
+      this.unitLabel = this.getUnitLabel(selectedUnit);
+
+      // Llamar al método reutilizable para actualizar métricas y gráficos
+      this.updateMetricsAndCharts(selectedUnit);
+    } else {
+      console.warn('Unidad no seleccionada en los filtros.');
+    }
+  }
+
+  resetFilters(): void {
+    this.filtersForm.reset({
+      unit: MeasurementUnit.UNITS,
+      startDate: this.getDateOneMonthAgo(),
+      endDate: this.getToday(),
+    });
+    console.log('Filtros restablecidos:', this.filtersForm.value);
+    this.applyFilters();
+  }
+
+
   private loadInventoryData(): void {
+    console.log('Cargando datos iniciales...');
     forkJoin({
       inventories: this.inventoryService.getInventories(),
       transactions: this.inventoryService.getTransactions()
     }).subscribe({
       next: ({ inventories, transactions }) => {
-        // Convertir datos a camelCase
+        console.log('Datos de inventarios recibidos:', inventories);
+        console.log('Datos de transacciones recibidos:', transactions);
+
         const camelCaseInventories = inventories.map(inv => this.mapperService.toCamelCase(inv));
         const camelCaseTransactions = transactions.map(trans => this.mapperService.toCamelCase(trans));
 
-        // Calcular métricas y actualizar gráficos
+        console.log('Inventarios procesados:', camelCaseInventories);
+        console.log('Transacciones procesadas:', camelCaseTransactions);
+
         this.calculateMetrics(camelCaseInventories);
         this.calculateTransactionTrends(camelCaseTransactions);
-        this.updateCharts();
+        this.updateCharts(camelCaseInventories);
       },
-      error: (error) => console.error('Error loading data:', error)
+      error: (error) => console.error('Error al cargar los datos:', error)
     });
   }
 
-  private calculateMetrics(inventories: Inventory[]): void {
-     // Filtrar y contar solo artículos registrables con unidad de medida en "unidades"
-  this.metrics.totalItems = inventories
-  .filter(inv => inv.article?.articleType === ArticleType.REGISTRABLE || inv.article.measurementUnit === MeasurementUnit.UNITS)
-  .reduce((sum, inv) => sum + (inv.stock || 0), 0);
 
-    // Total value
-    this.metrics.totalValue = inventories.reduce((sum, inv) => {
-      const lastTransactionWithPrice = inv.transactions?.slice().reverse().find(t => t.price !== null && t.price !== undefined);
-      const price = lastTransactionWithPrice?.price || 0;
-      return sum + ((inv.stock || 0) * price);
+  private calculateMetrics(allInventories: Inventory[]): void {
+    console.log('Calculando métricas para inventarios:', allInventories);
+
+    // Filtrar inventarios según la unidad seleccionada
+    const selectedUnit = this.filtersForm.get('unit')?.value;
+
+    // Calcular total de artículos solo para la unidad seleccionada
+    this.metrics.totalItems = allInventories
+        .filter(inv => inv.article?.measurementUnit === selectedUnit)
+        .reduce((sum, inv) => sum + (inv.stock || 0), 0);
+
+    console.log('Total de artículos:', this.metrics.totalItems);
+
+    // Calcular el valor total del inventario sin importar la unidad
+    this.metrics.totalValue = allInventories.reduce((sum, inv) => {
+        const lastTransactionWithPrice = inv.transactions?.slice().reverse().find(t => t.price !== null && t.price !== undefined);
+        const price = lastTransactionWithPrice?.price || 0;
+        return sum + ((inv.stock || 0) * price);
     }, 0);
 
-    // Low stock items
-    const lowStockItems = inventories.filter(inv => {
-      const isLowStock = inv.stock !== null && inv.minStock !== null && inv.stock <= inv.minStock && inv.stock > 0;
-      return isLowStock;
+    console.log('Valor total del inventario:', this.metrics.totalValue);
+
+    // Identificar los artículos con bajo stock
+    const lowStockItems = allInventories.filter(inv => {
+        const isLowStock = inv.stock !== null && inv.minStock !== null && inv.stock <= inv.minStock && inv.stock > 0;
+        return isLowStock;
     });
     this.metrics.lowStockItems = lowStockItems.length;
 
-    // Agrupar el stock total por categoría
+    console.log('Artículos con stock bajo:', this.metrics.lowStockItems);
+
+    // Agrupar por categoría
     this.metrics.stockByCategory = new Map<string, number>();
-    inventories.forEach(inv => {
-      const category = inv.article?.articleCategory;
-      if (category && category.denomination) {
-        const currentStock = this.metrics.stockByCategory.get(category.denomination) || 0;
-        this.metrics.stockByCategory.set(category.denomination, currentStock + (inv.stock || 0));
-      }
-    });
-
-    // Mapa para contar transacciones por artículo
-    const transactionCountMap = new Map<string, { name: string; count: number }>();
-
-    inventories.forEach(inv => {
-      if (inv.article?.name && inv.transactions) {
-        const totalTransactions = inv.transactions.reduce((sum, t) => sum + (t.quantity || 0), 0);
-        const currentCount = transactionCountMap.get(inv.article.name)?.count || 0;
-        transactionCountMap.set(inv.article.name, { name: inv.article.name, count: currentCount + totalTransactions });
-      }
-    });
-
-    // Determinar el artículo más transaccionado
-    const sortedTransactions = Array.from(transactionCountMap.values()).sort((a, b) => b.count - a.count);
-    this.metrics.mostArticleUsed = sortedTransactions.length > 0 ? sortedTransactions[0].name : 'Sin transacciones';
-  }
-
-  private calculateTransactionTrends(transactions: Transaction[]): void {
-    const monthlyTransactions = new Map<string, { entries: number; outputs: number }>();
-    transactions.forEach(t => {
-      if (t.transactionDate) {
-        const date = new Date(t.transactionDate);
-        const monthKey = `${date.getFullYear()}-${(date.getMonth() + 1).toString().padStart(2, '0')}`;
-        const current = monthlyTransactions.get(monthKey) || { entries: 0, outputs: 0 };
-        if (t.transactionType === TransactionType.ENTRY) {
-          current.entries += t.quantity || 0;
-        } else {
-          current.outputs += t.quantity || 0;
+    allInventories.forEach(inv => {
+        const category = inv.article?.articleCategory;
+        if (category && category.denomination) {
+            const currentStock = this.metrics.stockByCategory.get(category.denomination) || 0;
+            this.metrics.stockByCategory.set(category.denomination, currentStock + (inv.stock || 0));
         }
-        monthlyTransactions.set(monthKey, current);
+    });
+
+    console.log('Stock por categoría:', Array.from(this.metrics.stockByCategory.entries()));
+
+    // Calcular el artículo con más movimiento considerando todos los inventarios
+    this.calculateMostMovedArticle(allInventories);
+
+    console.log('Artículo con más movimiento:', this.metrics.mostArticleUsed);
+}
+
+
+
+
+
+
+private calculateTransactionTrends(transactions: Transaction[]): void {
+  const monthlyTransactions = new Map<string, { entries: number; outputs: number }>();
+
+  transactions.forEach(trans => {
+    if (trans.transactionDate) {
+      const date = new Date(trans.transactionDate);
+      const monthKey = `${date.getFullYear()}-${(date.getMonth() + 1).toString().padStart(2, '0')}`;
+      const current = monthlyTransactions.get(monthKey) || { entries: 0, outputs: 0 };
+
+      if (trans.transactionType === TransactionType.ENTRY) {
+        current.entries += trans.quantity || 0;
+      } else if (trans.transactionType === TransactionType.OUTPUT) {
+        current.outputs += trans.quantity || 0;
+      }
+
+      monthlyTransactions.set(monthKey, current);
+    }
+  });
+
+  const sortedMonths = Array.from(monthlyTransactions.entries())
+    .sort((a, b) => a[0].localeCompare(b[0]))
+    .slice(-6);
+
+  this.metrics.transactionTrends.labels = sortedMonths.map(([month]) =>
+    new Date(
+      parseInt(month.split('-')[0]),
+      parseInt(month.split('-')[1]) - 1
+    ).toLocaleDateString('es-ES', { month: 'short', year: '2-digit' })
+  );
+  this.metrics.transactionTrends.entries = sortedMonths.map(([_, data]) => data.entries);
+  this.metrics.transactionTrends.outputs = sortedMonths.map(([_, data]) => data.outputs);
+
+  console.log('Tendencias de transacciones calculadas:', this.metrics.transactionTrends);
+}
+
+
+  private updateCharts(inventories: Inventory[]): void {
+    const stockByCategory = new Map<string, number>();
+    inventories.forEach(inv => {
+      const category = inv.article?.articleCategory?.denomination;
+      if (category) {
+        const currentStock = stockByCategory.get(category) || 0;
+        stockByCategory.set(category, currentStock + (inv.stock || 0));
       }
     });
-    const sortedMonths = Array.from(monthlyTransactions.entries()).sort((a, b) => a[0].localeCompare(b[0])).slice(-6);
-    this.metrics.transactionTrends.labels = sortedMonths.map(([month]) => new Date(parseInt(month.split('-')[0]), parseInt(month.split('-')[1]) - 1).toLocaleDateString('es-ES', { month: 'short', year: '2-digit' }));
-    this.metrics.transactionTrends.entries = sortedMonths.map(([_, data]) => data.entries);
-    this.metrics.transactionTrends.outputs = sortedMonths.map(([_, data]) => data.outputs);
+
+    const categoryEntries = Array.from(stockByCategory.entries());
+    const colors = this.getColorsForData(categoryEntries.length);
+
+    this.categoryChartData = {
+      labels: categoryEntries.map(([category]) => category),
+      datasets: [{
+        data: categoryEntries.map(([_, value]) => value),
+        backgroundColor: colors
+      }]
+    };
   }
 
-  private updateCharts(): void {
-  // Convertir el mapa de categorías a un arreglo de entradas para el gráfico de tortas
-  const categoryEntries = Array.from(this.metrics.stockByCategory.entries());
 
-  // Generar colores adicionales en tonos pastel solo si son necesarios
-  const colors = this.getColorsForData(categoryEntries.length);
-
-  // Asignar los datos agrupados al gráfico de tortas
-  this.categoryChartData = {
-    labels: categoryEntries.map(([category]) => category),
-    datasets: [{
-      data: categoryEntries.map(([_, value]) => value),
-      backgroundColor: colors
-    }]
-  };
-
-    if (this.metrics.transactionTrends.labels.length > 0) {
-      this.transactionTrendsChartData = {
-        labels: this.metrics.transactionTrends.labels,
-        datasets: [
-          { label: 'Entradas', data: this.metrics.transactionTrends.entries, backgroundColor: 'rgba(76, 175, 80, 0.8)', borderColor: 'rgba(76, 175, 80, 1)', borderWidth: 1 },
-          { label: 'Salidas', data: this.metrics.transactionTrends.outputs, backgroundColor: 'rgba(244, 67, 54, 0.8)', borderColor: 'rgba(244, 67, 54, 1)', borderWidth: 1 }
-        ]
-      };
-    }
-    this.cdr.detectChanges();
-  }
 
   // Método para obtener una lista de colores, manteniendo los iniciales y generando tonos pastel si es necesario
   private getColorsForData(dataLength: number): string[] {
@@ -293,6 +391,41 @@ transactionTrendsChartData: ChartData<'bar'> = {
     const b = Math.floor((Math.random() * 127) + 127);
     return `rgba(${r}, ${g}, ${b}, 0.8)`;
   }
+
+    // Método para obtener la etiqueta dinámica del KPI
+    private getUnitLabel(unit: string): string {
+      switch (unit) {
+        case MeasurementUnit.UNITS:
+          return 'unidades';
+        case MeasurementUnit.KILOS:
+          return 'kilos';
+        case MeasurementUnit.LITERS:
+          return 'litros';
+        default:
+          return 'medida desconocida';
+      }
+    }
+
+  public capitalizeFirstLetter(text: string): string {
+    if (!text) return '';
+    return text.charAt(0).toUpperCase() + text.slice(1);
+  }
+
+  private calculateMostMovedArticle(inventories: Inventory[]): void {
+    let mostMovedArticle = '';
+    let maxTransactions = 0;
+
+    inventories.forEach(inv => {
+        const transactionCount = inv.transactions?.length || 0;
+        if (transactionCount > maxTransactions) {
+            maxTransactions = transactionCount;
+            mostMovedArticle = inv.article?.name || ''; // Asume que el artículo tiene un campo `name`
+        }
+    });
+
+    this.metrics.mostArticleUsed = mostMovedArticle;
+}
+
 
   showInfo(): void {
     this.modalService.open(InventoryDashboardInfoComponent, {
