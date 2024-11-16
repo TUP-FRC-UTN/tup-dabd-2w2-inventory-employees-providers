@@ -12,7 +12,17 @@
       </div>
       <div>
         @if (employeeForm.get('firstName')?.invalid && employeeForm.get('firstName')?.touched) {
-          <small class="text-danger ms-2">Nombre es requerido</small>
+          <small class="text-danger ms-2">
+            @if (employeeForm.get('firstName')?.errors?.['required']) {
+              Nombre es requerido
+            } @else if (employeeForm.get('firstName')?.errors?.['minlength']) {
+              El nombre debe tener al menos 3 caracteres
+            } @else if (employeeForm.get('firstName')?.errors?.['maxlength']) {
+              El nombre no puede tener más de 100 caracteres
+            } @else if (employeeForm.get('firstName')?.errors?.['pattern']) {
+              El nombre solo puede contener letras
+            }
+          </small>
         }
       </div>
     </div>
@@ -20,14 +30,23 @@
     <div class="col-md-6">
       <div class="flex-row d-flex align-items-center">
         <label for="lastName" class="col-form-label col-md-2">Apellido<label class="text-danger">*</label></label>
-        <input type="text" class="form-control m-2" id="lastName" formControlName="lastName"
-         
+        <input type="text" class="form-control m-2" id="lastName" formControlName="lastName"  
           [ngClass]="{'is-invalid': employeeForm.get('lastName')?.invalid && employeeForm.get('lastName')?.touched,
                      'is-valid': employeeForm.get('lastName')?.valid && employeeForm.get('lastName')?.touched}">
       </div>
       <div>
         @if (employeeForm.get('lastName')?.invalid && employeeForm.get('lastName')?.touched) {
-          <small class="text-danger ms-2">Apellido es requerido</small>
+          <small class="text-danger ms-2">
+            @if (employeeForm.get('lastName')?.errors?.['required']) {
+              Apellido es requerido
+            } @else if (employeeForm.get('lastName')?.errors?.['minlength']) {
+              El apellido debe tener al menos 3 caracteres
+            } @else if (employeeForm.get('lastName')?.errors?.['maxlength']) {
+              El apellido no puede tener más de 100 caracteres
+            } @else if (employeeForm.get('lastName')?.errors?.['pattern']) {
+              El apellido solo puede contener letras
+            }
+          </small>
         }
       </div>
     </div>
@@ -92,7 +111,17 @@
       </div>
       <div>
         @if (employeeForm.get('docNumber')?.invalid && employeeForm.get('docNumber')?.touched) {
-          <small class="text-danger ms-2">Documento es requerido</small>
+          <small class="text-danger ms-2">
+            @if (employeeForm.get('docNumber')?.errors?.['required']) {
+              Documento es requerido
+            } @else if (employeeForm.get('docNumber')?.errors?.['invalidDni']) {
+              El DNI no puede tener más de 8 dígitos
+            } @else if (employeeForm.get('docNumber')?.errors?.['invalidLength']) {
+              CUIT/CUIL debe tener 11 dígitos
+            } @else if (employeeForm.get('docNumber')?.errors?.['invalidCheckDigit']) {
+              Dígito verificador inválido
+            }
+          </small>
         }
       </div>
     </div>
@@ -111,9 +140,17 @@
         </div>
       </div>    
       <div>
-        @if (employeeForm.get('salary')?.touched && (employeeForm.get('salary')?.invalid || employeeForm.get('salary')?.value === 0)) {
-          <small class="text-danger ms-2">Salario es requerido</small>
-      }      
+        @if (employeeForm.get('salary')?.invalid && employeeForm.get('salary')?.touched) {
+          <small class="text-danger ms-2">
+            @if (employeeForm.get('salary')?.errors?.['required']) {
+              Salario es requerido
+            } @else if (employeeForm.get('salary')?.errors?.['min']) {
+              El salario debe ser mayor a 0
+            } @else if (employeeForm.get('salary')?.errors?.['pattern']) {
+              Formato de salario inválido
+            }
+          </small>
+        }    
       </div>
     </div>
  
@@ -152,12 +189,20 @@
               <label for="number" class="col-form-label col-md-2">Número<label class="text-danger">*</label></label>
               <input type="number" class="form-control m-2" id="number" formControlName="number"
                  style="text-align: right;"
-                [ngClass]="{'is-invalid': employeeForm.get('address.number')?.invalid && employeeForm.get('address.number')?.touched,
-                           'is-valid': employeeForm.get('address.number')?.valid && employeeForm.get('address.number')?.value !== 0}">
-            </div>
+                 [ngClass]="{'is-invalid': employeeForm.get('address.number')?.invalid && employeeForm.get('address.number')?.touched,
+                 'is-valid': employeeForm.get('address.number')?.valid && employeeForm.get('address.number')?.value !== 0}">
+           </div>
             <div>
               @if (employeeForm.get('address.number')?.invalid && employeeForm.get('address.number')?.touched) {
-                <small class="text-danger ms-2">El número es requerido</small>
+                <small class="text-danger ms-2">
+                  @if (employeeForm.get('address.number')?.errors?.['required']) {
+                    El número es requerido
+                  } @else if (employeeForm.get('address.number')?.errors?.['min']) {
+                    El número debe ser mayor a 0
+                  } @else if (employeeForm.get('address.number')?.errors?.['pattern']) {
+                    Solo se permiten números enteros
+                  }
+                </small>
               }
             </div>
           </div>
@@ -183,15 +228,12 @@
           <div class="col-md-6">
             <div class="flex-row d-flex align-items-center mb-3">
               <label for="country" class="col-form-label col-md-2">País<label class="text-danger">*</label></label>
-              <select id="country" type="select" class="form-control m-2" id="country" formControlName="country"
-                
-                [ngClass]="{'is-invalid': employeeForm.get('address.country')?.invalid && employeeForm.get('address.country')?.touched,
-                'is-valid': employeeForm.get('address.country')?.valid}">
-                <option *ngFor="let country of countryOptions" [value]="country.value">{{ country.display }}</option>
-              </select>
-            </div>
-            <div>
-              <small class="text-danger ms-2" *ngIf="employeeForm.get('address.country')?.invalid && employeeForm.get('address.country')?.touched">El país es requerido</small>
+              <input type="text" 
+                     class="form-control m-2" 
+                     id="country" 
+                     formControlName="country"
+                     [value]="'ARGENTINA'"
+                     [disabled]="true">
             </div>
           </div>
           
@@ -221,7 +263,15 @@
             </div>
             <div>
               @if (employeeForm.get('address.city')?.invalid && employeeForm.get('address.city')?.touched) {
-                <small class="text-danger ms-2">La ciudad es requerida</small>
+                <small class="text-danger ms-2">
+                  @if (employeeForm.get('address.city')?.errors?.['required']) {
+                    La ciudad es requerida
+                  } @else if (employeeForm.get('address.city')?.errors?.['minlength']) {
+                    La ciudad debe tener al menos 2 caracteres
+                  } @else if (employeeForm.get('address.city')?.errors?.['pattern']) {
+                    La ciudad solo puede contener letras
+                  }
+                </small>
               }
             </div>
           </div>
@@ -236,7 +286,15 @@
           </div>
           <div>
             @if (employeeForm.get('address.postal_code')?.invalid && employeeForm.get('address.postal_code')?.touched) {
-              <small class="text-danger ms-2">El código postal es requerido</small>
+              <small class="text-danger ms-2">
+                @if (employeeForm.get('address.postal_code')?.errors?.['required']) {
+                  El código postal es requerido
+                } @else if (employeeForm.get('address.postal_code')?.errors?.['min']) {
+                  El código postal debe ser mayor a 0
+                } @else if (employeeForm.get('address.postal_code')?.errors?.['pattern']) {
+                  El código postal solo puede contener números
+                }
+              </small>
             }
           </div>
         </div>
@@ -281,11 +339,20 @@
           </div>
         </div>
         <div class="col">
-          @if(employeeForm.get('contactsForm.contactValue')?.invalid &&
-          employeeForm.get('contactsForm.contactValue')?.touched ) {
-          @if(employeeForm.get('contactsForm.contactValue')?.errors?.['email']){
-          <small class="text-danger">Email inválido</small>
-          } }
+          @if (employeeForm.get('contactsForm.contactValue')?.invalid && 
+         employeeForm.get('contactsForm.contactValue')?.touched) {
+      <small class="text-danger">
+        @if (employeeForm.get('contactsForm.contactValue')?.errors?.['required']) {
+          El contacto es requerido
+        } @else if (employeeForm.get('contactsForm.contactValue')?.errors?.['invalidEmail']) {
+          Formato de email inválido
+        } @else if (employeeForm.get('contactsForm.contactValue')?.errors?.['invalidPhone']) {
+          Formato de teléfono inválido
+        } @else if (employeeForm.get('contactsForm.contactValue')?.errors?.['invalidUrl']) {
+          URL de red social inválida
+        }
+      </small>
+    }
         </div>
       </div>
       <!-- Botones para agregar y cancelar contactos -->

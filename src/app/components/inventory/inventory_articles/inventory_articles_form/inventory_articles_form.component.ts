@@ -1,7 +1,7 @@
 import { InventoryService } from './../../../../services/inventory.service';
 import { ArticleCateg, ArticleInventoryPost, ArticlePost } from '../../../../models/article.model';
 import { Component, EventEmitter, inject, OnInit, Output, TemplateRef, ViewChild } from '@angular/core';
-import { FormBuilder, FormGroup, FormsModule, ReactiveFormsModule, Validators } from '@angular/forms';
+import { AbstractControl, FormBuilder, FormGroup, FormsModule, ReactiveFormsModule, ValidatorFn, Validators } from '@angular/forms';
 import { CommonModule } from '@angular/common';
 import { Article, ArticleCategory, ArticleType, ArticleCondition, MeasurementUnit,Status } from '../../../../models/article.model';
 import { MapperService } from '../../../../services/MapperCamelToSnake/mapper.service';
@@ -46,18 +46,72 @@ export class ArticleFormComponent implements OnInit {
 
 
   constructor(private fb: FormBuilder, private inventoryService: InventoryService, private toast : ToastService) {
+    // this.articleForm = this.fb.group({
+    //   identifier: [{ value: '', disabled: true }, Validators.required],
+    //   name: ['', Validators.required],
+    //   description: [''],
+    //   articleType: [ArticleType.NON_REGISTRABLE, Validators.required],
+    //   articleCondition: [ArticleCondition.FUNCTIONAL, Validators.required],
+    //   articleCategory: [Validators.required],
+    //   measurementUnit: [MeasurementUnit.UNITS, Validators.required],
+    //   location: ['', Validators.required], // Campo ubicación del inventario
+    //   stock: [{value: '', disabled: false}, Validators.required],    // Campo stock del inventario
+    //   stockMin: ['',  ], // Campo stock mínimo del inventario
+    //   price: ['', ]    // Campo precio para la transacción inicial
+    // });
     this.articleForm = this.fb.group({
-      identifier: [{ value: '', disabled: true }, Validators.required],
-      name: ['', Validators.required],
-      description: [''],
-      articleType: [ArticleType.NON_REGISTRABLE, Validators.required],
-      articleCondition: [ArticleCondition.FUNCTIONAL, Validators.required],
-      articleCategory: [Validators.required],
-      measurementUnit: [MeasurementUnit.UNITS, Validators.required],
-      location: ['', Validators.required], // Campo ubicación del inventario
-      stock: [{value: '', disabled: false}, Validators.required],    // Campo stock del inventario
-      stockMin: ['',  ], // Campo stock mínimo del inventario
-      price: ['', ]    // Campo precio para la transacción inicial
+      identifier: [{ 
+        value: '', 
+        disabled: true 
+      }, [
+        Validators.required,
+        this.identifierValidator()
+      ]],
+      name: ['', [
+        Validators.required,
+        Validators.minLength(3),
+        Validators.maxLength(100),
+        this.nameValidator()
+      ]],
+      description: ['', [
+        Validators.maxLength(500)
+      ]],
+      articleType: [
+        ArticleType.NON_REGISTRABLE, 
+        Validators.required
+      ],
+      articleCondition: [
+        ArticleCondition.FUNCTIONAL, 
+        Validators.required
+      ],
+      articleCategory: ['', [
+        Validators.required
+      ]],
+      measurementUnit: [
+        MeasurementUnit.UNITS, 
+        Validators.required
+      ],
+      location: ['', [
+        Validators.required,
+        Validators.minLength(3),
+        Validators.maxLength(100),
+        Validators.pattern(/^[a-zA-Z0-9áéíóúÁÉÍÓÚñÑ\s-]*$/)
+      ]],
+      stock: [{ 
+        value: '', 
+        disabled: false 
+      }, [
+        Validators.required,
+        Validators.min(0),
+        Validators.pattern(/^\d+$/)
+      ]],
+      stockMin: ['', [
+        Validators.min(0),
+        Validators.pattern(/^\d+$/)
+      ]],
+      price: ['', [
+        this.priceValidator()
+      ]]
     });
   }
 
@@ -230,5 +284,91 @@ export class ArticleFormComponent implements OnInit {
   onClose(){
     this.showRegisterForm.emit();
     this.isModalOpen = false
+  }
+
+  private identifierValidator(): ValidatorFn {
+    return (control: AbstractControl) => {
+      if (!control.value) return null;
+      const identifier = control.value.toString();
+      const validFormat = /^[A-Z0-9-]{3,20}$/.test(identifier);
+      if (!validFormat) {
+        return { invalidFormat: true };
+      }
+      return null;
+    };
+  }
+  
+  private nameValidator(): ValidatorFn {
+    return (control: AbstractControl) => {
+      if (!control.value) return null;
+      const name = control.value.toString();
+      const validFormat = /^[a-zA-Z0-9áéíóúÁÉÍÓÚñÑ\s-]{3,100}$/.test(name);
+      if (!validFormat) {
+        return { invalidFormat: true };
+      }
+      return null;
+    };
+  }
+
+  // Validador para precio
+  private priceValidator(): ValidatorFn {
+    return (control: AbstractControl) => {
+      if (!control.value) return null;
+      const price = control.value;
+      if (isNaN(price) || price <= 0) {
+        return { invalidPrice: true };
+      }
+      if (!/^\d+(\.\d{1,2})?$/.test(price.toString())) {
+        return { invalidDecimal: true };
+      }
+      return null;
+    };
+  }
+
+  getErrorMessage(controlName: string): string {
+    const control = this.articleForm.get(controlName);
+    
+    if (control?.errors && control.touched) {
+      if (control.errors['required']) return 'Este campo es requerido';
+      if (control.errors['minlength']) return `Mínimo ${control.errors['minlength'].requiredLength} caracteres`;
+      if (control.errors['maxlength']) return `Máximo ${control.errors['maxlength'].requiredLength} caracteres`;
+      if (control.errors['invalidFormat']) {
+        switch (controlName) {
+          case 'identifier':
+            return 'El identificador debe contener solo letras mayúsculas, números y guiones';
+          case 'name':
+            return 'El nombre debe contener solo letras, números y guiones';
+          default:
+            return 'Formato inválido';
+        }
+      }
+      if (control.errors['pattern']) {
+        switch (controlName) {
+          case 'location':
+            return 'La ubicación solo puede contener letras, números y guiones';
+          case 'stock':
+          case 'stockMin':
+            return 'Solo se permiten números enteros';
+          default:
+            return 'Formato inválido';
+        }
+      }
+      if (control.errors['min']) return 'El valor debe ser mayor o igual a 0';
+      if (control.errors['invalidPrice']) return 'El precio debe ser mayor a 0';
+      if (control.errors['invalidDecimal']) return 'El precio debe tener máximo 2 decimales';
+      if (control.errors['unique']) return 'Este identificador ya existe';
+    }
+    return '';
+  }
+
+  // Método para verificar si un campo es inválido
+  isFieldInvalid(fieldName: string): boolean {
+    const field = this.articleForm.get(fieldName);
+    return field ? (field.invalid && (field.dirty || field.touched)) : false;
+  }
+
+  // Método para verificar si un campo tiene un error específico
+  hasError(fieldName: string, errorType: string): boolean {
+    return this.articleForm.get(fieldName)?.hasError(errorType) || false;
   }
 }
