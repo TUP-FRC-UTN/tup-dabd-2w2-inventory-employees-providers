@@ -34,71 +34,11 @@ export class EmployeesService {
       )
     );
   }
-  // getAllEmployeesPaged(
-  //   page: number = 0,
-  //   size: number = 40,
-  //   filters?: Record<string, string | undefined>
-  // ): Observable<PaginatedResponse<Employee>> {
-  //   let params = new HttpParams()
-  //     .set('page', page.toString())
-  //     .set('size', size.toString());
-  
-  //   if (filters) {
-  //     Object.keys(filters).forEach((key) => {
-  //       const value = filters[key];
-  //       if (value) {
-  //         params = params.set(key, value);
-  //       }
-  //     });
-  //   }
-  
-  //   console.log('Parámetros enviados al backend:', params.toString());
-  
-  //   return this.http.get<PaginatedResponse<Employee>>(`${this.apiUrl}/paged`, { params }).pipe(
-  //     map((response) => ({
-  //       ...response,
-  //       content: response.content.map((employee) => this.mapperService.toCamelCase(employee)),
-  //     })),
-  //     tap((response) => {
-  //       console.log('Respuesta mapeada del servicio:', response);
-  //     })
-  //   );
-  // }
-  // getAllEmployeesPaged(
-  //   page: number = 0,
-  //   size: number = 40,
-  //   filters?: {
-  //     firstName?: string;
-  //     lastName?: string;
-  //     type?: string;
-  //     docType?: string;
-  //     docNumber?: string;
-  //     state?: string;
-  //     startDate?: string;
-  //     endDate?: string;
-  //     salary?: string;
-  //   }
-  // ): Observable<PaginatedResponse<Employee>> {
-  //   let params = new HttpParams()
-  //     .set('page', page.toString())
-  //     .set('size', size.toString());
-  
-  //   if (filters) {
-  //     Object.entries(filters).forEach(([key, value]) => {
-  //       if (value) {
-  //         params = params.set(key, value); // Solo incluye filtros con valor
-  //       }
-  //     });
-  //   }
-  
-  //   console.log('Parámetros enviados al backend:', params.toString());
-  
-  //   return this.http.get<PaginatedResponse<Employee>>(`${this.apiUrl}/paged`, { params });
-  // }
+ 
   
   getAllEmployeesPaged(
     page: number = 0,
-    size: number = 40,
+    size: number = 400,
     filters?: {
       firstName?: string;
       lastName?: string;
