@@ -64,7 +64,7 @@ interface InventoryMetrics {
   templateUrl: './inventory-dashboard.component.html',
   styleUrls: ['./inventory-dashboard.component.scss']
 })
-export class InventoryDashboardComponent implements OnInit, AfterViewInit {
+export class InventoryDashboardComponent implements OnInit {
 
   mapperService: MapperService = inject(MapperService);
   inventoryService: InventoryService = inject(InventoryService);
@@ -92,14 +92,6 @@ export class InventoryDashboardComponent implements OnInit, AfterViewInit {
     datasets: [{
       data: [],
       backgroundColor: ['rgba(255, 99, 132, 0.8)', 'rgba(54, 162, 235, 0.8)', 'rgba(255, 206, 86, 0.8)']
-    }]
-  };
-
-  conditionChartData: ChartData<'doughnut'> = {
-    labels: [],
-    datasets: [{
-      data: [],
-      backgroundColor: ['rgba(76, 175, 80, 0.8)', 'rgba(244, 67, 54, 0.8)', 'rgba(255, 193, 7, 0.8)']
     }]
   };
 
@@ -160,14 +152,6 @@ transactionTrendsChartData: ChartData<'bar'> = {
     this.loadInventoryData();
   }
 
-  ngAfterViewInit(): void {
-    console.log('Datos de los gráficos después de la vista:', {
-      category: this.categoryChartData,
-      condition: this.conditionChartData,
-      trends: this.transactionTrendsChartData
-    });
-  }
-
   private loadInventoryData(): void {
     forkJoin({
       inventories: this.inventoryService.getInventories(),
@@ -193,8 +177,6 @@ transactionTrendsChartData: ChartData<'bar'> = {
   .filter(inv => inv.article?.articleType === ArticleType.REGISTRABLE || inv.article.measurementUnit === MeasurementUnit.UNITS)
   .reduce((sum, inv) => sum + (inv.stock || 0), 0);
 
-console.log("Total de artículos registrables en 'unidades':", this.metrics.totalItems);
-
     // Total value
     this.metrics.totalValue = inventories.reduce((sum, inv) => {
       const lastTransactionWithPrice = inv.transactions?.slice().reverse().find(t => t.price !== null && t.price !== undefined);
@@ -204,15 +186,10 @@ console.log("Total de artículos registrables en 'unidades':", this.metrics.tota
 
     // Low stock items
     const lowStockItems = inventories.filter(inv => {
-      console.log(`Artículo: ${inv.article?.name || 'Sin nombre'}`);
-      console.log(`Stock actual: ${inv.stock}, Stock mínimo: ${inv.minStock}`);
       const isLowStock = inv.stock !== null && inv.minStock !== null && inv.stock <= inv.minStock && inv.stock > 0;
-      console.log(`¿Es stock bajo? ${isLowStock}`);
       return isLowStock;
     });
     this.metrics.lowStockItems = lowStockItems.length;
-
-    console.log("Total de artículos con stock bajo:", this.metrics.lowStockItems);
 
     // Agrupar el stock total por categoría
     this.metrics.stockByCategory = new Map<string, number>();
@@ -221,16 +198,6 @@ console.log("Total de artículos registrables en 'unidades':", this.metrics.tota
       if (category && category.denomination) {
         const currentStock = this.metrics.stockByCategory.get(category.denomination) || 0;
         this.metrics.stockByCategory.set(category.denomination, currentStock + (inv.stock || 0));
-      }
-    });
-
-    // Agrupar el stock total por condición
-    this.metrics.stockByCondition = new Map();
-    inventories.forEach(inv => {
-      const condition = inv.article?.articleCondition;
-      if (condition) {
-        const currentStock = this.metrics.stockByCondition.get(condition) || 0;
-        this.metrics.stockByCondition.set(condition, currentStock + (inv.stock || 0));
       }
     });
 
@@ -245,14 +212,9 @@ console.log("Total de artículos registrables en 'unidades':", this.metrics.tota
       }
     });
 
-    // Mostrar detalles de las transacciones por artículo
-    console.log("Detalles de transacciones por artículo:", Array.from(transactionCountMap.entries()));
-
     // Determinar el artículo más transaccionado
     const sortedTransactions = Array.from(transactionCountMap.values()).sort((a, b) => b.count - a.count);
     this.metrics.mostArticleUsed = sortedTransactions.length > 0 ? sortedTransactions[0].name : 'Sin transacciones';
-
-    console.log("Artículo más transaccionado:", this.metrics.mostArticleUsed);
   }
 
   private calculateTransactionTrends(transactions: Transaction[]): void {
@@ -279,11 +241,9 @@ console.log("Total de artículos registrables en 'unidades':", this.metrics.tota
   private updateCharts(): void {
   // Convertir el mapa de categorías a un arreglo de entradas para el gráfico de tortas
   const categoryEntries = Array.from(this.metrics.stockByCategory.entries());
-  console.log("categoryEntries:", categoryEntries); // Verifica el contenido de categoryEntries
 
   // Generar colores adicionales en tonos pastel solo si son necesarios
   const colors = this.getColorsForData(categoryEntries.length);
-  console.log("colors:", colors); // Verifica los colores generados
 
   // Asignar los datos agrupados al gráfico de tortas
   this.categoryChartData = {
@@ -293,16 +253,6 @@ console.log("Total de artículos registrables en 'unidades':", this.metrics.tota
       backgroundColor: colors
     }]
   };
-  console.log("categoryChartData:", this.categoryChartData); // Verifica la estructura final de categoryChartData
-
-    const conditionEntries = Array.from(this.metrics.stockByCondition.entries());
-    this.conditionChartData = {
-      labels: conditionEntries.map(([condition]) => this.formatCondition(condition)),
-      datasets: [{
-        data: conditionEntries.map(([_, value]) => value),
-        backgroundColor: ['rgba(76, 175, 80, 0.8)', 'rgba(244, 67, 54, 0.8)', 'rgba(255, 193, 7, 0.8)']
-      }]
-    };
 
     if (this.metrics.transactionTrends.labels.length > 0) {
       this.transactionTrendsChartData = {
@@ -314,15 +264,6 @@ console.log("Total de artículos registrables en 'unidades':", this.metrics.tota
       };
     }
     this.cdr.detectChanges();
-  }
-
-  private formatCondition(condition: ArticleCondition): string {
-    const conditionMap: Record<ArticleCondition, string> = {
-      'FUNCTIONAL': 'Funcional',
-      'DEFECTIVE': 'Defectuoso',
-      'UNDER_REPAIR': 'En Reparación'
-    };
-    return conditionMap[condition] || condition;
   }
 
   // Método para obtener una lista de colores, manteniendo los iniciales y generando tonos pastel si es necesario
