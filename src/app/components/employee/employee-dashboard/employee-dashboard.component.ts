@@ -1,8 +1,8 @@
 import { Component, OnInit, ViewChild, ElementRef, inject, ChangeDetectorRef, AfterViewInit } from '@angular/core';
 import { FormBuilder, FormControl, FormGroup, ReactiveFormsModule } from '@angular/forms';
-import { CommonModule, DecimalPipe } from '@angular/common';
+import { CommonModule, DatePipe, DecimalPipe } from '@angular/common';
 import { Chart, ChartType, registerables } from 'chart.js';
-import { ToastService, MainContainerComponent } from 'ngx-dabd-grupo01';
+import { ToastService, MainContainerComponent, FilterConfigBuilder, Filter, TableFiltersComponent } from 'ngx-dabd-grupo01';
 import { forkJoin, map } from 'rxjs';
 import { debounceTime, distinctUntilChanged } from 'rxjs';
 import { Employee, EmployeeType, StatusType, EmployeePayment } from '../../../models/employee.model';
@@ -24,8 +24,8 @@ interface DateRange {
 @Component({
   selector: 'app-employee-dashboard',
   standalone: true,
-  imports: [MainContainerComponent, CommonModule, ReactiveFormsModule],
-  providers: [DecimalPipe],
+  imports: [MainContainerComponent, CommonModule, ReactiveFormsModule,TableFiltersComponent],
+  providers: [DecimalPipe, DatePipe],
   templateUrl: './employee-dashboard.component.html',
   styleUrls: ['./employee-dashboard.component.scss']
 })
@@ -60,6 +60,17 @@ export class EmployeeDashboardComponent implements OnInit, AfterViewInit {
   isLoading: boolean = false; // Añadir esta propiedad para evitar el error
   dateFilterForm: FormGroup;
   predefinedRanges: DateRange[] = [];
+  //FILTROS NUEVOS
+  filterConfig: Filter[] = new FilterConfigBuilder()
+  .selectFilter('Estado', 'enabled', 'Seleccione un Estado', [
+    { value: '', label: 'Todos' },
+    { value: 'true', label: 'Activo' },
+    { value: 'false', label: 'Inactivo' },
+  ])
+  .dateFilter('Fecha desde', 'startDate', 'Seleccione una fecha')
+  .dateFilter('Fecha hasta', 'endDate', 'Seleccione una fecha')
+  .build();
+
 
   // Charts
   charts: any = {};
@@ -113,16 +124,20 @@ export class EmployeeDashboardComponent implements OnInit, AfterViewInit {
       endDate: [''],
       selectedRange: ['']
     });
-
-    // Mantener searchFilterAll existente
     this.searchFilterAll.valueChanges
-      .pipe(
-        debounceTime(300),
-        distinctUntilChanged()
-      )
-      .subscribe(searchTerm => {
-        this.getEmployeesWithDateFilter(searchTerm || '');
-      });
+    .pipe(debounceTime(300), distinctUntilChanged())
+    .subscribe((searchTerm) => {
+      this.getEmployees(searchTerm || '');
+    });
+    // Mantener searchFilterAll existente
+    // this.searchFilterAll.valueChanges
+    //   .pipe(
+    //     debounceTime(300),
+    //     distinctUntilChanged()
+    //   )
+    //   .subscribe(searchTerm => {
+    //     this.getEmployeesWithDateFilter(searchTerm || '');
+    //   });
 
     // Agregar suscripción a cambios en filtros de fecha
 
@@ -134,6 +149,140 @@ export class EmployeeDashboardComponent implements OnInit, AfterViewInit {
       this.loadEmployeeData();
     }
   }
+  //NUEVOS FILTROS
+  filterChange(filters: Record<string, any>): void {
+    console.log('Filtros recibidos del componente:', filters); // Debug
+  
+    const { startDate, endDate, enabled } = filters;
+  
+    if (startDate && endDate && new Date(startDate) > new Date(endDate)) {
+      this.toastService.sendError('La fecha "desde" no puede ser mayor que la fecha "hasta".');
+      return;
+    }
+  
+    const filterParams: any = {
+      enabled,
+      startDate: startDate || null,
+      endDate: endDate || null,
+    };
+  
+    console.log('Filtros construidos para el servicio:', filterParams); // Debug
+  
+    this.getEmployeesWithFilters(filterParams);
+  }
+  
+  private buildFilters(searchTerm?: string): any {
+    const formValues = this.dateFilterForm.value;
+    const filters: any = {
+      ...(searchTerm && { name: searchTerm }),
+      ...(formValues.startDate && { startDate: formValues.startDate }),
+      ...(formValues.endDate && { endDate: formValues.endDate }),
+    };
+    return filters;
+  }
+  private formatDateToLocalDateTime(date: string): string {
+    const parsedDate = new Date(date);
+    return `${parsedDate.toISOString().split('T')[0]}T00:00:00`; // Formato 'YYYY-MM-DDTHH:mm:ss'
+  }
+  
+  getEmployeesWithFilters(filters?: any): void {
+    const page = 0;
+    const size = 40;
+  
+    const validFilters: any = {
+      state: filters?.enabled ? this.mapStateToBackend(filters.enabled) : null,
+      hiringDate: filters?.startDate && filters?.endDate 
+        ? `${this.formatDateToISO(filters.startDate)},${this.formatDateToISO(filters.endDate)}`
+        : null,
+    };
+  
+    console.log('Filtros enviados al servicio:', validFilters); // Debug
+  
+    this.employeesService.getAllEmployeesPaged(page, size, validFilters).subscribe({
+      next: (response) => {
+        console.log('Respuesta recibida del servicio:', response); // Debug
+        this.employeeList = response.content; 
+        this.calculateMetrics();
+        this.updateCharts();
+      },
+      error: (error) => {
+        console.error('Error al cargar empleados con filtros:', error);
+        this.toastService.sendError('Error al cargar empleados con los filtros aplicados.');
+      },
+    });
+  }
+  
+  private mapStateToBackend(state: string): string | null {
+    if (state === 'Activo') return 'IN_SERVICE';
+    if (state === 'Inactivo') return 'DOWN';
+    return null; // Si no hay estado seleccionado
+  }
+  private formatDateToISO(date: string): string {
+    const parsedDate = new Date(date);
+    return parsedDate.toISOString().split('T')[0]; // Formato 'yyyy-MM-dd'
+  }
+  
+  
+  
+  
+  // getEmployees(searchTerm?: string): void {
+  //   const filters = { ...this.getFilters() };
+  
+  //   if (searchTerm) {
+  //     filters.name = searchTerm;
+  //     filters.cuil = searchTerm;
+  //     filters['service.name'] = searchTerm;
+  //     filters['company.name'] = searchTerm;
+  //     filters.contact = searchTerm;
+  //   }
+  
+  //   this.employeesService.getAllEmployeesPaged().subscribe({
+  //     next: (response) => {
+  //       this.employeeList = this.mapperService.toCamelCase(response.content);
+  //       this.calculateMetrics();
+  //       this.pieChartEmployeeStatusDatasets[0].data = [this.inServiceCount, this.inactiveCount];
+  //       // Reinicializar los charts después de actualizar los datos
+  //       setTimeout(() => {
+  //         this.initializeCharts();
+  //       });
+  //     },
+  //     error: () => {
+  //       this.toastService.sendError('Error al cargar empleados.');
+  //     }
+  //   });
+  // }
+  getEmployees(searchTerm?: string): void {
+    const filters = this.buildFilters(searchTerm);
+  
+    this.employeesService.getAllEmployeesPaged(filters).subscribe({
+      next: (response) => {
+        this.employeeList = this.mapperService.toCamelCase(response.content);
+        this.calculateMetrics();
+        this.updateCharts();
+      },
+      error: () => {
+        this.toastService.sendError('Error al cargar empleados.');
+      },
+    });
+  }
+  updateCharts(): void {
+    if (!this.employeeList.length) {
+      console.warn('No hay datos para mostrar en los gráficos');
+      this.toastService.sendError('No hay datos disponibles para actualizar los gráficos.');
+      return;
+    }
+  
+    // Actualizar el dataset del gráfico de pastel
+    this.pieChartEmployeeStatusDatasets[0].data = [this.inServiceCount, this.inactiveCount];
+  
+    // Reiniciar gráficos existentes
+    this.destroyExistingCharts();
+  
+    // Inicializar gráficos con los datos actuales
+    this.initializeCharts();
+  }
+//TERMINA NUEVO FILTROS
+  
   applyDateFilters(): void {
     const dateFilters = this.getDateFilters();
   
@@ -387,7 +536,7 @@ getDataFilteredByDateRange(startDate: Date, endDate: Date): void {
 
           if (this.chartData.length > 0) {
               this.calculateMetrics();
-              this.updateCharts(this.chartData);
+             // this.updateCharts(this.chartData);
           } else {
               console.warn('No hay datos disponibles para el rango seleccionado');
               this.toastService.sendError('No hay datos disponibles para el rango seleccionado');
@@ -402,14 +551,14 @@ getDataFilteredByDateRange(startDate: Date, endDate: Date): void {
 
   
  // Método para actualizar los gráficos
- updateCharts(data: Employee[]): void {
-  if (data.length > 0) {
-      this.initializeCharts();
-  } else {
-      console.warn('No hay datos disponibles para el rango seleccionado');
-      this.toastService.sendError('No hay datos disponibles para el rango seleccionado');
-  }
-}
+//  updateCharts(data: Employee[]): void {
+//   if (data.length > 0) {
+//       this.initializeCharts();
+//   } else {
+//       console.warn('No hay datos disponibles para el rango seleccionado');
+//       this.toastService.sendError('No hay datos disponibles para el rango seleccionado');
+//   }
+// }
 
 
   formatChartData(data: any[]): any {
@@ -434,32 +583,7 @@ getDataFilteredByDateRange(startDate: Date, endDate: Date): void {
     this.loadPayrollData();
   }
 
-  getEmployees(searchTerm?: string): void {
-    const filters = { ...this.getFilters() };
   
-    if (searchTerm) {
-      filters.name = searchTerm;
-      filters.cuil = searchTerm;
-      filters['service.name'] = searchTerm;
-      filters['company.name'] = searchTerm;
-      filters.contact = searchTerm;
-    }
-  
-    this.employeesService.getAllEmployeesPaged().subscribe({
-      next: (response) => {
-        this.employeeList = this.mapperService.toCamelCase(response.content);
-        this.calculateMetrics();
-        this.pieChartEmployeeStatusDatasets[0].data = [this.inServiceCount, this.inactiveCount];
-        // Reinicializar los charts después de actualizar los datos
-        setTimeout(() => {
-          this.initializeCharts();
-        });
-      },
-      error: () => {
-        this.toastService.sendError('Error al cargar empleados.');
-      }
-    });
-  }
 
   calculateKPIs(): void {
     const now = new Date();
