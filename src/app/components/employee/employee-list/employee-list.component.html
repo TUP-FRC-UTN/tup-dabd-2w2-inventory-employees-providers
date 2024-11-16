@@ -76,12 +76,12 @@
                   <li>
                     <a class="dropdown-item" (click)="showDetailModal(detailModal, employee.id)" title="Ver"
                       aria-disabled="true">
-                      Ver detalles
+                      Ver Detalles
                     </a>
                   </li>
                   <li>
                     <a class="dropdown-item" (click)="showEmployeeAccess(employee.id)" title="Ver accessos">
-                      Ver accesos
+                      Ver Horarios
                     </a>
                   </li>
                   <li>
@@ -106,7 +106,6 @@
 
   <!-- Paginación -->
   <div class="d-flex justify-content-between align-items-center p-3 border-top">
-    <!-- Left side - Items per page dropdown -->
     <div class="d-flex align-items-center">
       <select (change)="onItemsPerPageChange()" class="form-select form-select-sm" style="width: auto;"
         [(ngModel)]="pageSize">
@@ -116,8 +115,6 @@
         <option value="50">50 Elementos</option>
       </select>
     </div>
-
-    <!-- Navigation buttons -->
     <div class="ms-3">
       <button class="btn btn-outline-secondary btn-sm me-1" [disabled]="currentPage === 0" (click)="goToPreviousPage()">
         <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-chevron-left"
@@ -134,60 +131,6 @@
             d="M4.646 1.646a.5.5 0 0 1 .708 0l6 6a.5.5 0 0 1 0 .708l-6 6a.5.5 0 0 1-.708-.708L10.293 8 4.646 2.354a.5.5 0 0 1 0-.708z" />
         </svg>
       </button>
-    </div>
-  </div>
-
-  <!-- FILTRO MODAL -->
-  <div *ngIf="showModalFilters" class="modal fade show" tabindex="-1" role="dialog" style="display: block;">
-    <div class="modal-dialog modal-lg" role="document">
-      <div class="modal-content">
-        <div class="modal-header">
-          <h5 class="modal-title">Filtrar Empleados</h5>
-          <button type="button" class="btn-close" aria-label="Close" (click)="closeModalFilters()"></button>
-        </div>
-        <div class="modal-body">
-          <form [formGroup]="filterForm">
-            <div class="row">
-              <div class="col-md-4">
-                <label>Nombre</label>
-                <input type="text" class="form-control" placeholder="Nombre" formControlName="firstName">
-              </div>
-              <div class="col-md-4">
-                <label>Apellido</label>
-                <input type="text" class="form-control" placeholder="Apellido" formControlName="lastName">
-              </div>
-              <div class="col-md-4">
-                <label>Tipo de Empleado</label>
-                <select class="form-select" formControlName="employeeType">
-                  <option value="">Seleccionar</option>
-                  <!-- Llenado de opciones dinámicas -->
-                  <option *ngFor="let type of employeeTypes" [value]="type">{{ type }}</option>
-                </select>
-              </div>
-            </div>
-            <div class="row mt-3">
-              <div class="col-md-4">
-                <label>Número de Documento</label>
-                <input type="text" class="form-control" placeholder="Número de Documento" formControlName="docNumber">
-              </div>
-              <div class="col-md-4">
-                <label>Estado</label>
-                <select class="form-select" formControlName="state">
-                  <option value="">Seleccionar</option>
-                  <!-- Llenado de opciones dinámicas -->
-                  <option *ngFor="let status of statusTypes" [value]="status">{{ status }}</option>
-                </select>
-              </div>
-            </div>
-          </form>
-        </div>
-        <div class="modal-footer">
-          <button type="button" class="btn btn-outline-danger" (click)="clearFilters()">
-            <i class="bi bi-trash"></i>
-          </button>
-          <button type="button" class="btn btn-primary" (click)="applyFilters()">Aplicar Filtros</button>
-        </div>
-      </div>
     </div>
   </div>
 </app-main-container>

@@ -29,7 +29,8 @@ Chart.register(...registerables);
     CommonModule,
     ReactiveFormsModule,
     MainContainerComponent,
-    BaseChartDirective, FormsModule,
+    BaseChartDirective,
+    FormsModule,
     ListEmpresasRegComponent,
     ListProviderRegComponent
 ],

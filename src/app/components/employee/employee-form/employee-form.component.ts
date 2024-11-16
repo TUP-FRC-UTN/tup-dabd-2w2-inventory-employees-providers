@@ -32,10 +32,6 @@ export class EmployeeFormComponent implements OnInit {
     firstName: new FormControl('', [Validators.required, Validators.minLength(3), Validators.maxLength(100)]),
     lastName: new FormControl('', [Validators.required, Validators.minLength(3), Validators.maxLength(100)]),
     employeeType: new FormControl(EmployeeType.ADMINISTRATIVO, Validators.required),
-    //hiringDate: new FormControl(new Date().toISOString().split('T')[0], [Validators.required]), // Default to today
-    //hiringDate: new FormControl(new Date().toISOString().slice(0, 19), [Validators.required]),
-    //hiringDate: new FormControl(this.today, [Validators.required]),
-    //hiringDate: new FormControl(this.formattedDateTime, [Validators.required]),
     hiringDate: new FormControl<string>(this.formattedDateTime, {
       validators: [Validators.required],
       nonNullable: true,
@@ -63,23 +59,6 @@ export class EmployeeFormComponent implements OnInit {
   @ViewChild('accessModal') accessModal!: TemplateRef<any>;
   contactTypes = ['PHONE', 'EMAIL', 'SOCIAL_MEDIA_LINK'];
   private toastService = inject(ToastService);
-  
-  // get contacts() {
-  //   return this.employeeForm.get('contacts') as FormArray;
-  // }
-
-  // addContact() {
-  //   const contactForm = new FormGroup({
-  //     contact_type: new FormControl('', Validators.required),
-  //     contact_value: new FormControl('', [Validators.required])
-  //   });
-  //   this.contacts.push(contactForm);
-  // }
-
-  // removeContact(index: number) {
-  //   this.contacts.removeAt(index);
-  // }
-  
  currentEmployeeId!: number;
 
   constructor() {}
@@ -111,7 +90,6 @@ export class EmployeeFormComponent implements OnInit {
   ngOnInit(): void {
     this.activatedRoute.params.subscribe((params) => {
       const id = +params['id'];
-      console.log(id);
       if (id) {
         this.getById(id);
       } else {
@@ -134,7 +112,6 @@ export class EmployeeFormComponent implements OnInit {
     this.addContact();
 
     this.employeeForm.get('hiringDate')?.valueChanges.subscribe(value => {
-      console.log(value);
       this.employeeForm.patchValue({ hiringDate: value });
     })
 
@@ -159,9 +136,7 @@ export class EmployeeFormComponent implements OnInit {
   getById(id: number) {
     this.currentId = id;
     this.employeeService.getEmployeeById(id).subscribe((data) => {
-      data = this.mapperService.toCamelCase(data);
-      console.log('[EmployeeForm] Datos originales:', data);
-      
+      data = this.mapperService.toCamelCase(data);      
       this.employeeForm.patchValue({
         id: data.id,
         firstName: data.firstName,
@@ -173,13 +148,9 @@ export class EmployeeFormComponent implements OnInit {
         state: StatusType.ACTIVE,
         salary: data.salary,
       });
-
-      // Guardar el estado inicial del formulario después de cargarlo
       this.initialFormValue = this.employeeForm.value;
       this.formHasChanges = false;
-      this.isEdit = true;
-      
-      console.log('[EmployeeForm] Valor inicial del formulario guardado:', this.initialFormValue);
+      this.isEdit = true;      
     });
   }
 
@@ -187,14 +158,12 @@ export class EmployeeFormComponent implements OnInit {
     if (this.employeeForm.valid) {
       let employeeData = this.prepareEmployeeData();
       employeeData = this.mapperService.toSnakeCase(employeeData);
-      console.log(employeeData);
       if (this.currentId!=0) {
         employeeData.id=this.currentId;
         this.updateEmployee(employeeData);
       } else {
         employeeData.id
         this.createEmployee(employeeData);
-        //this.router.navigate(['/employees/list']); // Redirect to employee list       
       }
     }
   }
@@ -222,60 +191,31 @@ export class EmployeeFormComponent implements OnInit {
         postal_code: 5000  
       }
     });
-    // this.contacts.clear();
-    // this.addContact();
   }
-/*
-  prepareEmployeeData(): Employee {
-    const { id, firstName, lastName, employeeType, hiringDate, documentType, docNumber, salary, state } = this.employeeForm.value;    
-    let parsedHiringDate: Date | null = new Date();
-    /*if (hiringDate) {
-      parsedHiringDate = new Date(hiringDate);
-    }
 
-    return {
-      id,
-      firstName,
-      lastName,
-      employeeType,
-      documentType: documentType,
-      docNumber,
-      hiringDate,
-      salary,
-      state,
-    } as Employee;
-  } */
-    prepareEmployeeData(): any {
-      const formValue = this.employeeForm.value;
-      const hiringDate = formValue.hiringDate 
-      ? new Date(formValue.hiringDate).toISOString()
-      : new Date().toISOString();
-      //const hiringDate = formValue.hiringDate + (formValue.hiringDate?.includes('T') ? '' : 'T00:00:00');
-      // Crear el objeto base del empleado
-      const employeeData = {
-        id: formValue.id,
-        first_name: formValue.firstName,
-        last_name: formValue.lastName,
-        employee_type: formValue.employeeType,
-        document_type: formValue.documentType,
-        doc_number: formValue.docNumber,
-        hiring_date: hiringDate,
-        salary: formValue.salary,
-        state: formValue.state,
-        // contact: this.contacts.length > 0 ? this.contacts.at(0).value : null,
-        address: formValue.address
+  prepareEmployeeData(): any {
+    const formValue = this.employeeForm.value;
+    const hiringDate = formValue.hiringDate ? new Date(formValue.hiringDate).toISOString() : new Date().toISOString();
+    const employeeData = {
+      id: formValue.id,
+      first_name: formValue.firstName,
+      last_name: formValue.lastName,
+      employee_type: formValue.employeeType,
+      document_type: formValue.documentType,
+      doc_number: formValue.docNumber,
+      hiring_date: hiringDate,
+      salary: formValue.salary,
+      state: formValue.state,
+      address: formValue.address
       };
-  
       return employeeData;
-    }
+  }
 
   showInfo(): void {
     this.modalService.open(this.infoModal, { centered: true });
   }
 
   createEmployee(employee: Employee) {
-    console.log(employee);
-    console.log("Este es el metodo de createEmployee");
     this.employeeService.addEmployee(employee).subscribe({
       next: (response) => {
         this.toastService.sendSuccess("El Empleado ha sido creado con éxito.");
@@ -283,11 +223,10 @@ export class EmployeeFormComponent implements OnInit {
           this.currentEmployeeId = response.id;
           this.employeeRegistered = true;
           this.disableForm();
-          console.log('id enviado', this.currentEmployeeId);
           this.openAccessModal();
         }
         this.toastService.sendSuccess("Cargue los dato de acceso.");
-        this.resetForm(); // Limpia el formulario
+        this.resetForm();
       },
       error: (error) => {
         this.toastService.sendError("Hubo un error en la creación del empleado.");
@@ -309,7 +248,6 @@ export class EmployeeFormComponent implements OnInit {
   disableForm(): void {
     Object.keys(this.employeeForm.controls).forEach(key => {
       this.employeeForm.get(key)?.disable();
-      // this.contacts.get('contact_type')?.disable();
     });
   }
 
@@ -320,7 +258,6 @@ export class EmployeeFormComponent implements OnInit {
   }
 
   updateEmployee(employee: Employee) {
-    console.log('[EmployeeForm] Actualizando empleado:', employee);
     this.employeeService.updateEmployee(employee).subscribe({
       next: (response) => {
         this.toastService.sendSuccess("El Empleado ha sido modificado con éxito.");
@@ -342,7 +279,7 @@ export class EmployeeFormComponent implements OnInit {
 
   documentExistsValidator(control: AbstractControl) {
     return control.valueChanges.pipe(
-      debounceTime(300), // para evitar múltiples llamadas al backend
+      debounceTime(300),
       switchMap((documentNumber) => 
         this.employeeService.checkIfDocumentExists(documentNumber)
         
@@ -353,26 +290,25 @@ export class EmployeeFormComponent implements OnInit {
     
 }
 
-onCancel(){
-  this.resetForm();
-  this.router.navigate(['/employees/list']);
-}
-openAccessModal() {
-  const modalRef = this.modalService.open(this.accessModal, {
-    size: 'lg',
-    backdrop: 'static',
-    keyboard: false
-  });
-}
+  onCancel(){
+    this.resetForm();
+    this.router.navigate(['/employees/list']);  
+  }
+  openAccessModal() {
+    const modalRef = this.modalService.open(this.accessModal, {
+      size: 'lg',
+      backdrop: 'static',
+      keyboard: false
+    });
+  }
 
-onAccessSaved() {
-  this.modalService.dismissAll();
-  this.startNewEmployee();
-  this.router.navigate(['/employees/list']);
-}
+  onAccessSaved() {
+    this.modalService.dismissAll();
+    this.startNewEmployee();
+    this.router.navigate(['/employees/list']);  
+  }
 
-  changeContactType(event: any) {
-      
+  changeContactType(event: any) {    
     const type = event.target.value;
     if(type) {
       this.employeeForm.controls['contactsForm'].controls['contactValue'].addValidators(Validators.required);
@@ -399,8 +335,6 @@ onAccessSaved() {
         this.contactIndex = undefined;
       }
       this.employeeForm.get('contactsForm')?.reset();
-    } else {
-      //this.toastService.sendError("Contacto no valido.")
     }
   }
 
@@ -421,12 +355,10 @@ onAccessSaved() {
     const contact = this.contacts[index];
     if (contact) {
         const contactFormGroup = this.employeeForm.get('contactsForm') as FormGroup;
-
         contactFormGroup.patchValue({
           contactType: contact.contactType,
           contactValue: contact.contactValue
-        })
-
+        });
         this.contactIndex = index;
     }
   }
@@ -437,13 +369,10 @@ onAccessSaved() {
 
   private checkFormChanges(): void {
     if (!this.initialFormValue) {
-      console.warn('[EmployeeForm] No hay valor inicial para comparar');
       return;
     }
-
     const currentValue = this.employeeForm.value;
     this.formHasChanges = !this.isEqual(currentValue, this.initialFormValue);
-    console.log('[EmployeeForm] Formulario tiene cambios:', this.formHasChanges);
   }
 
   private isEqual(obj1: any, obj2: any): boolean {

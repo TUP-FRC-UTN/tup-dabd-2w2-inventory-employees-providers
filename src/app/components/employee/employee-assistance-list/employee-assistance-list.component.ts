@@ -26,16 +26,25 @@ export class EmployeeAssistanceListComponent {
   //Info
   @ViewChild('infoModal') infoModal!: TemplateRef<any>;
 
+  // Services
+  private employeeService = inject(EmployeesService);
+  private assistanceService = inject(EmployeeAssistanceService);
+  private activatedRouter = inject(ActivatedRoute);
+  private toastService = inject(ToastService);
+  private mapperService = inject(MapperService);
+  private modalService = inject(NgbModal);
+
   // Lists
   employeeAssistances:EmployeeAccess[]=[];
   isLoading = false;
-  currentFilters! : Record<string,any>;
-
-  // Forms and Filters
-  searchFilter:FormControl = new FormControl('');
+  
+  //Employee Data
   currentEmployee:Employee | undefined;
   currentEmployeeId:number = 0;
-  filterForm: FormGroup;
+  
+  // Forms and Filters
+  searchFilter:FormControl = new FormControl('');
+  currentFilters! : Record<string,any>;
   filterConfig: Filter[] = new FilterConfigBuilder()
     .dateFilter(
       'Fecha Desde',
@@ -49,21 +58,25 @@ export class EmployeeAssistanceListComponent {
       '',
       'yyyy-MM-dd'
     )
-    .build();
-
-    constructor(private fb: FormBuilder) {
-      this.filterForm = this.fb.group({
-        searchFilter: this.searchFilter,
-      });
-    }
+    .selectFilter(
+      'Tipo de Acceso',
+      '',
+      'Seleccione un tipo',
+      [
+        {value:'',label:'Todos'},
+        {value:'ENTRY', label:'Entradas'},
+        {value:'EXIT', label:'Salidas'}
+      ]
+    )
+  .build();
  
-    filterChange($event: Record<string, any>) {
-      const filters = $event;
-      this.currentFilters = filters;
-      if(this.currentEmployee!=undefined){
-        this.getEmployees();
-      }    
-    }
+  filterChange($event: Record<string, any>) {
+    const filters = $event;
+    this.currentFilters = filters;
+    if(this.currentEmployee!=undefined){
+      this.getEmployees();
+    }    
+  }
   
   // Pagination
   currentPage: number = 0;
@@ -72,22 +85,25 @@ export class EmployeeAssistanceListComponent {
   pageSize: number = 10;
   sizeOptions: number[] = [5, 10, 20, 50, 100];
 
-  // Services
-  private employeeService = inject(EmployeesService);
-  private assistanceService = inject(EmployeeAssistanceService);
-  private router = inject(Router);
-  private activatedRouter = inject(ActivatedRoute);
-  private toastService = inject(ToastService);
-  private mapperService = inject(MapperService);
-  private modalService = inject(NgbModal);
-
   ngOnInit(): void {
     this.activatedRouter.params.subscribe((params) =>{
       const id = +params['id'];
-      console.log(id);
       if (id) {
         this.getById(id);
       }});
+  }
+
+  getById(id: number) {
+    this.employeeService.getEmployee(id).subscribe({
+      next: (response) => {
+        this.currentEmployee = this.mapperService.toCamelCase(response);
+        this.getEmployees();
+      },
+      error: (error) => {
+        this.toastService.sendError("Hubo un error al obtener la información del empleado.");
+        console.error(error);
+      }
+    })
   }
 
   getEmployees(page: number = this.currentPage, size: number = this.pageSize, searchTerm?: string): void {
@@ -96,14 +112,11 @@ export class EmployeeAssistanceListComponent {
     if(this.currentFilters!=undefined){
       filters = this.currentFilters;
     }
-    filters['textFilter'] = this.currentEmployee?.docNumber;
-    filters['docType'] = 'CUIL';
+    filters['textFilter'] = this.currentEmployee?.docNumber.toString();
     filters['visitorType'] = 'EMPLOYEE';
-    filters['actionType'] = 'ENTRY';
 
     this.assistanceService.getAllEmployeesPaged(this.currentPage,this.pageSize,filters).subscribe({
       next:(response) => {
-        console.log(response);
         response = this.mapperService.toCamelCase(response);
         this.employeeAssistances = this.mapperService.toCamelCase(response.items);
         this.totalItems = response.totalElements;
@@ -116,21 +129,6 @@ export class EmployeeAssistanceListComponent {
         this.isLoading = false;
       }
     })
-    console.log(this.employeeAssistances)
-  }
-
-  getById(id: number) {
-    this.employeeService.getEmployee(id).subscribe({
-      next: (response) => {
-        console.log(response);
-        this.currentEmployee = this.mapperService.toCamelCase(response);
-      },
-      error: (error) => {
-        this.toastService.sendError("Hubo un error al obtener la información del empleado.");
-        console.error(error);
-      }
-    })
-    this.getEmployees();
   }
 
   applyFilters(): void {
@@ -149,7 +147,7 @@ export class EmployeeAssistanceListComponent {
   }
 
   onPageChange(page: number): void {
-    this.currentPage = page - 1; // Convert to 0-based for backend
+    this.currentPage = page - 1;
     if(this.currentEmployee!=undefined){
       this.getEmployees();
     }
@@ -162,7 +160,7 @@ export class EmployeeAssistanceListComponent {
     }  
   }
 
-  // Export methods
+  // Metodos de exportación
   exportToPDF(): void {
     const doc = new jsPDF();
     autoTable(doc, {
@@ -207,29 +205,6 @@ export class EmployeeAssistanceListComponent {
       if(this.currentEmployee!=undefined){
         this.getEmployees();
       }    
-    }
-  }
-
-  private formatearFecha(fecha: string | Date | null): string {
-    if (!fecha) return '';
-    
-    // Si ya es un objeto Date
-    if (fecha instanceof Date) {
-      return fecha.toISOString().split('T')[0];
-    }
-    
-    // Si es un string, manejar diferentes formatos
-    try {
-      // Manejar formato LocalDateTime (yyyy-MM-dd'T'HH:mm:ss)
-      if (fecha.includes('T')) {
-        return fecha.split('T')[0];
-      }
-      
-      // Si es solo un string de fecha (yyyy-MM-dd)
-      return fecha;
-    } catch (error) {
-      console.error('Error al formatear la fecha:', error);
-      return '';
     }
   }
 

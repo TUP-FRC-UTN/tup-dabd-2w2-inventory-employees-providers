@@ -37,8 +37,6 @@ export class EmployeeContactComponent {
   }
 
   ngOnInit() {
-    // Add first contact by default
     this.addContact();
   }
-
 }

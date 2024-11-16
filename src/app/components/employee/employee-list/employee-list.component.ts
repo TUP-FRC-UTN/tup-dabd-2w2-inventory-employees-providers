@@ -1,4 +1,4 @@
-import { ChangeDetectorRef, Component, CUSTOM_ELEMENTS_SCHEMA, ElementRef, inject, OnInit, TemplateRef, ViewChild } from '@angular/core';
+import { Component, CUSTOM_ELEMENTS_SCHEMA, inject, OnInit, TemplateRef, ViewChild } from '@angular/core';
 import { FormBuilder, FormControl, FormGroup, FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { NgbModal } from '@ng-bootstrap/ng-bootstrap';
 import { Router, RouterModule } from '@angular/router';
@@ -11,7 +11,6 @@ import autoTable from 'jspdf-autotable';
 import { debounceTime, distinctUntilChanged } from 'rxjs';
 import { CommonModule, DatePipe } from '@angular/common';
 import { MapperService } from '../../../services/MapperCamelToSnake/mapper.service';
-import { Chart, ChartType } from 'chart.js';
 import { EmployeeListInfoComponent } from './employee-list-info/employee-list-info.component';
 import { TableFiltersComponent, Filter, FilterConfigBuilder } from 'ngx-dabd-grupo01';
 import { EmployeeViewAcessComponent } from '../employee-view-acess/employee-view-acess.component';
@@ -21,7 +20,7 @@ import { EmployeeViewAcessComponent } from '../employee-view-acess/employee-view
   standalone: true,
   imports: [
     CommonModule, ReactiveFormsModule, FormsModule, RouterModule,
-    MainContainerComponent, ConfirmAlertComponent, DatePipe, TableFiltersComponent, EmployeeViewAcessComponent
+    MainContainerComponent, ConfirmAlertComponent, TableFiltersComponent, EmployeeViewAcessComponent
   ],
   providers:[DatePipe],
   templateUrl: './employee-list.component.html',
@@ -30,7 +29,6 @@ import { EmployeeViewAcessComponent } from '../employee-view-acess/employee-view
 })
 export class EmployeeListComponent implements OnInit {
   @ViewChild('infoModal') infoModal!: TemplateRef<any>;
-  @ViewChild('pieChart') pieChartRef!: ElementRef;
   @ViewChild('employeeAccess') employeeAccess!: EmployeeViewAcessComponent;
   showModalFilters: boolean = false;
   
@@ -111,7 +109,7 @@ export class EmployeeListComponent implements OnInit {
   totalPages:number = 0;
   pageSize: number = 10;
   sizeOptions: number[] = [5, 10, 20, 50, 100];
-
+  
   selectedEmployee?: Employee;
 
   // Services
@@ -160,15 +158,12 @@ export class EmployeeListComponent implements OnInit {
     this.isLoading = true;
 
     const filters = this.currentFilters;
-    console.log('Filters:', filters);
 
-    debugger
     this.employeeService.getAllEmployeesPaged(this.currentPage,this.pageSize,filters).subscribe({
 
       next: (response) => {
         response = this.mapperService.toCamelCase(response);
         
-        //this.employeeList = this.mapperService.toCamelCase(response.content);
         this.employeeList = response.content.map((empleado: any) => {
           const hiringDate = empleado.hiringDate || empleado.hiring_date;
           
@@ -176,13 +171,7 @@ export class EmployeeListComponent implements OnInit {
             ...empleado,
             hiringDate: hiringDate ? this.formatearFecha(hiringDate) : ''
           };
-        });
-        console.log('Respuesta original:', response);
-        console.log('Respuesta después de mapeo:', response);
-        console.log('Primer empleado:', response.content[0]);
-        console.log('Fecha del primer empleado:', response.content[0].hiringDate);
-        console.log("empleado.hiringDate", this.employeeList[0].hiringDate)
-        
+        });        
         this.filteredEmployeeList = [...this.employeeList];
         this.totalItems = response.totalElements;
         this.totalPages = response.totalPages;
@@ -217,81 +206,6 @@ export class EmployeeListComponent implements OnInit {
   onItemsPerPageChange(): void {
     this.currentPage = 0;
     this.getEmployees();
-  }
-
-  // Metrics methods
-  calculateMetrics(): void {
-    this.inServiceCount = this.employeeList.filter(employee => employee.state === 'IN_SERVICE').length;
-    this.inactiveCount = this.employeeList.filter(employee => employee.state === 'DOWN').length;
-    
-    this.typeCountMap = this.employeeList.reduce((acc, employee) => {
-      const type = employee.employeeType;
-      if (type) {
-        acc[type] = (acc[type] || 0) + 1;
-      }
-      return acc;
-    }, {} as { [key: string]: number });
-  }
-
-  // Chart methods remain the same...
-  createPieChart(): void {
-    if (!this.pieChartRef?.nativeElement) {
-      console.warn('Elemento del gráfico circular no encontrado');
-      return;
-    }
-    if (this.pieChart) {
-      this.pieChart.destroy();
-    }
-    this.pieChart = new Chart(this.pieChartRef.nativeElement, {
-      type: 'pie' as ChartType,
-      data: {
-        labels: ['En Servicio', 'Inactivo'],
-        datasets: [{
-          data: [this.inServiceCount, this.inactiveCount],
-          backgroundColor: ['#28a745', '#dc3545'],
-        }]
-      },
-      options: {
-        responsive: true,
-        plugins: {
-          legend: {
-            position: 'top'
-          }
-        }
-      }
-    });
-  }
-
-  createBarChart(): void {
-    if (this.barChart) {
-      this.barChart.destroy();
-    }
-
-    const ctx = document.getElementById('barChart') as HTMLCanvasElement;
-    const employeeTypes = Object.keys(this.typeCountMap);
-    const typeCounts = Object.values(this.typeCountMap);
-
-    this.barChart = new Chart(ctx, {
-      type: 'bar',
-      data: {
-        labels: employeeTypes,
-        datasets: [{
-          label: 'Cantidad de Empleados',
-          data: typeCounts,
-          backgroundColor: '#007bff'
-        }]
-      },
-      options: {
-        responsive: true,
-        plugins: {
-          legend: { display: false }
-        },
-        scales: {
-          x: { title: { display: true, text: 'Tipo de Empleado' } },
-          y: { title: { display: true, text: 'Cantidad' }, beginAtZero: true }
-        }
-      }
-    });
   }
 
   // Export methods
@@ -361,22 +275,14 @@ export class EmployeeListComponent implements OnInit {
 
 
   showDetailModal(content: any, id: number) {
-    console.log("Este es el metodo de showDetailModal");
-    //debugger
+
     this.employeeService.getEmployeeById(id).subscribe({
       next: (employee) => {
-        console.log('Detalles del empleado:', employee);
-        console.log('this.selectedEmployee', this.selectedEmployee);
-        console.log('este es el numero de telefono de this.selectedEmployee', this.selectedEmployee?.contactValue);
         this.selectedEmployee = employee;
-        //debugger
         this.modalService.open(content, {
           ariaLabelledBy: 'modal-basic-title',
           size: 'lg'
         });
-        console.log('this.selectedEmployee', this.selectedEmployee);
-        console.log('este es el numero de telefono de this.selectedEmployee', this.selectedEmployee?.contactValue);
-        console.log(this.selectedEmployee);
       },
       error: (error) => {
         console.error('Error al cargar los detalles del empleado:', error);
@@ -413,19 +319,14 @@ export class EmployeeListComponent implements OnInit {
   private formatearFecha(fecha: string | Date | null): string {
     if (!fecha) return '';
     
-    // Si ya es un objeto Date
     if (fecha instanceof Date) {
       return fecha.toISOString().split('T')[0];
     }
     
-    // Si es un string, manejar diferentes formatos
     try {
-      // Manejar formato LocalDateTime (yyyy-MM-dd'T'HH:mm:ss)
       if (fecha.includes('T')) {
         return fecha.split('T')[0];
       }
-      
-      // Si es solo un string de fecha (yyyy-MM-dd)
       return fecha;
     } catch (error) {
       console.error('Error al formatear la fecha:', error);
@@ -434,7 +335,6 @@ export class EmployeeListComponent implements OnInit {
   }
 
   showEmployeeAccess(employeeId: number) {
-    console.log('Showing access for employee:', employeeId);
     if (this.employeeAccess) {
       this.employeeAccess.showEmployeeSchedule(employeeId);
     } else {
@@ -442,7 +342,6 @@ export class EmployeeListComponent implements OnInit {
     }
   }
   showEmployeeAssistance(employeeId: number) {
-    // Usar el Router para navegar a la vista de asistencias con el ID del empleado
     this.router.navigate(['/employees/assistance', employeeId]);
   }
 }

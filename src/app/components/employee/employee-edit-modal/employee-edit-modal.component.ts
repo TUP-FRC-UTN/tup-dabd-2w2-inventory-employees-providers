@@ -26,7 +26,6 @@ export class EmployeeEditModalComponent implements OnInit {
   ngOnInit(): void {
     this.employeeService.getSelectedEmployee().subscribe(employee => {
       if (employee) {
-        // Create a copy of the employee to avoid directly modifying the original
         this.employee = { ...employee };
       }
     });
@@ -37,8 +36,7 @@ export class EmployeeEditModalComponent implements OnInit {
       this.employeeService.updateEmployee(this.employee).subscribe({
         next: () => {
           this.onClose();
-          // You might want to refresh the employee list here
-          location.reload(); // Or use a more elegant solution to refresh the list
+          location.reload();
         },
         error: (error) => {
           console.error('Error updating employee:', error);
