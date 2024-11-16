@@ -138,17 +138,6 @@
   color: inherit !important;
 }
 
-/* prueba */
-
-/* .dark-mode ::ng-deep .card-body {
-  background-color: #2c2c2c !important;
-  color: #ffffff !important;
-}
-
-.dark-mode app-main-container .card-body {
-  background-color: #2c2c2c !important;
-  color: #ffffff !important;
-} */
 .dark-mode .col.mt-4.content {
   background-color: #2c2c2c !important; /* Fondo oscuro */
   color: #ffffff !important; /* Color de texto claro */
@@ -182,4 +171,39 @@
 
 .dark-mode .bi-search {
   color: #e0e0e0 !important; /* Cambia el color del ícono de búsqueda */
+}
+.dark-mode .provider-item.p-3.mb-2.rounded-3 {
+  background-color: #2b2b2b !important; /* Fondo oscuro para los elementos de la lista */
+  color: #e0e0e0 !important; /* Texto claro */
+  border: 1px solid #444444; /* Borde oscuro para destacar */
+}
+
+.dark-mode .provider-item.p-3.mb-2.rounded-3 .d-flex.align-items-center {
+  color: #e0e0e0 !important; /* Color claro para el contenido */
+}
+
+.dark-mode .provider-item.p-3.mb-2.rounded-3.bg-light {
+  background-color: #3b3b3b !important; /* Fondo alternativo para las filas pares */
+}
+.dark-mode .col-6 .p-3.rounded-3.bg-light {
+  background-color: #333333 !important; /* Fondo oscuro para la tarjeta */
+  color: #e0e0e0 !important; /* Texto claro */
+  border: 1px solid6y #444444; /* Borde oscuro para resaltar */
+}
+
+.dark-mode .col-6 .p-3.rounded-3.bg-light .icon-circle {
+  background-color: #555555 !important; /* Fondo oscuro para el círculo del icono */
+  color: #e0e0e0 !important; /* Color claro para el icono */
+}
+
+.dark-mode .col-6 .p-3.rounded-3.bg-light h6 {
+  color: #e0e0e0 !important; /* Título claro */
+}
+
+.dark-mode .col-6 .p-3.rounded-3.bg-light .text-primary {
+  color: #66a3ff !important; /* Ajuste de color para el texto primario */
+}
+
+.dark-mode .col-6 .p-3.rounded-3.bg-light .text-muted {
+  color: #b3b3b3 !important; /* Color más claro para el texto de subtítulo */
 }

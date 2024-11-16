@@ -761,8 +761,10 @@ getDataFilteredByDateRange(startDate: Date, endDate: Date): void {
         datasets: [{
           label: 'Distribución de Antigüedad',
           data: tenureRanges,
+          //fill: false,
           borderColor: '#3F51B5',
-          borderWidth: 0.1
+          backgroundColor: '#3F51B5',
+          //tension: 0.1
         }]
       },
       options: {
