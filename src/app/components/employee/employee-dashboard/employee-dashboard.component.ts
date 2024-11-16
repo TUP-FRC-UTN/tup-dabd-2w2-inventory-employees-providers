@@ -150,6 +150,11 @@ export class EmployeeDashboardComponent implements OnInit, AfterViewInit {
     }
   }
   //NUEVOS FILTROS
+  private formatDateToISO(date: string): string {
+    const parsedDate = new Date(date);
+    return parsedDate.toISOString().split('T')[0]; // Formato 'yyyy-MM-dd'
+  }
+  
   filterChange(filters: Record<string, any>): void {
     console.log('Filtros recibidos del componente:', filters); // Debug
   
@@ -186,14 +191,14 @@ export class EmployeeDashboardComponent implements OnInit, AfterViewInit {
   }
   
   getEmployeesWithFilters(filters?: any): void {
-    const page = 0;
-    const size = 40;
+    const page = 0; // Página inicial
+    const size = 40; // Tamaño por defecto
   
     const validFilters: any = {
       state: filters?.enabled ? this.mapStateToBackend(filters.enabled) : null,
-      hiringDate: filters?.startDate && filters?.endDate 
+      hiringDate: filters?.startDate && filters?.endDate
         ? `${this.formatDateToISO(filters.startDate)},${this.formatDateToISO(filters.endDate)}`
-        : null,
+        : null, // Rango de fechas en formato esperado
     };
   
     console.log('Filtros enviados al servicio:', validFilters); // Debug
@@ -201,7 +206,7 @@ export class EmployeeDashboardComponent implements OnInit, AfterViewInit {
     this.employeesService.getAllEmployeesPaged(page, size, validFilters).subscribe({
       next: (response) => {
         console.log('Respuesta recibida del servicio:', response); // Debug
-        this.employeeList = response.content; 
+        this.employeeList = response.content; // La respuesta ya viene mapeada
         this.calculateMetrics();
         this.updateCharts();
       },
@@ -212,14 +217,11 @@ export class EmployeeDashboardComponent implements OnInit, AfterViewInit {
     });
   }
   
+  
   private mapStateToBackend(state: string): string | null {
-    if (state === 'Activo') return 'IN_SERVICE';
-    if (state === 'Inactivo') return 'DOWN';
-    return null; // Si no hay estado seleccionado
-  }
-  private formatDateToISO(date: string): string {
-    const parsedDate = new Date(date);
-    return parsedDate.toISOString().split('T')[0]; // Formato 'yyyy-MM-dd'
+    if (state === 'true') return 'IN_SERVICE';
+    if (state === 'false') return 'DOWN';
+    return null;
   }
   
   
@@ -283,19 +285,24 @@ export class EmployeeDashboardComponent implements OnInit, AfterViewInit {
   }
 //TERMINA NUEVO FILTROS
   
-  applyDateFilters(): void {
-    const dateFilters = this.getDateFilters();
-  
-    // Si no hay filtros de fecha seleccionados, cargamos todos los empleados
-    if (!dateFilters.startDate && !dateFilters.endDate) {
-      this.getEmployees(); // Llama al método para obtener todos los empleados sin filtros
-    } else if (dateFilters.startDate && dateFilters.endDate) {
-      // Verificamos que haya fechas válidas antes de aplicar el filtro
-      this.getEmployeesWithDateFilter();
-    } else {
-      this.toastService.sendError('Por favor, selecciona fechas válidas para aplicar el filtro.');
-    }
+applyDateFilters(): void {
+  const dateFilters = this.getDateFilters();
+
+  // Si no hay filtros de fecha seleccionados, cargamos todos los empleados
+  if (!dateFilters.startDate && !dateFilters.endDate) {
+    this.getEmployees(); // Llama al método para obtener todos los empleados sin filtros
+  } else if (dateFilters.startDate && dateFilters.endDate) {
+    // Verificamos que haya fechas válidas antes de aplicar el filtro
+    this.getEmployeesWithFilters({
+      startDate: dateFilters.startDate,
+      endDate: dateFilters.endDate,
+      enabled: this.filterForm.get('enabled')?.value || null,
+    });
+  } else {
+    this.toastService.sendError('Por favor, selecciona fechas válidas para aplicar el filtro.');
   }
+}
+
   
   
   private initializePredefinedRanges(): void {
@@ -439,10 +446,11 @@ export class EmployeeDashboardComponent implements OnInit, AfterViewInit {
   private getDateFilters(): { startDate: string | null, endDate: string | null } {
     const { startDate, endDate } = this.dateFilterForm.value;
     return {
-      startDate: startDate || null,
-      endDate: endDate || null
+      startDate: startDate ? this.formatDateToISO(startDate) : null,
+      endDate: endDate ? this.formatDateToISO(endDate) : null,
     };
   }
+  
 
   // Método para aplicar rango predefinido
   applyPredefinedRange(range: DateRange): void {

@@ -34,91 +34,85 @@ export class EmployeesService {
       )
     );
   }
-  getAllEmployeesPaged(
-    page: number = 0,
-    size: number = 40,
-    filters?: Record<string, string | undefined> // Aquí usamos Record para claves dinámicas
-  ): Observable<PaginatedResponse<Employee>> {
-    let params = new HttpParams()
-      .set('page', page.toString())
-      .set('size', size.toString());
-  
-    if (filters) {
-      Object.keys(filters).forEach((key) => {
-        const value = filters[key]; // Ahora TypeScript reconoce esto
-        if (value) {
-          params = params.set(key, value);
-        }
-      });
-    }
-  
-    console.log('URL generada para el backend:', `${this.apiUrl}/paged`);
-    console.log('Parámetros enviados al backend:', params.toString());
-  
-    return this.http.get<PaginatedResponse<Employee>>(`${this.apiUrl}/paged`, { params }).pipe(
-      map((response) => {
-        const mappedContent = response.content.map((employee) =>
-          this.mapperService.toCamelCase(employee)
-        );
-        return {
-          ...response,
-          content: mappedContent,
-        };
-      }),
-      tap((response) => {
-        console.log('Respuesta mapeada del servicio:', response);
-      })
-    );
-  }
-  
-  
   // getAllEmployeesPaged(
   //   page: number = 0,
   //   size: number = 40,
-  //   filters?: {
-  //     firstName?: string;
-  //     lastName?: string;
-  //     type?: string;
-  //     docType?: string;
-  //     docNumber?: string;
-  //     state?: string;
-  //     date?: string;
-  //     salary?: string;
-  //   }
+  //   filters?: Record<string, string | undefined>
   // ): Observable<PaginatedResponse<Employee>> {
   //   let params = new HttpParams()
   //     .set('page', page.toString())
   //     .set('size', size.toString());
   
   //   if (filters) {
-  //     if (filters.firstName) params = params.set('firstName', filters.firstName);
-  //     if (filters.lastName) params = params.set('lastName', filters.lastName);
-  //     if (filters.type) params = params.set('type', filters.type);
-  //     if (filters.docType) params = params.set('docType', filters.docType);
-  //     if (filters.docNumber) params = params.set('docNumber', filters.docNumber);
-  //     if (filters.state) params = params.set('state', filters.state);
-  //     if (filters.date) params = params.set('date', filters.date);
-  //     if (filters.salary) params = params.set('salary', filters.salary);
+  //     Object.keys(filters).forEach((key) => {
+  //       const value = filters[key];
+  //       if (value) {
+  //         params = params.set(key, value);
+  //       }
+  //     });
   //   }
   
+  //   console.log('Parámetros enviados al backend:', params.toString());
+  
   //   return this.http.get<PaginatedResponse<Employee>>(`${this.apiUrl}/paged`, { params }).pipe(
-  //     map(response => {
-  //       // Mapeo los campos de snake_case a camelCase
-  //       const mappedContent = response.content.map(employee => this.mapperService.toCamelCase(employee));
-  //       return {
-  //         ...response,
-  //         content: mappedContent
-  //       };
-  //     }),
-  //     tap(response => {
-  //       response.content.forEach(employee => {
-  //         if (!employee.hiringDate) {
-  //           console.warn(`Employee with ID ${employee.id} is missing hiringDate.`);
-  //         }
-  //       });
+  //     map((response) => ({
+  //       ...response,
+  //       content: response.content.map((employee) => this.mapperService.toCamelCase(employee)),
+  //     })),
+  //     tap((response) => {
+  //       console.log('Respuesta mapeada del servicio:', response);
   //     })
   //   );
   // }
+  
+  
+  getAllEmployeesPaged(
+    page: number = 0,
+    size: number = 40,
+    filters?: {
+      firstName?: string;
+      lastName?: string;
+      type?: string;
+      docType?: string;
+      docNumber?: string;
+      state?: string;
+      date?: string;
+      salary?: string;
+    }
+  ): Observable<PaginatedResponse<Employee>> {
+    let params = new HttpParams()
+      .set('page', page.toString())
+      .set('size', size.toString());
+  
+    if (filters) {
+      if (filters.firstName) params = params.set('firstName', filters.firstName);
+      if (filters.lastName) params = params.set('lastName', filters.lastName);
+      if (filters.type) params = params.set('type', filters.type);
+      if (filters.docType) params = params.set('docType', filters.docType);
+      if (filters.docNumber) params = params.set('docNumber', filters.docNumber);
+      if (filters.state) params = params.set('state', filters.state);
+      if (filters.date) params = params.set('date', filters.date);
+      if (filters.salary) params = params.set('salary', filters.salary);
+    }
+  
+    return this.http.get<PaginatedResponse<Employee>>(`${this.apiUrl}/paged`, { params }).pipe(
+      map(response => {
+        // Mapeo los campos de snake_case a camelCase
+        const mappedContent = response.content.map(employee => this.mapperService.toCamelCase(employee));
+        return {
+          ...response,
+          content: mappedContent
+        };
+      }),
+      tap(response => {
+        response.content.forEach(employee => {
+          if (!employee.hiringDate) {
+            console.warn(`Employee with ID ${employee.id} is missing hiringDate.`);
+          }
+        });
+      })
+    );
+  }
   
   
   //fin filtros dashboard
