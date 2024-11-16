@@ -71,6 +71,8 @@ export class InventoryDashboardComponent implements OnInit {
   mapperService: MapperService = inject(MapperService);
   inventoryService: InventoryService = inject(InventoryService);
   cdr: ChangeDetectorRef = inject(ChangeDetectorRef);
+  noData: boolean = false;
+  noDataBar: boolean = false;
   private modalService = inject(NgbModal);
   private router = inject(Router);
 
@@ -200,19 +202,34 @@ transactionTrendsChartData: ChartData<'bar'> = {
 
 
 
-  applyFilters(): void {
-    const selectedUnit = this.filtersForm.get('unit')?.value;
+applyFilters(): void {
+  const { unit, startDate, endDate } = this.filtersForm.value;
 
-    if (selectedUnit) {
-      // Actualizar el subtítulo dinámico del KPI
-      this.unitLabel = this.getUnitLabel(selectedUnit);
+  if (unit) {
+    // Actualizar el subtítulo dinámico del KPI
+    this.unitLabel = this.getUnitLabel(unit);
 
-      // Llamar al método reutilizable para actualizar métricas y gráficos
-      this.updateMetricsAndCharts(selectedUnit);
-    } else {
-      console.warn('Unidad no seleccionada en los filtros.');
-    }
+    // Actualizar métricas globales y gráficos
+    this.updateMetricsAndCharts(unit);
+
+    // Cargar tendencias de transacciones basadas en las fechas y unidad seleccionada
+    this.inventoryService.getFilteredInventory(unit, startDate, endDate).subscribe({
+      next: (filteredInventories: Inventory[]) => {
+        console.log('Respuesta del backend:', filteredInventories);
+
+        const camelCaseInventories = filteredInventories.map(inv => this.mapperService.toCamelCase(inv));
+        console.log('Datos mapeados a camelCase:', camelCaseInventories);
+
+        // Actualizar métricas específicas de transacciones
+        this.calculateTransactionMetrics(camelCaseInventories);
+      },
+      error: (error) => console.error('Error al cargar las tendencias de transacciones:', error)
+    });
+  } else {
+    console.warn('Unidad no seleccionada en los filtros.');
   }
+}
+
 
   resetFilters(): void {
     this.filtersForm.reset({
@@ -242,7 +259,6 @@ transactionTrendsChartData: ChartData<'bar'> = {
         console.log('Transacciones procesadas:', camelCaseTransactions);
 
         this.calculateMetrics(camelCaseInventories);
-        this.calculateTransactionTrends(camelCaseTransactions);
         this.updateCharts(camelCaseInventories);
       },
       error: (error) => console.error('Error al cargar los datos:', error)
@@ -300,67 +316,70 @@ transactionTrendsChartData: ChartData<'bar'> = {
 }
 
 
+private calculateTransactionMetrics(inventories: Inventory[]): void {
+  const transactionTrends = new Map<string, { entries: number; outputs: number }>();
 
+  inventories.forEach(inv => {
+    inv.transactions.forEach(trans => {
+      if (trans.transactionDate) {
+        const date = new Date(trans.transactionDate);
+        const monthKey = `${date.getFullYear()}-${(date.getMonth() + 1).toString().padStart(2, '0')}`;
+        const current = transactionTrends.get(monthKey) || { entries: 0, outputs: 0 };
 
+        if (trans.transactionType === TransactionType.ENTRY) {
+          current.entries += trans.quantity || 0;
+        } else if (trans.transactionType === TransactionType.OUTPUT) {
+          current.outputs += trans.quantity || 0;
+        }
 
-
-private calculateTransactionTrends(transactions: Transaction[]): void {
-  const monthlyTransactions = new Map<string, { entries: number; outputs: number }>();
-
-  transactions.forEach(trans => {
-    if (trans.transactionDate) {
-      const date = new Date(trans.transactionDate);
-      const monthKey = `${date.getFullYear()}-${(date.getMonth() + 1).toString().padStart(2, '0')}`;
-      const current = monthlyTransactions.get(monthKey) || { entries: 0, outputs: 0 };
-
-      if (trans.transactionType === TransactionType.ENTRY) {
-        current.entries += trans.quantity || 0;
-      } else if (trans.transactionType === TransactionType.OUTPUT) {
-        current.outputs += trans.quantity || 0;
+        transactionTrends.set(monthKey, current);
       }
-
-      monthlyTransactions.set(monthKey, current);
-    }
+    });
   });
 
-  const sortedMonths = Array.from(monthlyTransactions.entries())
-    .sort((a, b) => a[0].localeCompare(b[0]))
-    .slice(-6);
+  const sortedMonths = Array.from(transactionTrends.entries())
+    .sort((a, b) => a[0].localeCompare(b[0]));
 
-  this.metrics.transactionTrends.labels = sortedMonths.map(([month]) =>
-    new Date(
-      parseInt(month.split('-')[0]),
-      parseInt(month.split('-')[1]) - 1
-    ).toLocaleDateString('es-ES', { month: 'short', year: '2-digit' })
-  );
-  this.metrics.transactionTrends.entries = sortedMonths.map(([_, data]) => data.entries);
-  this.metrics.transactionTrends.outputs = sortedMonths.map(([_, data]) => data.outputs);
+  this.metrics.transactionTrends = {
+    labels: sortedMonths.map(([month]) => month),
+    entries: sortedMonths.map(([_, data]) => data.entries),
+    outputs: sortedMonths.map(([_, data]) => data.outputs)
+  };
 
-  console.log('Tendencias de transacciones calculadas:', this.metrics.transactionTrends);
+  // Actualizar la bandera
+  this.noDataBar = sortedMonths.length === 0; // Si no hay transacciones, no hay datos
+  console.log('No hay datos para el gráfico de barras:', this.noDataBar);
 }
 
 
-  private updateCharts(inventories: Inventory[]): void {
-    const stockByCategory = new Map<string, number>();
-    inventories.forEach(inv => {
-      const category = inv.article?.articleCategory?.denomination;
-      if (category) {
-        const currentStock = stockByCategory.get(category) || 0;
-        stockByCategory.set(category, currentStock + (inv.stock || 0));
-      }
-    });
 
-    const categoryEntries = Array.from(stockByCategory.entries());
-    const colors = this.getColorsForData(categoryEntries.length);
 
-    this.categoryChartData = {
-      labels: categoryEntries.map(([category]) => category),
-      datasets: [{
-        data: categoryEntries.map(([_, value]) => value),
-        backgroundColor: colors
-      }]
-    };
-  }
+private updateCharts(inventories: Inventory[]): void {
+  const stockByCategory = new Map<string, number>();
+  inventories.forEach(inv => {
+    const category = inv.article?.articleCategory?.denomination;
+    if (category) {
+      const currentStock = stockByCategory.get(category) || 0;
+      stockByCategory.set(category, currentStock + (inv.stock || 0));
+    }
+  });
+
+  const categoryEntries = Array.from(stockByCategory.entries());
+  const colors = this.getColorsForData(categoryEntries.length);
+
+  this.categoryChartData = {
+    labels: categoryEntries.map(([category]) => category),
+    datasets: [{
+      data: categoryEntries.map(([_, value]) => value),
+      backgroundColor: colors
+    }]
+  };
+
+  // Actualizar la bandera
+  this.noData = categoryEntries.length === 0; // Si no hay categorías, no hay datos
+  console.log('No hay datos para el gráfico de tortas:', this.noData);
+}
+
 
 
 
