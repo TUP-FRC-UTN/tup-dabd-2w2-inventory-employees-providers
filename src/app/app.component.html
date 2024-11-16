@@ -3,41 +3,57 @@
 <nav class="navbar navbar-expand-lg navbar-dark bg-dark fixed-top">
   <div class="container-fluid">
     <a class="navbar-brand" href="/employees/list">
-      <img src="https://www.villadelcondor.com/imagenes/villa_del_condor.png" alt="Villa del Condor - Casas & Club de Montaña" class="navbar-logo" />
+      <img 
+        src="https://www.villadelcondor.com/imagenes/villa_del_condor.png" 
+        alt="Villa del Condor - Casas & Club de Montaña" 
+        class="navbar-logo" 
+        style="height: 40px; width: auto;"
+      />
     </a>
-    <button class="navbar-toggler" type="button" (click)="isMenuCollapsed = !isMenuCollapsed">
+
+    <button 
+      class="navbar-toggler" 
+      type="button" 
+      data-bs-toggle="collapse" 
+      data-bs-target="#navbarNav" 
+      aria-controls="navbarNav" 
+      aria-expanded="false" 
+      aria-label="Toggle navigation">
       <span class="navbar-toggler-icon"></span>
     </button>
-    <div [ngbCollapse]="isMenuCollapsed" class="collapse navbar-collapse" id="navbarNav">
-      <ul class="navbar-nav me-auto">
-        <li class="nav-item">
-          <a class="nav-link">Accessos</a>
-        </li>
-        <li class="nav-item">
-          <a class="nav-link">Boletas y Cobro</a>
-        </li>
-        <li class="nav-item">
-          <a class="nav-link">Gastos</a>
-        </li>
-        <li class="nav-item">
-          <a class="nav-link">Empleados, Proveedores e Inventarios</a>
-        </li>
-        <li class="nav-item">
-          <a class="nav-link">Multas</a>
-        </li>
-        <li class="nav-item">
-          <a class="nav-link">Notificaciones</a>
-        </li>
-        <li class="nav-item">
-          <a class="nav-link">Usuarios</a>
-        </li>
-      </ul>
-      <div class="d-flex align-items-center">
+    
+
+    <div class="collapse navbar-collapse" id="navbarNav">
+      <div class="navbar-nav">
+        <a class="nav-link" href="#">Accesos</a>
+        <a class="nav-link" href="#">Boletas y Cobro</a>
+        <a class="nav-link" href="#">Gastos</a>
+        <a class="nav-link" href="#">Empleados, Proveedores e Inventarios</a>
+        <a class="nav-link" href="#">Multas</a>
+        <a class="nav-link" href="#">Notificaciones</a>
+        <a class="nav-link" href="#">Usuarios</a>
+      </div>
+
+      <button class="btn btn-outline-secondary m-4" (click)="toggleDarkMode()">
+        <i *ngIf="!darkModeEnabled" class="bi bi-moon"></i>
+        <i *ngIf="darkModeEnabled" class="bi bi-brightness-high"></i>
+        {{ darkModeEnabled ? '' : '' }}
+      </button>
+  
+      <div class="ms-auto d-flex align-items-center ">
         <button class="btn btn-primary d-flex align-items-center me-3">
-          <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-bell-fill" viewBox="0 0 16 16">
+          <svg 
+            xmlns="http://www.w3.org/2000/svg" 
+            width="16" 
+            height="16" 
+            fill="currentColor" 
+            class="bi bi-bell-fill" 
+            viewBox="0 0 16 16" 
+            style="color: white !important;">
             <path d="M8 16a2 2 0 0 0 2-2H6a2 2 0 0 0 2 2m.995-14.901a1 1 0 1 0-1.99 0A5 5 0 0 0 3 6c0 1.098-.5 6-2 7h14c-1.5-1-2-5.902-2-7 0-2.42-1.72-4.44-4.005-4.901"/>
           </svg>
         </button>
+        
         <button class="btn btn-danger d-flex align-items-center">
           <i class="bi bi-box-arrow-right me-2"></i>
           Logout
@@ -46,6 +62,7 @@
     </div>
   </div>
 </nav>
+
 <!-- Main Container -->
 <div class="container-fluid mt-5">
   <div class="row">

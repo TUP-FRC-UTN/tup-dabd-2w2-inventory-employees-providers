@@ -1,20 +1,20 @@
-import { ArticleInventoryPost, ArticlePost } from '../../../../models/article.model';
+import { InventoryService } from './../../../../services/inventory.service';
+import { ArticleCateg, ArticleInventoryPost, ArticlePost } from '../../../../models/article.model';
 import { Component, EventEmitter, inject, OnInit, Output, TemplateRef, ViewChild } from '@angular/core';
 import { FormBuilder, FormGroup, FormsModule, ReactiveFormsModule, Validators } from '@angular/forms';
 import { CommonModule } from '@angular/common';
-import { InventoryService } from '../../../../services/inventory.service';
 import { Article, ArticleCategory, ArticleType, ArticleCondition, MeasurementUnit,Status } from '../../../../models/article.model';
 import { MapperService } from '../../../../services/MapperCamelToSnake/mapper.service';
 import { ActivatedRoute, Router, RouterModule } from '@angular/router';
-import { Inventory } from '../../../../models/inventory.model';
+import { Inventory, StatusType } from '../../../../models/inventory.model';
 import { NgbModal } from '@ng-bootstrap/ng-bootstrap';
-import { ToastService } from 'ngx-dabd-grupo01';
+import { MainContainerComponent, ToastService } from 'ngx-dabd-grupo01';
 
 
 @Component({
   selector: 'app-article',
   standalone: true,
-  imports: [CommonModule, ReactiveFormsModule,RouterModule], // Agrega ReactiveFormsModule aquí
+  imports: [CommonModule, ReactiveFormsModule,RouterModule, MainContainerComponent], // Agrega ReactiveFormsModule aquí
   templateUrl: './inventory_articles_form.component.html',
   styleUrls: ['./inventory_articles_form.component.css']
 })
@@ -40,25 +40,24 @@ export class ArticleFormComponent implements OnInit {
   // Propiedades para los enumerados
   ArticleType = ArticleType; // Asignamos el enum ArticleType a una propiedad del componente
   ArticleStatus = ArticleCondition; // Asignamos el enum ArticleStatus a una propiedad del componente
-  ArticleCategory = ArticleCategory; // Asignamos el enum ArticleCategory a una propiedad del componente
+  ArticleCategory: ArticleCateg[] = []; // Asignamos el enum ArticleCategory a una propiedad del componente
   MeasurementUnit = MeasurementUnit; // Asignamos el enum MeasurementUnit a una propiedad del componente
 
-  
+
 
   constructor(private fb: FormBuilder, private inventoryService: InventoryService, private toast : ToastService) {
     this.articleForm = this.fb.group({
-      identifier: [{value:'', disabled: true}],
+      identifier: [{ value: '', disabled: true }, Validators.required],
       name: ['', Validators.required],
       description: [''],
       articleType: [ArticleType.NON_REGISTRABLE, Validators.required],
       articleCondition: [ArticleCondition.FUNCTIONAL, Validators.required],
-      articleCategory: [ArticleCategory.DURABLES, Validators.required],
+      articleCategory: [Validators.required],
       measurementUnit: [MeasurementUnit.UNITS, Validators.required],
       location: ['', Validators.required], // Campo ubicación del inventario
       stock: [{value: '', disabled: false}, Validators.required],    // Campo stock del inventario
-      stockMin: [''], // Campo stock mínimo del inventario
-      price: ['']     // Campo precio para la transacción inicial
-
+      stockMin: ['',  ], // Campo stock mínimo del inventario
+      price: ['', ]    // Campo precio para la transacción inicial
     });
   }
 
@@ -70,7 +69,49 @@ export class ArticleFormComponent implements OnInit {
       }
     });
     this.articleForm.get('articleType')?.valueChanges.subscribe(this.handleArticleTypeChange.bind(this));
+    this.loadCategories();
   }
+
+  loadCategories(): void {
+    this.inventoryService.getArticleCategories().subscribe(
+      (data: ArticleCateg[]) => {
+        // Filtra las categorías activas
+        console.log(data);
+        this.ArticleCategory = data.filter(category => category.status.toString() === 'ACTIVE');
+
+        // Verifica si hay categorías activas y establece el valor del formulario
+        if (this.ArticleCategory.length > 0) {
+          this.articleForm.get('articleCategory')?.setValue(this.ArticleCategory[0].id);
+        }
+      },
+      (error) => {
+        console.error('Error al cargar las categorías', error);
+      }
+    );
+}
+
+
+  checkIdentifier() {
+    const identifier = this.articleForm.get('identifier')?.value;
+    if (identifier) {
+      this.inventoryService.articleExist(identifier).subscribe(
+        (exists) => {
+          if (exists) {
+            // Si el identificador existe, establecer el error en el control
+            this.articleForm.get('identifier')?.setErrors({ unique: true });
+          } else {
+            // Si no existe, limpiar los errores
+            this.articleForm.get('identifier')?.setErrors(null);
+          }
+        },
+        (error) => {
+          console.error('Error al verificar el identificador:', error);
+          // Manejar el error aquí si es necesario
+        }
+      );
+    }
+  }
+
 
   showInfo(): void {
     this.modalService.open(this.infoModal, { centered: true });
@@ -109,6 +150,7 @@ export class ArticleFormComponent implements OnInit {
     if(value === ArticleType.REGISTRABLE) {
       this.articleForm.get('identifier')?.enable();
       this.articleForm.get('measurementUnit')?.disable();
+      this.articleForm.get('measurementUnit')?.setValue(MeasurementUnit.UNITS)
       this.articleForm.get('stock')?.disable();
       this.articleForm.get('stock')?.setValue(1);
       this.articleForm.get('stockMin')?.disable();
@@ -129,11 +171,10 @@ export class ArticleFormComponent implements OnInit {
         name: this.articleForm.get('name')?.value,
         description: this.articleForm.get('description')?.value ?? null,
         articleCondition: this.articleForm.get('articleCondition')?.value,
-        articleCategory: this.articleForm.get('articleCategory')?.value,
+        articleCategoryId: this.articleForm.get('articleCategory')?.value,
         articleType: this.articleForm.get('articleType')?.value,
         measurementUnit: this.articleForm.get('measurementUnit')?.value
       };
-
       const articleInventory: ArticleInventoryPost = {
         article,
         stock: this.articleForm.get('stock')?.value,
@@ -144,15 +185,16 @@ export class ArticleFormComponent implements OnInit {
 
       const articleInventoryFormatted = this.mapperService.toSnakeCase(articleInventory);
       if(!this.isEditing){
+        console.log(articleInventoryFormatted);
         this.inventoryService.addInventoryArticle(articleInventoryFormatted).subscribe((data) => {
           console.log(data);
           this.resetForm(); // Limpia el formulario después de crear exitosamente
           this.router.navigate(['/inventories']);
-          this.toast.sendSuccess('Articulo creado exitosamente');
-        }) 
+          this.toast.sendSuccess('Artículo creado exitosamente');
+        })
       }
       else {
-        this.toast.sendError('Articulo no creado');
+        this.toast.sendError('Error al crear Artículo.');
       }
        if (this.currentArticleId!= undefined){
         this.inventoryService.updateArticle(this.currentArticleId,articleInventoryFormatted.article as Article).subscribe((data)=> console.log(data));
@@ -164,6 +206,9 @@ export class ArticleFormComponent implements OnInit {
         const inventoryUpdateFormatted = this.mapperService.toSnakeCase(inventoryUpdate);
         //this.inventoryService.updateInventory(this.currentArticleId).subscribe((data)=> console.log(data));
       }
+    }else{
+      this.toast.sendError('Error al crear Artículo.');
+      this.articleForm.markAllAsTouched();
     }
   }
 
@@ -186,6 +231,4 @@ export class ArticleFormComponent implements OnInit {
     this.showRegisterForm.emit();
     this.isModalOpen = false
   }
-
- 
 }

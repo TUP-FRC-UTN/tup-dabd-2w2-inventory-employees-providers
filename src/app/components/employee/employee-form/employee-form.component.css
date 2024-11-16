@@ -10,3 +10,35 @@
 .custom-button i {
     vertical-align: middle;     
 }
+
+.card-header {
+    background-color: #f8f9fa;
+    border-bottom: 1px solid #e9ecef;
+  }
+  
+  .card-title {
+    margin-bottom: 0;
+  }
+  
+  .btn-sm {
+    padding: 0.25rem 0.5rem;
+    font-size: 0.875rem;
+  }
+  ::ng-deep .modal-dialog {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin: 0 auto;
+    min-height: calc(100vh - 60px); 
+  }
+  
+  ::ng-deep .modal-content {
+    width: 100%;
+    max-width: 800px; 
+  }
+  
+  ::ng-deep .modal-dialog-centered {
+    display: flex;
+    align-items: center;
+    min-height: calc(100% - 1rem);
+  }
