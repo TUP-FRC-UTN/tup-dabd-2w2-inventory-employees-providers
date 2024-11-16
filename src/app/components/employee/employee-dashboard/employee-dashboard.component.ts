@@ -30,7 +30,6 @@ interface DateRange {
   styleUrls: ['./employee-dashboard.component.scss']
 })
 export class EmployeeDashboardComponent implements OnInit, AfterViewInit {
-  @ViewChild('pieChart') pieChart!: ElementRef<HTMLCanvasElement>;
   @ViewChild('barChart') barChart!: ElementRef<HTMLCanvasElement>;
   @ViewChild('lineChart') lineChart!: ElementRef<HTMLCanvasElement>;
   @ViewChild('salaryChart') salaryChart!: ElementRef<HTMLCanvasElement>;
@@ -646,11 +645,8 @@ getDataFilteredByDateRange(startDate: Date, endDate: Date): void {
   }
 
   initializeCharts(): void {
-    if (this.pieChart && this.barChart && this.lineChart) {
-      // Destruir charts existentes si los hay
-      if (Chart.getChart(this.pieChart.nativeElement)) {
-        Chart.getChart(this.pieChart.nativeElement)?.destroy();
-      }
+    if (this.barChart && this.lineChart) {
+
       if (Chart.getChart(this.barChart.nativeElement)) {
         Chart.getChart(this.barChart.nativeElement)?.destroy();
       }
@@ -658,37 +654,11 @@ getDataFilteredByDateRange(startDate: Date, endDate: Date): void {
         Chart.getChart(this.lineChart.nativeElement)?.destroy();
       }
   
-      this.initializeStatusPieChart();
       this.initializeEmployeeTypeChart();
       this.initializeTenureDistributionChart();
     }
   }
 
-  createPieChart(): void {
-    if (this.pieChart) {
-      const chart = Chart.getChart(this.pieChart.nativeElement);
-      if (chart) {
-        chart.destroy();
-      }
-    }
-
-    new Chart(this.pieChart.nativeElement, {
-      type: 'pie',
-      data: {
-        labels: ['Activos', 'Inactivos'],
-        datasets: [{
-          data: [this.inServiceCount, this.inactiveCount],
-          backgroundColor: ['#28a745', '#dc3545']
-        }]
-      },
-      options: {
-        responsive: true,
-        plugins: {
-          legend: { position: 'top' }
-        }
-      }
-    });
-  }
 
   createBarChart(): void {
     if (!this.barChart) return;
@@ -742,36 +712,7 @@ getDataFilteredByDateRange(startDate: Date, endDate: Date): void {
       }
     });
   }
-  // Gráficos adicionales del primer componente
-  initializeStatusPieChart(): void {
-    const ctx = this.pieChart.nativeElement.getContext('2d');
-    if (!ctx) return;
-
-    new Chart(ctx, {
-      type: 'pie',
-      data: {
-        labels: ['Activos', 'Inactivos'],
-        datasets: [{
-          data: [this.inServiceCount, this.inactiveCount],
-          backgroundColor: ['#4CAF50', '#F44336']
-        }]
-      },
-      options: {
-        responsive: true,
-        maintainAspectRatio: false,
-        plugins: {
-          legend: {
-            position: 'bottom'
-          },
-          title: {
-            display: true,
-            text: 'Distribución de Estado de Empleados'
-          }
-        }
-      }
-    });
-  }
-
+  
   initializeEmployeeTypeChart(): void {
     if (!this.barChart?.nativeElement) return;
 
@@ -954,10 +895,6 @@ getDataFilteredByDateRange(startDate: Date, endDate: Date): void {
     // Destruimos los gráficos existentes antes de crear nuevos
     this.destroyExistingCharts();
 
-    if (this.pieChart?.nativeElement) {
-      this.initializeStatusPieChart();
-    }
-
     if (this.barChart?.nativeElement) {
       this.initializeEmployeeTypeChart();
     }
@@ -972,7 +909,6 @@ getDataFilteredByDateRange(startDate: Date, endDate: Date): void {
   }
   private destroyExistingCharts(): void {
     const charts = [
-      this.pieChart?.nativeElement,
       this.barChart?.nativeElement,
       this.lineChart?.nativeElement,
       this.salaryChart?.nativeElement
