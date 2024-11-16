@@ -32,12 +32,6 @@ export class EmployeeListComponent implements OnInit {
   @ViewChild('employeeAccess') employeeAccess!: EmployeeViewAcessComponent;
   showModalFilters: boolean = false;
   
-  // Metrics
-  inServiceCount = 0;
-  inactiveCount = 0;
-  typeCountMap: { [key: string]: number } = {};
-  pieChart!: Chart;
-  barChart!: Chart;
 
   // Lists
   employeeList: Employee[] = [];

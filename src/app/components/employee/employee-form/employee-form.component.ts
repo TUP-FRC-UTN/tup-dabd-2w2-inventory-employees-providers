@@ -41,7 +41,7 @@ export class EmployeeFormComponent implements OnInit {
     salary: new FormControl(0, [Validators.required, Validators.min(0)]),
     state: new FormControl(StatusType.ACTIVE),
     contactsForm: new FormGroup({
-      contactType: new FormControl('', []),
+      contactType: new FormControl('EMAIL', []),
       contactValue: new FormControl('', []),
     }),
     address: new FormGroup({
