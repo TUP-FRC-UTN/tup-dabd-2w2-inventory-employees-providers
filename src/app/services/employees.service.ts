@@ -85,6 +85,7 @@ export class EmployeesService {
   
   //fin filtros dashboard
   createSchedule(schedule: EmployeeSchedule): Observable<EmployeeSchedule> {
+    console.log('Schedule to create:', schedule);
     return this.http.post<EmployeeSchedule>(this.apiUrlSHIFT, schedule);
   }
 
@@ -168,7 +169,7 @@ export class EmployeesService {
   // Actualizar un empleado existente
   updateEmployee(employee: Employee): Observable<Employee> {
     //employee.hiringDate.setHours(employee.hiringDate.getHours() + 5);
-    return this.http.put<Employee>(`${this.apiUrl}/${employee.id}`, employee);
+    return this.http.put<Employee>(`${this.apiUrl}/update/${employee.id}`, employee);
   }
 
   // Eliminar (o desactivar) un empleado
