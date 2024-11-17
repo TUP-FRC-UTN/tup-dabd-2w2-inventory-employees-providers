@@ -1,5 +1,5 @@
 import { Component, inject, OnInit, Output, TemplateRef, ViewChild } from '@angular/core';
-import { AbstractControl, FormArray, FormControl, FormGroup, ReactiveFormsModule, ValidatorFn, Validators } from '@angular/forms';
+import { AbstractControl, FormArray, FormControl, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
 import { EmployeeType, Employee, DocumentType, StatusType } from '../../../models/employee.model';
 import { ActivatedRoute, Router } from '@angular/router';
 import { EmployeesService } from '../../../services/employees.service';
@@ -28,131 +28,37 @@ export class EmployeeFormComponent implements OnInit {
   formattedDateTime = this.today.slice(0, 19);
 
   employeeForm = new FormGroup({
-    id: new FormControl(0),
-    firstName: new FormControl('', [
-      Validators.required, 
-      Validators.minLength(3), 
-      Validators.maxLength(100),
-      Validators.pattern(/^[a-zA-ZáéíóúÁÉÍÓÚñÑ\s]*$/)
-    ]),
-    lastName: new FormControl('', [
-      Validators.required, 
-      Validators.minLength(3), 
-      Validators.maxLength(100),
-      Validators.pattern(/^[a-zA-ZáéíóúÁÉÍÓÚñÑ\s]*$/)
-    ]),
+    id:new FormControl(0),
+    firstName: new FormControl('', [Validators.required, Validators.minLength(3), Validators.maxLength(100)]),
+    lastName: new FormControl('', [Validators.required, Validators.minLength(3), Validators.maxLength(100)]),
     employeeType: new FormControl(EmployeeType.ADMINISTRATIVO, Validators.required),
+    //hiringDate: new FormControl(new Date().toISOString().split('T')[0], [Validators.required]), // Default to today
+    //hiringDate: new FormControl(new Date().toISOString().slice(0, 19), [Validators.required]),
+    //hiringDate: new FormControl(this.today, [Validators.required]),
+    //hiringDate: new FormControl(this.formattedDateTime, [Validators.required]),
     hiringDate: new FormControl<string>(this.formattedDateTime, {
-      validators: [
-        Validators.required,
-        (control) => {
-          const date = new Date(control.value);
-          const today = new Date();
-          return date > today ? { futureDate: true } : null;
-        }
-      ],
+      validators: [Validators.required],
       nonNullable: true,
     }),
     documentType: new FormControl(DocumentType.DNI, Validators.required),
-    docNumber: new FormControl('', [
-      Validators.required, 
-      this.documentValidator()
-    ]),
-    salary: new FormControl(0, [
-      Validators.required, 
-      Validators.min(0),
-      Validators.pattern(/^\d+(\.\d{1,2})?$/)
-    ]),
+    docNumber: new FormControl('', [Validators.required, Validators.pattern(/^[0-9.-]*$/)]),
+    salary: new FormControl(0, [Validators.required, Validators.min(0)]),
     state: new FormControl(StatusType.ACTIVE),
     contactsForm: new FormGroup({
-      contactType: new FormControl('', [Validators.required]),
-      contactValue: new FormControl('', [
-        Validators.required,
-        (control) => {
-          const type = control.parent?.get('contactType')?.value;
-          if (!type || !control.value) return null;
-
-          switch (type) {
-            case 'EMAIL':
-              return /^[a-zA-Z0-9._-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,6}$/.test(control.value) 
-                ? null 
-                : { invalidEmail: true };
-            case 'PHONE':
-              return /^[\d\s()-]{8,15}$/.test(control.value) 
-                ? null 
-                : { invalidPhone: true };
-            case 'SOCIAL_MEDIA_LINK':
-              return /^https?:\/\//.test(control.value) 
-                ? null 
-                : { invalidUrl: true };
-            default:
-              return null;
-          }
-        }
-      ])
+      contactType: new FormControl('', []),
+      contactValue: new FormControl('', []),
     }),
     address: new FormGroup({
-      street_address: new FormControl('', [
-        Validators.required,
-        Validators.minLength(3),
-        Validators.maxLength(100)
-      ]),
-      number: new FormControl(0, [
-        Validators.required, 
-        Validators.min(0),
-        Validators.pattern(/^\d+$/)
-      ]),
-      floor: new FormControl(0, [
-        Validators.required, 
-        Validators.min(0),
-        Validators.pattern(/^\d+$/)
-      ]),
+      street_address: new FormControl('', [Validators.required]),
+      number: new FormControl(0, [Validators.required, Validators.min(0)]),
+      floor: new FormControl(0, [Validators.required, Validators.min(0)]),
       apartment: new FormControl(''),
-      city: new FormControl('', [
-        Validators.required,
-        Validators.minLength(2),
-        Validators.pattern(/^[a-zA-ZáéíóúÁÉÍÓÚñÑ\s]*$/)
-      ]),
+      city: new FormControl('', [Validators.required]),
       province: new FormControl('', [Validators.required]),
-      country: new FormControl({ 
-        value: 'ARGENTINA', 
-        disabled: true 
-      }, [Validators.required]),
-      postal_code: new FormControl(0, [
-        Validators.required, 
-        Validators.min(0),
-        Validators.pattern(/^\d+$/)
-      ])
+      country: new FormControl('', [Validators.required]),
+      postal_code: new FormControl(0, [Validators.required, Validators.min(0)])
     })
   });
-  // employeeForm = new FormGroup({
-  //   id:new FormControl(0),
-  //   firstName: new FormControl('', [Validators.required, Validators.minLength(3), Validators.maxLength(100)]),
-  //   lastName: new FormControl('', [Validators.required, Validators.minLength(3), Validators.maxLength(100)]),
-  //   employeeType: new FormControl(EmployeeType.ADMINISTRATIVO, Validators.required),
-  //   hiringDate: new FormControl<string>(this.formattedDateTime, {
-  //     validators: [Validators.required],
-  //     nonNullable: true,
-  //   }),
-  //   documentType: new FormControl(DocumentType.DNI, Validators.required),
-  //   docNumber: new FormControl('', [Validators.required, Validators.pattern(/^[0-9.-]*$/)]),
-  //   salary: new FormControl(0, [Validators.required, Validators.min(0)]),
-  //   state: new FormControl(StatusType.ACTIVE),
-  //   contactsForm: new FormGroup({
-  //     contactType: new FormControl('', []),
-  //     contactValue: new FormControl('', []),
-  //   }),
-  //   address: new FormGroup({
-  //     street_address: new FormControl('', [Validators.required]),
-  //     number: new FormControl(0, [Validators.required, Validators.min(0)]),
-  //     floor: new FormControl(0, [Validators.required, Validators.min(0)]),
-  //     apartment: new FormControl(''),
-  //     city: new FormControl('', [Validators.required]),
-  //     province: new FormControl('', [Validators.required]),
-  //     country: new FormControl('', [Validators.required]),
-  //     postal_code: new FormControl(0, [Validators.required, Validators.min(0)])
-  //   })
-  // });
 
   @ViewChild('accessModal') accessModal!: TemplateRef<any>;
   contactTypes = ['PHONE', 'EMAIL', 'SOCIAL_MEDIA_LINK'];
@@ -555,82 +461,4 @@ onAccessSaved() {
     });
     return cleaned;
   }
-
-    private dniValidator(): ValidatorFn {
-      return (control: AbstractControl) => {
-        if (!control.value) return null;
-        const dni = control.value.toString().replace(/\D/g, '');
-        if (dni.length > 8) {
-          return { invalidDni: 'El DNI no puede tener más de 8 dígitos' };
-        }
-        return null;
-      };
-    }
-
-    private cuitValidator(): ValidatorFn {
-      return (control: AbstractControl) => {
-        if (!control.value) return null;
-        const cuit = control.value.toString().replace(/\D/g, '');
-        
-        if (cuit.length !== 11) {
-          return { invalidLength: 'CUIT/CUIL debe tener 11 dígitos' };
-        }
-  
-        const multiplicadores = [5, 4, 3, 2, 7, 6, 5, 4, 3, 2];
-        let suma = 0;
-  
-        for (let i = 0; i < multiplicadores.length; i++) {
-          suma += parseInt(cuit[i]) * multiplicadores[i];
-        }
-  
-        const resto = suma % 11;
-        const digitoVerificador = 11 - resto;
-        const ultimoDigito = parseInt(cuit[10]);
-  
-        if (digitoVerificador !== ultimoDigito) {
-          return { invalidCheckDigit: 'Dígito verificador inválido' };
-        }
-  
-        return null;
-      };
-    }
-    private documentValidator(): ValidatorFn {
-      return (control: AbstractControl) => {
-        if (!control.value) return null;
-        
-        const docType = control.parent?.get('documentType')?.value;
-        switch (docType) {
-          case DocumentType.DNI:
-            return this.dniValidator()(control);
-          case DocumentType.CUIT:
-          case DocumentType.CUIL:
-            return this.cuitValidator()(control);
-          default:
-            return null;
-        }
-      };
-    }
-    getErrorMessage(controlName: string, groupName?: string): string {
-      const control = groupName ? 
-        this.employeeForm.get(`${groupName}.${controlName}`) : 
-        this.employeeForm.get(controlName);
-  
-      if (control?.errors) {
-        if (control.errors['required']) return 'Este campo es requerido';
-        if (control.errors['minlength']) return `Mínimo ${control.errors['minlength'].requiredLength} caracteres`;
-        if (control.errors['maxlength']) return `Máximo ${control.errors['maxlength'].requiredLength} caracteres`;
-        if (control.errors['pattern']) return 'Formato inválido';
-        if (control.errors['min']) return 'El valor debe ser mayor a 0';
-        if (control.errors['invalidDni']) return 'DNI inválido';
-        if (control.errors['invalidLength']) return 'CUIT/CUIL debe tener 11 dígitos';
-        if (control.errors['invalidCheckDigit']) return 'CUIT/CUIL inválido';
-        if (control.errors['invalidEmail']) return 'Email inválido';
-        if (control.errors['invalidPhone']) return 'Teléfono inválido';
-        if (control.errors['invalidUrl']) return 'URL inválida';
-        if (control.errors['futureDate']) return 'La fecha no puede ser futura';
-      }
-      return '';
-    }
-
-  
 }
