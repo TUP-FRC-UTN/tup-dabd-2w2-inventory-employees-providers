@@ -88,7 +88,6 @@ applyDateFilters(event: { startDate?: string | Date; endDate?: string | Date; en
   };
 
   console.log('Filtros aplicados desde dashboard:', dateFilter);
-
   // Llama al método para obtener proveedores con los filtros formateados
   this.getProvidersWithFilters(dateFilter);
 }
@@ -164,6 +163,7 @@ applyDateFilters(event: { startDate?: string | Date; endDate?: string | Date; en
     //this.getAllProviders();
     //this.getCompany();
     //this.getServices();
+
   }
 
   getMonthName(offset: number = 0): string {
@@ -261,40 +261,7 @@ applyDateFilters(event: { startDate?: string | Date; endDate?: string | Date; en
   };
 
   // Datos de los gráficos
-  pieChartData: ChartData<'pie'> = {
-    labels: ['Activos', 'Inactivos'],
-    datasets: [{
-      data: [0, 0],
-      backgroundColor: ['#28a745', '#dc3545']
-    }]
-  };
-
-  barChartData: ChartData<'bar'> = {
-    labels: [],
-    datasets: [{
-      data: [],
-      label: 'Cantidad de Proveedores',
-      backgroundColor: ['#007bff', '#28a745', '#ffc107', '#17a2b8', '#dc3545', '#6610f2']
-    }]
-  };
-
-  doughnutChartData: ChartData<'doughnut'> = {
-    labels: ['Servicios Esenciales', 'Servicios Especializados'],
-    datasets: [{
-      data: [0, 0],
-      backgroundColor: ['#17a2b8', '#ffc107']
-    }]
-  };
-
-
-  horizontalBarChartData: ChartData<'bar'> = {
-    labels: ['Zona Norte', 'Zona Sur', 'Zona Este', 'Zona Oeste', 'Zona Central'],
-    datasets: [{
-      data: [0, 0, 0, 0, 0],
-      backgroundColor: '#20c997'
-    }]
-  };
-
+  
   companyBarChartData: ChartData<'bar'> = {
     labels: [],
     datasets: [{
@@ -440,57 +407,12 @@ applyDateFilters(event: { startDate?: string | Date; endDate?: string | Date; en
   
   
 
-
   private updateAllCharts(): void {
-    if (!this.providerList.length) return;
-  
-    // Actualizar gráficos individuales
-    this.updatePieChart();
-    this.updateBarChart();
-    //this.updateDoughnutChart();
-    // this.updateCompanyChart();
-    // this.updateMonthlyRegistrationChart();
-    // this.updateIndependentVsCorporateChart();
-  
-    // Asegurar que todos los gráficos individuales se actualicen
-    if (this.chart) {
-      this.chart.update();
-    }
-  
-    // Forzar la detección de cambios para asegurarse de que los gráficos se rendericen
-    this.changeDetector.detectChanges();
-  }
-  
-  
-  // Actualización individual de cada gráfico
-  private updatePieChart(): void {
-    if (!this.pieChartData?.datasets?.[0]) return;
-    
-    this.pieChartData.datasets[0].data = [
-      this.metrics.activeCount,
-      this.metrics.inactiveCount
-    ];
-  }
-  
-  private updateBarChart(): void {
-    if (!this.barChartData?.datasets?.[0]) return;
-  
-    const serviceDistribution = this.getServiceDistributionn(this.providerList);
-    this.barChartData.labels = Object.keys(serviceDistribution);
-    this.barChartData.datasets[0].data = Object.values(serviceDistribution);
-  
-    // Forzar actualización de este gráfico en específico
-    if (this.chart) {
-      this.chart.update();
-    }
-  }
-  
-  
-  private updateHorizontalBarChart(): void {
-    if (!this.horizontalBarChartData?.datasets?.[0]) return;
-    
-    const zoneDistribution = this.getZoneDistributionn(this.providerList);
-    this.horizontalBarChartData.datasets[0].data = Object.values(zoneDistribution);
+    this.chart?.update();
+    this.updateCompanyChart();
+    this.updateMonthlyRegistrationChart();
+    this.updateIndependentVsCorporateChart();
+
   }
   
   private updateCompanyChart(): void {
@@ -594,9 +516,7 @@ applyDateFilters(event: { startDate?: string | Date; endDate?: string | Date; en
     this.filterForm = this.fb.group({
       startDate: [''],
       endDate: [''],
-      serviceName: ['', Validators.maxLength(100)],
-      enabled: [''],
-      registration: ['']
+      enabled: ['']
     });
     this.providerList = [];
     this.initializeForm();
@@ -606,10 +526,6 @@ applyDateFilters(event: { startDate?: string | Date; endDate?: string | Date; en
   }
 
   private initializeChartConfigs(): void {
-    this.chartConfigs.pieChart = this.getChartConfig('pie', 'Estado de Proveedores');
-    this.chartConfigs.barChart = this.getChartConfig('bar', 'Distribución por Servicio', true);
-    this.chartConfigs.doughnutChart = this.getChartConfig('doughnut', 'Distribución de Servicios', false, 'right');
-    this.chartConfigs.horizontalBarChart = this.getChartConfig('horizontalBar', 'Distribución por Zona');
     this.chartConfigs.companyBarChart = this.getChartConfig('bar', 'Proveedores por Compañía', true);
     this.chartConfigs.monthlyRegistrationChart = this.getChartConfig('bar', 'Registro Mensual de Proveedores', true);
     this.chartConfigs.independentVsCorporateChart = this.getChartConfig('doughnut', 
@@ -725,21 +641,21 @@ applyDateFilters(event: { startDate?: string | Date; endDate?: string | Date; en
       }
     });
   }
+  
 
   private calculateMetrics(): void {
     const metrics = this.metrics;
-    
+  
     if (!Array.isArray(this.providerList)) {
       console.error('providerList no es un array:', this.providerList);
       this.providerList = []; // Inicializar como array vacío si no es un array
       return;
     }
-
+  
     // Obtener fechas del filtro
     const startDate = this.filterForm.get('startDate')?.value;
     const endDate = this.filterForm.get('endDate')?.value;
-    
-    
+  
     // Lista de proveedores filtrada por fecha si hay filtros activos
     let filteredProviders = [...this.providerList]; // Crear una copia del array
     if (startDate && endDate) {
@@ -750,19 +666,16 @@ applyDateFilters(event: { startDate?: string | Date; endDate?: string | Date; en
         return regDate >= start && regDate <= end;
       });
     }
-
+  
     // Cálculo de proveedores activos e inactivos con la lista filtrada
     metrics.activeCount = filteredProviders.filter(p => p.enabled).length;
     metrics.inactiveCount = filteredProviders.length - metrics.activeCount;
-    
+  
     // Cálculo del porcentaje de activación
-    metrics.activationRate = filteredProviders.length > 0 
+    metrics.activationRate = filteredProviders.length > 0
       ? Math.round((metrics.activeCount / filteredProviders.length) * 100)
       : 0;
-
-    // Determinar si hay más inactivos que activos
-    metrics.isNegativeTrendActive = metrics.inactiveCount > metrics.activeCount;
-
+  
     // Cálculo de empresas únicas en el período
     const uniqueCompanies = new Set(
       filteredProviders
@@ -770,89 +683,59 @@ applyDateFilters(event: { startDate?: string | Date; endDate?: string | Date; en
         .filter(Boolean)
     );
     metrics.uniqueCompaniesCount = uniqueCompanies.size;
-
+  
     // Cálculo de empresas activas e inactivas
     const companiesInPeriod = this.companies.filter(company => {
       if (!startDate || !endDate) return true;
       const companyDate = new Date(company.registration);
       return companyDate >= new Date(startDate) && companyDate <= new Date(endDate);
     });
-
+  
     metrics.activeCompaniesCount = companiesInPeriod.filter(c => c.enabled).length;
     metrics.inactiveCompaniesCount = companiesInPeriod.length - metrics.activeCompaniesCount;
-    
+  
     // Cálculo del porcentaje de activación de empresas
-    metrics.companiesActivationRate = companiesInPeriod.length > 0 
+    metrics.companiesActivationRate = companiesInPeriod.length > 0
       ? Math.round((metrics.activeCompaniesCount / companiesInPeriod.length) * 100)
       : 0;
-
+  
     // Calcular métricas de crecimiento mensual
     const currentDate = new Date();
     const currentMonth = currentDate.getMonth();
     const currentYear = currentDate.getFullYear();
-
+  
     // Proveedores del mes actual dentro del rango de fechas
     const currentMonthProviders = filteredProviders.filter(provider => {
       const regDate = new Date(provider.registration);
-      return regDate.getMonth() === currentMonth && 
+      return regDate.getMonth() === currentMonth &&
              regDate.getFullYear() === currentYear;
     });
-
+  
     // Proveedores del mes anterior dentro del rango de fechas
     const previousMonthProviders = filteredProviders.filter(provider => {
       const regDate = new Date(provider.registration);
-      const isPreviousMonth = currentMonth === 0 
+      const isPreviousMonth = currentMonth === 0
         ? regDate.getMonth() === 11 && regDate.getFullYear() === currentYear - 1
         : regDate.getMonth() === currentMonth - 1 && regDate.getFullYear() === currentYear;
       return isPreviousMonth;
     });
-
+  
     metrics.currentMonthCount = currentMonthProviders.length;
     metrics.previousProvidersCount = previousMonthProviders.length;
     metrics.providersGrowthCount = currentMonthProviders.length - previousMonthProviders.length;
-
+  
     // Calcular tasa de crecimiento mensual
     metrics.monthlyGrowthRate = previousMonthProviders.length > 0
       ? Math.round(((currentMonthProviders.length - previousMonthProviders.length) / previousMonthProviders.length) * 100)
       : currentMonthProviders.length > 0 ? 100 : 0;
-
-    // Cálculo de servicios únicos
-    const uniqueServices = new Set(
-      filteredProviders
-        .map(p => p.service?.name)
-        .filter(Boolean)
-    );
-    metrics.uniqueServicesCount = uniqueServices.size;
-
-    // Service-specific counts con filtros
-    metrics.securityProvidersCount = this.getProvidersCountByService('seguridad', filteredProviders);
-    metrics.maintenanceProvidersCount = this.getProvidersCountByService('mantenimiento', filteredProviders);
-    metrics.gardeningProvidersCount = this.getProvidersCountByService('jardinería', filteredProviders);
-    metrics.cleaningProvidersCount = this.getProvidersCountByService('limpieza', filteredProviders);
-
-    // Essential vs Specialized services
-    metrics.essentialServicesCount = 
-      metrics.securityProvidersCount + 
-      metrics.maintenanceProvidersCount + 
-      metrics.cleaningProvidersCount;
-    metrics.specializedServicesCount = filteredProviders.length - metrics.essentialServicesCount;
-
-    // Promedios actualizados
-    metrics.avgProvidersPerService = metrics.uniqueServicesCount > 0
-      ? Math.round(filteredProviders.length / metrics.uniqueServicesCount)
-      : 0;
-    metrics.avgProvidersPerCompany = metrics.uniqueCompaniesCount > 0
-      ? Math.round(filteredProviders.length / metrics.uniqueCompaniesCount)
-      : 0;
-
+  
     // Actualizar top providers
     this.calculateTopProviderss(filteredProviders);
-
+  
     // Forzar actualización de gráficos
     this.updateChartsWithNewData(filteredProviders);
-    //No entiendo q hace 
   }
-
+  
   private getProvidersCountByService(serviceName: string, providers: Supplier[]): number {
     return providers.filter(p => 
       p.service?.name?.toLowerCase() === serviceName.toLowerCase()
@@ -886,21 +769,16 @@ applyDateFilters(event: { startDate?: string | Date; endDate?: string | Date; en
     const metrics = this.metrics;
     
     // Actualizar gráfico de torta
-    this.pieChartData.datasets[0].data = [metrics.activeCount, metrics.inactiveCount];
+
     
     // Actualizar gráfico de barras de servicios
     const serviceDistribution = this.getServiceDistributionn(filteredProviders);
-    this.barChartData.labels = Object.keys(serviceDistribution);
-    this.barChartData.datasets[0].data = Object.values(serviceDistribution);
+
 
     // Actualizar gráfico de dona
-    this.doughnutChartData.datasets[0].data = [
-      metrics.essentialServicesCount,
-      metrics.specializedServicesCount
-    ];
 
     // Actualizar gráfico de barras horizontal
-    this.horizontalBarChartData.datasets[0].data = this.getZoneDistributionn(filteredProviders);
+
 
     // Actualizar gráfico de compañías
     const companyDistribution = this.getCompanyDistributionn(filteredProviders);
@@ -1102,21 +980,12 @@ applyDateFilters(event: { startDate?: string | Date; endDate?: string | Date; en
     const metrics = this.metrics;
     
     // Update pie chart
-    this.pieChartData.datasets[0].data = [metrics.activeCount, metrics.inactiveCount];
+
     
     // Update bar chart
     const serviceDistribution = this.getServiceDistribution();
-    this.barChartData.labels = Object.keys(serviceDistribution);
-    this.barChartData.datasets[0].data = Object.values(serviceDistribution);
 
-    // Update doughnut chart
-    this.doughnutChartData.datasets[0].data = [
-      metrics.essentialServicesCount,
-      metrics.specializedServicesCount
-    ];
 
-    // Update horizontal bar chart
-    this.horizontalBarChartData.datasets[0].data = this.getZoneDistribution();
 
     // Actualizar nuevo gráfico de compañías
     const companyDistribution = this.getCompanyDistribution();
@@ -1218,13 +1087,7 @@ applyDateFilters(event: { startDate?: string | Date; endDate?: string | Date; en
     if (!this.chart || !this.dataLoaded) return;
 
     // Configuración inicial de los gráficos
-    this.pieChartData = {
-      labels: ['Activos', 'Inactivos'],
-      datasets: [{
-        data: [this.metrics.activeCount, this.metrics.inactiveCount],
-        backgroundColor: ['#28a745', '#dc3545']
-      }]
-    };
+
   }
   private getServiceDistribution(): { [key: string]: number } {
     const distribution: { [key: string]: number } = {};
@@ -1244,130 +1107,6 @@ applyDateFilters(event: { startDate?: string | Date; endDate?: string | Date; en
   }
 
 
- /* private providerListasGraficas : Supplier[] = [];
-  calculateCharsGraphics() {
-    this.providerService.getAllProvider().subscribe({
-      next: (response) => {
-        this.providerListasGraficas = response;
-        this.updateCharts();
-      },
-      error: () => {
-        this.toastService.sendError('Error al cargar proveedores.');
-      }
-    })
-  }
-  // private updateCharts(): void {
-  //   // Actualizar gráfico de estado de proveedores
-  //   this.pieChartData.datasets[0].data = [
-  //     this.metrics.activeCount,
-  //     this.metrics.inactiveCount
-  //   ];
-
-  //   // Actualizar gráfico de distribución por servicio
-  //   const serviceDistribution = this.getServiceDistribution();
-  //   this.barChartData.labels = Object.keys(serviceDistribution);
-  //   this.barChartData.datasets[0].data = Object.values(serviceDistribution);
-
-  //   // Actualizar gráfico de tipos de servicios
-  //   this.doughnutChartData.datasets[0].data = [
-  //     this.metrics.essentialServicesCount,
-  //     this.metrics.specializedServicesCount
-  //   ];
-
-  //   // Forzar actualización de los gráficos
-  //   if (this.chart) {
-  //     this.chart.update();
-  //   }
-  // }
-  private updateCharts(): void {
-    if (!this.chart || !this.chartsInitialized) return;
-
-    // Actualizar los datos
-    this.pieChartData.datasets[0].data = [
-      this.metrics.activeCount,
-      this.metrics.inactiveCount
-    ];
-
-    const serviceDistribution = this.getServiceDistribution();
-    this.barChartData.labels = Object.keys(serviceDistribution);
-    this.barChartData.datasets[0].data = Object.values(serviceDistribution);
-
-    this.doughnutChartData.datasets[0].data = [
-      this.metrics.essentialServicesCount,
-      this.metrics.specializedServicesCount
-    ];
-
-    // Forzar la actualización de los gráficos
-    setTimeout(() => {
-      this.chart?.update();
-      this.changeDetector.detectChanges();
-    }, 0);
-  }
-
-  private getServiceDistribution(): { [key: string]: number } {
-    const distribution: { [key: string]: number } = {};
-    
-    // Agrupar proveedores por servicio
-    this.providerList.forEach(provider => {
-      const serviceName = provider.service?.name || 'Sin categorizar';
-      distribution[serviceName] = (distribution[serviceName] || 0) + 1;
-    });
-
-    // Ordenar por cantidad de proveedores (opcional)
-    return Object.fromEntries(
-      Object.entries(distribution)
-        .sort(([,a], [,b]) => b - a)
-        .slice(0, 6) // Limitar a los 6 servicios más comunes
-    );
-  }
-
-  private dataLoaded = false;
-  private chartsInitialized = false;
-  
-  ngAfterViewInit() {
-    // Si los datos ya están cargados, inicializar los gráficos
-    if (this.dataLoaded) {
-      this.initializeCharts();
-    }
-  }
-  
-
-    this.barChartData = {
-      labels: [],
-      datasets: [{
-        data: [],
-        label: 'Cantidad de Proveedores',
-        backgroundColor: ['#007bff', '#28a745', '#ffc107', '#17a2b8', '#dc3545', '#6610f2']
-      }]
-    };
-
-    this.doughnutChartData = {
-      labels: ['Servicios Esenciales', 'Servicios Especializados'],
-      datasets: [{
-        data: [this.metrics.essentialServicesCount, this.metrics.specializedServicesCount],
-        backgroundColor: ['#17a2b8', '#ffc107']
-      }]
-    };
-
-    // Actualizar los datos de los gráficos
-    const serviceDistribution = this.getServiceDistribution();
-    this.barChartData.labels = Object.keys(serviceDistribution);
-    this.barChartData.datasets[0].data = Object.values(serviceDistribution);
-
-    // Marcar los gráficos como inicializados
-    this.chartsInitialized = true;
-
-    // Forzar la actualización inicial
-    setTimeout(() => {
-      this.chart?.update();
-      this.changeDetector.detectChanges();
-    }, 0);
-  }
-
-}*/
-
-
-  // Suppliers x Compania
   
   //metodo para calcular
   private getCompanyDistribution(): { [key: string]: number } {
