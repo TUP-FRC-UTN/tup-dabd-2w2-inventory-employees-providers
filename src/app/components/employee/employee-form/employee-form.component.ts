@@ -28,7 +28,7 @@ export class EmployeeFormComponent implements OnInit {
   formattedDateTime = this.today.slice(0, 19);
 
   employeeForm = new FormGroup({
-    id: new FormControl(0),
+    //id: new FormControl(0),
     firstName: new FormControl('', [
       Validators.required, 
       Validators.minLength(3), 
@@ -257,7 +257,7 @@ export class EmployeeFormComponent implements OnInit {
       console.log('[EmployeeForm] Datos originales:', data);
       
       this.employeeForm.patchValue({
-        id: data.id,
+        //id: data.id,
         firstName: data.firstName,
         lastName: data.lastName,
         employeeType: data.employeeType,
@@ -296,7 +296,7 @@ export class EmployeeFormComponent implements OnInit {
     this.showEmployeeForm = true;
     this.employeeRegistered = false;
     this.employeeForm.reset({
-      id: 0,
+      //id: 0,
       firstName: '',
       lastName: '',
       employeeType: EmployeeType.MANTENIMIENTO,
@@ -347,7 +347,7 @@ export class EmployeeFormComponent implements OnInit {
       //const hiringDate = formValue.hiringDate + (formValue.hiringDate?.includes('T') ? '' : 'T00:00:00');
       // Crear el objeto base del empleado
       const employeeData = {
-        id: formValue.id,
+        //id: formValue.id,
         first_name: formValue.firstName,
         last_name: formValue.lastName,
         employee_type: formValue.employeeType,
