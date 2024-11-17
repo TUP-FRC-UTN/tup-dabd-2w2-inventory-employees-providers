@@ -53,14 +53,14 @@ export interface EmployeeShifts {
 }
 
 export interface Address {
-  street_address: string;
+  streetAddress: string;
   number: number;
   floor: number;
   apartment: string;
   city: string;
   province: string;
   country: string;
-  postal_code: number;
+  postalCode: number;
 }
 
 // Definimos la interfaz Employee para representar un empleado en el sistema.

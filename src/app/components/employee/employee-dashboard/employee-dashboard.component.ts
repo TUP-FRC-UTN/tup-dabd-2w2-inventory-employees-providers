@@ -46,6 +46,14 @@ export class EmployeeDashboardComponent implements OnInit, AfterViewInit {
   retentionRate: number = 0;
   avgTenure: number = 0;
   private dataLoaded = false;
+  //Barra Progreso
+  activeEmployeesCount: number = 0;
+  inactiveEmployeesCount: number = 0;
+  employeesActivationRate: number = 0;
+  employeesGrowthCount: number = 0;
+  employeesGrowthRate: number = 0;
+  isNegativeTrend: boolean = false;
+  previousActiveEmployeesCount: number = 0;
   // Form Controls
   filterForm: FormGroup;
   searchFilterAll = new FormControl('');
@@ -589,6 +597,21 @@ getDataFilteredByDateRange(startDate: Date, endDate: Date): void {
     Object.entries(this.employeeTypeCountMap).forEach(([type, count]) => {
         this.employeesByType.set(type, count);
     });
+
+    //Barra de progreso de empleados
+    // Calculo de porcentaje de empleados activos
+    this.employeesActivationRate = this.employeeList.length > 0
+      ? Math.round((this.inServiceCount / this.employeeList.length) * 100)
+      : 0;
+
+    // porcentaje de crecimiento de empleados
+    this.employeesGrowthCount = this.inServiceCount - this.previousActiveEmployeesCount;
+    this.employeesGrowthRate = this.previousActiveEmployeesCount > 0
+      ? Math.round(((this.inServiceCount - this.previousActiveEmployeesCount) / this.previousActiveEmployeesCount) * 100)
+      : this.inServiceCount > 0 ? 100 : 0;
+
+    // Verificar si hay una tendencia negativa
+    this.isNegativeTrend = this.inactiveCount > this.inServiceCount;
 
     // Calcular otros KPIs
     if (this.employeeList.length > 0) {
