@@ -160,9 +160,10 @@ export class EmployeeListComponent implements OnInit {
     this.isLoading = true;
 
     const filters = this.currentFilters;
+    
     console.log('Filters:', filters);
 
-    debugger
+    //debugger
     this.employeeService.getAllEmployeesPaged(this.currentPage,this.pageSize,filters).subscribe({
 
       next: (response) => {
