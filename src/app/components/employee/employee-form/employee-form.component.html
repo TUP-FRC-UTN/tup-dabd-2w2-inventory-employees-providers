@@ -312,47 +312,24 @@
   <div formGroupName="contactsForm" class="row g-3 pb-5">
     <h5 class="mt-2 p-2 pb-4">Añadir Contactos</h5>
     <div class="row">
-      <div class="col-md-4 mx-auto">
-        <div class="row g-0 align-items-center">
-          <div class="col-auto">
-            <label for="contact-type" class="col-form-label me-2">Tipo Contacto</label>
-          </div>
-          <div class="col">
-            <select id="contact-type" class="form-select" formControlName="contactType"
-              (change)="changeContactType($event)">
-              <option disabled selected>Selecciona un tipo</option>
-              <option value="PHONE">Telefono</option>
-              <option value="EMAIL">Email</option>
-              <option value="SOCIAL_MEDIA_LINK">Link red social</option>
-            </select>
-          </div>
-        </div>
-      </div>
-
       <div class="col-md-6 mx-auto">
         <div class="row g-0 align-items-center">
           <div class="col-auto">
-            <label for="contact-info" class="col-form-label me-2">Contacto</label>
+            <label for="contact-info" class="col-form-label me-2">Email</label>
           </div>
           <div class="col">
-            <input type="text" class="form-control" id="contact-info" formControlName="contactValue" />
+            <input type="text" class="form-control" id="contact-info" formControlName="contactValue"
+              [ngClass]="{'is-invalid': employeeForm.get('contactsForm.contactValue')?.invalid && employeeForm.get('contactsForm.contactValue')?.touched,
+                          'is-valid': employeeForm.get('contactsForm.contactValue')?.valid && employeeForm.get('contactsForm.contactValue')?.touched}">
           </div>
         </div>
         <div class="col">
-          @if (employeeForm.get('contactsForm.contactValue')?.invalid && 
-         employeeForm.get('contactsForm.contactValue')?.touched) {
-      <small class="text-danger">
-        @if (employeeForm.get('contactsForm.contactValue')?.errors?.['required']) {
-          El contacto es requerido
-        } @else if (employeeForm.get('contactsForm.contactValue')?.errors?.['invalidEmail']) {
-          Formato de email inválido
-        } @else if (employeeForm.get('contactsForm.contactValue')?.errors?.['invalidPhone']) {
-          Formato de teléfono inválido
-        } @else if (employeeForm.get('contactsForm.contactValue')?.errors?.['invalidUrl']) {
-          URL de red social inválida
-        }
-      </small>
-    }
+          @if(employeeForm.get('contactsForm.contactValue')?.invalid &&
+              employeeForm.get('contactsForm.contactValue')?.touched) {
+            @if(employeeForm.get('contactsForm.contactValue')?.errors?.['email']) {
+              <small class="text-danger">Email inválido</small>
+            }
+          }
         </div>
       </div>
       <!-- Botones para agregar y cancelar contactos -->
