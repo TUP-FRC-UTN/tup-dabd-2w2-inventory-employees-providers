@@ -220,7 +220,6 @@ export class EmployeeFormComponent implements OnInit {
     this.addContact();
 
     this.employeeForm.get('hiringDate')?.valueChanges.subscribe(value => {
-      console.log(value);
       this.employeeForm.patchValue({ hiringDate: value });
     })
 
