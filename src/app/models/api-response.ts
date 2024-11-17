@@ -7,3 +7,5 @@ export interface PaginatedResponse<T> {
     first: boolean;
     last: boolean;
   }
+
+  
