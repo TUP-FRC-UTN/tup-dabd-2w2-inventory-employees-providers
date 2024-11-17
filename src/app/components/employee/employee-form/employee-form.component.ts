@@ -106,10 +106,7 @@ export class EmployeeFormComponent implements OnInit {
         Validators.pattern(/^[a-zA-ZáéíóúÁÉÍÓÚñÑ\s]*$/)
       ]),
       province: new FormControl('', [Validators.required]),
-      country: new FormControl({ 
-        value: 'ARGENTINA', 
-        disabled: true 
-      }, [Validators.required]),
+      country: new FormControl({value:'', disabled: true}),
       postalCode: new FormControl(0, [
         Validators.required, 
         Validators.min(0),
@@ -333,7 +330,7 @@ export class EmployeeFormComponent implements OnInit {
     } as Employee;
   } */
     prepareEmployeeData(): any {
-      const formValue = this.employeeForm.value;
+      const formValue = this.employeeForm.getRawValue();
       const hiringDate = formValue.hiringDate 
       ? new Date(formValue.hiringDate).toISOString()
       : new Date().toISOString();
