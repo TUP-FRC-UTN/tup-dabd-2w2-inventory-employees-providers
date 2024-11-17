@@ -1,5 +1,5 @@
 import { Component, inject, OnInit, TemplateRef, ViewChild } from '@angular/core';
-import { FormBuilder, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
+import { AbstractControl, FormBuilder, FormGroup, ReactiveFormsModule, ValidatorFn, Validators } from '@angular/forms';
 import { ProvidersService } from '../../../services/providers.service';
 import { CommonModule } from '@angular/common';
 import { ActivatedRoute, Router } from '@angular/router';
@@ -31,14 +31,59 @@ export class ProviderFormComponent implements OnInit {
   private toastService = inject(ToastService);
 
   constructor() {
+    // this.providerForm = this.fb.group({
+    //   name: ['', Validators.required],
+    //   cuil: ['', [Validators.required, Validators.minLength(11), Validators.maxLength(11)]],
+    //   service: [null, Validators.required],
+    //   company: [null, Validators.required],
+    //   contact: ['', Validators.required],
+    //   address: ['', Validators.required],
+    //   details: ['', Validators.required]
+    // });
     this.providerForm = this.fb.group({
-      name: ['', Validators.required],
-      cuil: ['', [Validators.required, Validators.minLength(11), Validators.maxLength(11)]],
-      service: [null, Validators.required],
-      company: [null, Validators.required],
-      contact: ['', Validators.required],
-      address: ['', Validators.required],
-      details: ['', Validators.required]
+      name: ['', [
+        Validators.required,
+        Validators.minLength(3),
+        Validators.maxLength(100),
+        Validators.pattern(/^[a-zA-ZáéíóúÁÉÍÓÚñÑ\s.&-]*$/)
+      ]],
+      cuil: ['', [
+        Validators.required,
+        Validators.pattern(/^\d{11}$/),
+        this.cuilValidator()
+      ]],
+      service: [null, [
+        Validators.required
+      ]],
+      company: [null, [
+        Validators.required
+      ]],
+      contact: ['', [
+        Validators.required,
+        Validators.minLength(8),
+        (control: AbstractControl) => {
+          if (!control.value) return null;
+          const value = control.value.toString();
+          
+          // Detectar si es email o teléfono
+          if (value.includes('@')) {
+            return this.emailValidator()(control);
+          } else {
+            return this.phoneValidator()(control);
+          }
+        }
+      ]],
+      address: ['', [
+        Validators.required,
+        Validators.minLength(5),
+        Validators.maxLength(200),
+        Validators.pattern(/^[a-zA-Z0-9áéíóúÁÉÍÓÚñÑ\s,.-]*$/)
+      ]],
+      details: ['', [
+        Validators.required,
+        Validators.minLength(10),
+        Validators.maxLength(500)
+      ]]
     });
   }
 
@@ -192,5 +237,84 @@ export class ProviderFormComponent implements OnInit {
         this.toastService.sendError('No se pudo cargar los datos del proveedor');
       }
     });
+  }
+
+  private cuilValidator(): ValidatorFn {
+    return (control: AbstractControl) => {
+      if (!control.value) return null;
+      
+      const cuil = control.value.toString().replace(/\D/g, '');
+      
+      if (cuil.length !== 11) {
+        return { invalidLength: 'El CUIL debe tener 11 dígitos' };
+      }
+
+      const multiplicadores = [5, 4, 3, 2, 7, 6, 5, 4, 3, 2];
+      let suma = 0;
+
+      for (let i = 0; i < multiplicadores.length; i++) {
+        suma += parseInt(cuil[i]) * multiplicadores[i];
+      }
+
+      const resto = suma % 11;
+      const digitoVerificador = 11 - resto;
+      const ultimoDigito = parseInt(cuil[10]);
+
+      if (digitoVerificador !== ultimoDigito) {
+        return { invalidCheckDigit: 'Dígito verificador inválido' };
+      }
+
+      return null;
+    };
+  }
+  private phoneValidator(): ValidatorFn {
+    return (control: AbstractControl) => {
+      if (!control.value) return null;
+      const phone = control.value.toString();
+      const phoneRegex = /^[\d\s()-]{8,15}$/;
+      return phoneRegex.test(phone) ? null : { invalidPhone: true };
+    };
+  }
+
+  private emailValidator(): ValidatorFn {
+    return (control: AbstractControl) => {
+      if (!control.value) return null;
+      const email = control.value.toString();
+      const emailRegex = /^[a-zA-Z0-9._-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,6}$/;
+      return emailRegex.test(email) ? null : { invalidEmail: true };
+    };
+  }
+
+  getErrorMessage(controlName: string): string {
+    const control = this.providerForm.get(controlName);
+    
+    if (control?.errors) {
+      if (control.errors['required']) return 'Este campo es requerido';
+      if (control.errors['minlength']) return `Mínimo ${control.errors['minlength'].requiredLength} caracteres`;
+      if (control.errors['maxlength']) return `Máximo ${control.errors['maxlength'].requiredLength} caracteres`;
+      if (control.errors['pattern']) {
+        switch (controlName) {
+          case 'name':
+            return 'Solo se permiten letras, espacios y algunos caracteres especiales (. & -)';
+          case 'cuil':
+            return 'El CUIL debe contener solo números';
+          case 'address':
+            return 'Formato de dirección inválido';
+          default:
+            return 'Formato inválido';
+        }
+      }
+      if (control.errors['invalidLength']) return 'El CUIL debe tener 11 dígitos';
+      if (control.errors['invalidCheckDigit']) return 'CUIL inválido';
+      if (control.errors['invalidEmail']) return 'Email inválido';
+      if (control.errors['invalidPhone']) return 'Teléfono inválido';
+    }
+    return '';
+  }
+
+  // Método para verificar si un campo es inválido
+  isFieldInvalid(fieldName: string): boolean {
+    const field = this.providerForm.get(fieldName);
+    return field ? field.invalid && (field.dirty || field.touched) : false;
   }
 }
