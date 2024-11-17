@@ -48,7 +48,21 @@ export class ProvidersService {
     return this.http.get<PaginatedResponse<Supplier>>(`${this.apiUrl}/pageable`, { params });
 }
 
-getAllProvider():Observable<Supplier[]>{
+private formatDate(date: Date): string {
+  return date.toISOString().split('T')[0];
+}
+
+getAllProvider(dateFilter?: {start?: Date; end?: Date}):Observable<Supplier[]>{
+  if(dateFilter?.start && dateFilter?.end){
+    let params = new HttpParams()
+      .set('page', '0')
+      .set('size', '9999999')
+      .set('start', this.formatDate(dateFilter.start))
+      .set('end', this.formatDate(dateFilter.end));
+
+    return this.http.get<Supplier[]>(`${this.apiUrl}/pageable`, {params});
+  }
+
   return this.http.get<Supplier[]>(this.apiUrl);
 }
 
