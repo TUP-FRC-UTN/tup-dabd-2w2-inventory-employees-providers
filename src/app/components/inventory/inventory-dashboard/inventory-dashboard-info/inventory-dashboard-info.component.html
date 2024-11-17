@@ -6,13 +6,16 @@
           <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
         </div>
         <div class="modal-body">
-          <p>Esta pantalla ofrece un análisisdel <strong>inventario</strong> de la organización. A continuación se describen las métricas visualizadas en esta sección:</p>
+          <p>Esta pantalla ofrece un análisis del <strong>inventario</strong> de la organización. A continuación se describen las métricas visualizadas en esta sección:</p>
           <ul>
-            <li><strong>Nivel de Stock Crítico</strong>: Este gráfico de torta indica la proporción de artículos en stock crítico (por debajo del stock mínimo) frente a aquellos con stock adecuado.</li>
-            <li><strong>Nivel de Stock por Categoría</strong>: Muestra un desglose del inventario por categoría de artículo, lo que permite visualizar la cantidad de stock en cada una de las categorías definidas.</li>
-            <li><strong>Rotación de Inventario</strong>: Este gráfico de barras refleja la frecuencia de transacciones de entrada y salida en el inventario, lo que ayuda a entender la rotación de los artículos mes a mes.</li>
+            <li><strong>Total</strong>: Muestra el total de los artículos dependiendo de su unidad de medida.</li>
+            <li><strong>Valor total del inventario Bajo</strong>: Muestra el valor total del inventario.</li>
+            <li><strong>Stock Bajo</strong>: Indica la cantidad de artículos que están en stock mínimo.</li>
+            <li><strong>Mayor Movimiento</strong>: Muestra el artículo con más movimiento en el inventario.</li>
+            <li><strong>Tendencias de Movimientos</strong>: Muestra los movimientos realizados de los artículos por pedido de tiempo y unidad de medida.</li>
+            <li><strong>Stock por Categoría</strong>: Indica la cantidad de artículos que hay en el inventario por categoría.</li>
           </ul>
-         
+
         </div>
         <div class="modal-footer">
           <button type="button" class="btn btn-secondary" data-bs-dismiss="modal" (click)="activeModal.close()">Cerrar</button>
