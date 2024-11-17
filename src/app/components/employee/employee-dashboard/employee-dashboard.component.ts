@@ -764,37 +764,62 @@ getDataFilteredByDateRange(startDate: Date, endDate: Date): void {
     });
 }
 
-  initializeTenureDistributionChart(): void {
-    if (this.lineChart) {
-      const ctx = this.lineChart.nativeElement.getContext('2d');
-      if (ctx) {
-    const tenureRanges = this.calculateTenureRanges();
+initializeTenureDistributionChart(): void {
+  if (!this.lineChart?.nativeElement) return;
 
-    this.charts.lineChart = new Chart(ctx, {
-      type: 'line',
-      data: {
-        labels: ['0-1 año', '1-2 años', '2-5 años', '5+ años'],
-        datasets: [{
-          label: 'Distribución de Antigüedad',
-          data: tenureRanges,
-          fill: false,
-          borderColor: '#3F51B5',
-          tension: 0.1
-        }]
+  const ctx = this.lineChart.nativeElement.getContext('2d');
+  if (!ctx) return;
+
+  const tenureRanges = this.calculateTenureRanges(); // Datos para el gráfico
+
+  // Destruye cualquier gráfico existente en el canvas
+  if (this.charts.lineChart) {
+    this.charts.lineChart.destroy();
+  }
+
+  this.charts.lineChart = new Chart(ctx, {
+    type: 'bar', // Cambiamos el tipo de gráfico a 'bar'
+    data: {
+      labels: ['0-1 año', '1-2 años', '2-5 años', '5+ años'], // Etiquetas del eje X
+      datasets: [{
+        label: 'Distribución de Antigüedad',
+        data: tenureRanges, // Datos para cada rango
+        backgroundColor: ['#FF9800', '#2196F3', '#4CAF50', '#9C27B0'], // Colores de las barras
+        borderColor: ['#E65100', '#0D47A1', '#1B5E20', '#4A148C'], // Colores del borde
+        borderWidth: 1,
+      }]
+    },
+    options: {
+      responsive: true,
+      maintainAspectRatio: false,
+      plugins: {
+        title: {
+          display: true,
+          text: 'Distribución de Antigüedad',
+        },
+        legend: {
+          display: false, // Ocultar la leyenda si no es necesaria
+        },
       },
-      options: {
-        responsive: true,
-        plugins: {
+      scales: {
+        x: {
           title: {
             display: true,
-            text: 'Distribución de Antigüedad'
-          }
-        }
-      }
-        });
-      }
-    }
-  }
+            text: 'Rango de Antigüedad (años)',
+          },
+        },
+        y: {
+          beginAtZero: true,
+          title: {
+            display: true,
+            text: 'Cantidad de Empleados',
+          },
+        },
+      },
+    },
+  });
+}
+
 
   initializePayrollChart(payments: EmployeePayment[]): void {
     if (!this.salaryChart) return;
@@ -832,23 +857,22 @@ getDataFilteredByDateRange(startDate: Date, endDate: Date): void {
   }
 
   calculateTenureRanges(): number[] {
-    const ranges = [0, 0, 0, 0]; // 0-1, 1-2, 2-5, 5+
+    const ranges = [0, 0, 0, 0]; // 0-1, 1-2, 2-5, 5+ años
     const now = new Date();
-
+  
     this.employeeList.forEach(emp => {
       const hiringDate = new Date(emp.hiringDate);
-      console.log('Fecha de contratacion de los empleados', hiringDate);
       const years = (now.getTime() - hiringDate.getTime()) / (1000 * 60 * 60 * 24 * 365);
-
+  
       if (years <= 1) ranges[0]++;
       else if (years <= 2) ranges[1]++;
       else if (years <= 5) ranges[2]++;
       else ranges[3]++;
     });
-
+  
     return ranges;
   }
-
+  
   calculateMonthlyPayroll(payments: EmployeePayment[]): Map<string, number> {
     const monthlyTotals = new Map<string, number>();
 
