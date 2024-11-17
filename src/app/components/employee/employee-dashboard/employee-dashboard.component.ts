@@ -222,10 +222,10 @@ export class EmployeeDashboardComponent implements OnInit, AfterViewInit {
   getEmployeesWithFilters(filters: any): void {
     console.log('Filtros enviados al backend:', filters);
 
-    this.employeesService.getAllEmployeesPaged(0, 40, filters).subscribe({
+    this.employeesService.getAllEmployeesDashboard( filters).subscribe({
         next: (response) => {
             console.log('Respuesta del backend:', response);
-            this.employeeList = response.content; // Actualizamos la lista de empleados
+            this.employeeList = response; // Actualizamos la lista de empleados
             this.calculateMetrics(); // Calculamos métricas
             this.updateCharts(); // Actualizamos gráficos
         },
@@ -520,9 +520,9 @@ getDataFilteredByDateRange(startDate: Date, endDate: Date): void {
       filters.contact = searchTerm;
     }
   
-    this.employeesService.getAllEmployeesPaged().subscribe({
+    this.employeesService.getAllEmployeesDashboard().subscribe({
       next: (response) => {
-        this.employeeList = this.mapperService.toCamelCase(response.content);
+        this.employeeList = this.mapperService.toCamelCase(response);
         this.calculateMetrics();
         this.pieChartEmployeeStatusDatasets[0].data = [this.inServiceCount, this.inactiveCount];
         // Reinicializar los charts después de actualizar los datos

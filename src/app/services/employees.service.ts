@@ -35,7 +35,7 @@ export class EmployeesService {
     );
   }
  
-  
+  //PARA LISTADO
   getAllEmployeesPaged(
     page: number = 0,
     size: number = 400,
@@ -85,6 +85,45 @@ export class EmployeesService {
       })
     );
   }
+  //PARA FILTROS DE DASHBOARD
+  getAllEmployeesDashboard(
+    filters?: {
+      startDate?: string;
+      endDate?: string;
+      state?:string;
+    }
+  ): Observable<Employee[]> {
+    let params = new HttpParams();
+  
+    if (filters) {
+      if (filters.startDate) params = params.set('startDate', filters.startDate);
+      if (filters.endDate) params = params.set('endDate', filters.endDate);
+      if (filters.state) params = params.set('state', filters.state); // Agregamos el filtro de estado
+
+    }
+  
+    console.log('Parámetros enviados al backend:', params.toString());
+  
+    return this.http.get<Employee[] | undefined>(`${this.apiUrl}/dashboards`, { params }).pipe(
+      map(response => {
+        if (!response) {
+          console.warn('El backend devolvió una respuesta vacía o undefined');
+          return []; // Devuelve una lista vacía si la respuesta es undefined
+        }
+        return response.map(employee => this.mapperService.toCamelCase(employee));
+      }),
+      tap(response => {
+        response.forEach(employee => {
+          if (!employee.hiringDate) {
+            console.warn(`Employee with ID ${employee.id} is missing hiringDate.`);
+          }
+        });
+      })
+    );
+  }
+  
+  
+  
   
   
   //fin filtros dashboard
