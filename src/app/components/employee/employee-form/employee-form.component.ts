@@ -84,7 +84,7 @@ export class EmployeeFormComponent implements OnInit {
       ])
     }),
     address: new FormGroup({
-      street_address: new FormControl('', [
+      streetAddress: new FormControl('', [
         Validators.required,
         Validators.minLength(3),
         Validators.maxLength(100)
@@ -110,7 +110,7 @@ export class EmployeeFormComponent implements OnInit {
         value: 'ARGENTINA', 
         disabled: true 
       }, [Validators.required]),
-      postal_code: new FormControl(0, [
+      postalCode: new FormControl(0, [
         Validators.required, 
         Validators.min(0),
         Validators.pattern(/^\d+$/)
@@ -206,7 +206,7 @@ export class EmployeeFormComponent implements OnInit {
             city: 'Córdoba',
             province: Provinces.CORDOBA,
             country: Countries.ARGENTINA,
-            postal_code: 5000
+            postalCode: 5000
           }
         })
       }
@@ -257,6 +257,8 @@ export class EmployeeFormComponent implements OnInit {
         docNumber: data.docNumber,
         state: StatusType.ACTIVE,
         salary: data.salary,
+        address: data.address,
+        contactsForm: data.contact,
       });
 
       // Guardar el estado inicial del formulario después de cargarlo
@@ -297,14 +299,14 @@ export class EmployeeFormComponent implements OnInit {
       state: StatusType.ACTIVE,
       salary: 0,
       address: {
-        street_address: '',
+        streetAddress: '',
         number: 0,
         floor: 0,
         apartment: '',
         city: 'Córdoba',
         province: Provinces.CORDOBA,
         country: Countries.ARGENTINA,
-        postal_code: 5000  
+        postalCode: 5000  
       }
     });
     // this.contacts.clear();

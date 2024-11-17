@@ -209,14 +209,14 @@
           <!-- Calle y Número -->
           <div class="col-md-6">
             <div class="flex-row d-flex align-items-center mb-3">
-              <label for="street_address" class="col-form-label col-md-2">Calle<label class="text-danger">*</label></label>
-              <input type="text" class="form-control m-2" id="street_address" formControlName="street_address"
+              <label for="streetAddress" class="col-form-label col-md-2">Calle<label class="text-danger">*</label></label>
+              <input type="text" class="form-control m-2" id="streetAddress" formControlName="streetAddress"
                 
-                [ngClass]="{'is-invalid': employeeForm.get('address.street_address')?.invalid && employeeForm.get('address.street_address')?.touched,
-                           'is-valid': employeeForm.get('address.street_address')?.valid}">
+                [ngClass]="{'is-invalid': employeeForm.get('address.streetAddress')?.invalid && employeeForm.get('address.streetAddress')?.touched,
+                           'is-valid': employeeForm.get('address.streetAddress')?.valid}">
             </div>
             <div>
-              @if (employeeForm.get('address.street_address')?.invalid && employeeForm.get('address.street_address')?.touched) {
+              @if (employeeForm.get('address.streetAddress')?.invalid && employeeForm.get('address.streetAddress')?.touched) {
                 <small class="text-danger ms-2">La calle es requerida</small>
               }
             </div>
@@ -316,20 +316,20 @@
 
         <div class="col-md-6">
           <div class="flex-row d-flex align-items-center mb-3">
-            <label for="postal_code" class="col-form-label col-md-2">Código Postal<label class="text-danger">*</label></label>
-            <input type="number" class="form-control m-2" id="postal_code" formControlName="postal_code"
+            <label for="postalCode" class="col-form-label col-md-2">Código Postal<label class="text-danger">*</label></label>
+            <input type="number" class="form-control m-2" id="postalCode" formControlName="postalCode"
                style="text-align: right;"
-              [ngClass]="{'is-invalid': employeeForm.get('address.postal_code')?.invalid && employeeForm.get('address.postal_code')?.touched,
-                         'is-valid': employeeForm.get('address.postal_code')?.valid && employeeForm.get('address.postal_code')?.value !== 0}">
+              [ngClass]="{'is-invalid': employeeForm.get('address.postalCode')?.invalid && employeeForm.get('address.postalCode')?.touched,
+                         'is-valid': employeeForm.get('address.postalCode')?.valid && employeeForm.get('address.postalCode')?.value !== 0}">
           </div>
           <div>
-            @if (employeeForm.get('address.postal_code')?.invalid && employeeForm.get('address.postal_code')?.touched) {
+            @if (employeeForm.get('address.postalCode')?.invalid && employeeForm.get('address.postalCode')?.touched) {
               <small class="text-danger ms-2">
-                @if (employeeForm.get('address.postal_code')?.errors?.['required']) {
+                @if (employeeForm.get('address.postalCode')?.errors?.['required']) {
                   El código postal es requerido
-                } @else if (employeeForm.get('address.postal_code')?.errors?.['min']) {
+                } @else if (employeeForm.get('address.postalCode')?.errors?.['min']) {
                   El código postal debe ser mayor a 0
-                } @else if (employeeForm.get('address.postal_code')?.errors?.['pattern']) {
+                } @else if (employeeForm.get('address.postalCode')?.errors?.['pattern']) {
                   El código postal solo puede contener números
                 }
               </small>
