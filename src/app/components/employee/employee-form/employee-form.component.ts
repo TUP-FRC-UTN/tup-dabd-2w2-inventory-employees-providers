@@ -28,7 +28,7 @@ export class EmployeeFormComponent implements OnInit {
   formattedDateTime = this.today.slice(0, 19);
 
   employeeForm = new FormGroup({
-    id: new FormControl(0),
+    //id: new FormControl(0),
     firstName: new FormControl('', [
       Validators.required, 
       Validators.minLength(3), 
@@ -65,7 +65,7 @@ export class EmployeeFormComponent implements OnInit {
     ]),
     state: new FormControl(StatusType.ACTIVE),
     contactsForm: new FormGroup({
-      contactType: new FormControl('', [Validators.required]),
+      contactType: new FormControl('EMAIL', []),
       contactValue: new FormControl('', [
         Validators.required,
         (control) => {
@@ -77,14 +77,6 @@ export class EmployeeFormComponent implements OnInit {
               return /^[a-zA-Z0-9._-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,6}$/.test(control.value) 
                 ? null 
                 : { invalidEmail: true };
-            case 'PHONE':
-              return /^[\d\s()-]{8,15}$/.test(control.value) 
-                ? null 
-                : { invalidPhone: true };
-            case 'SOCIAL_MEDIA_LINK':
-              return /^https?:\/\//.test(control.value) 
-                ? null 
-                : { invalidUrl: true };
             default:
               return null;
           }
@@ -92,7 +84,7 @@ export class EmployeeFormComponent implements OnInit {
       ])
     }),
     address: new FormGroup({
-      street_address: new FormControl('', [
+      streetAddress: new FormControl('', [
         Validators.required,
         Validators.minLength(3),
         Validators.maxLength(100)
@@ -114,11 +106,8 @@ export class EmployeeFormComponent implements OnInit {
         Validators.pattern(/^[a-zA-ZáéíóúÁÉÍÓÚñÑ\s]*$/)
       ]),
       province: new FormControl('', [Validators.required]),
-      country: new FormControl({ 
-        value: 'ARGENTINA', 
-        disabled: true 
-      }, [Validators.required]),
-      postal_code: new FormControl(0, [
+      country: new FormControl({value:'', disabled: true}),
+      postalCode: new FormControl(0, [
         Validators.required, 
         Validators.min(0),
         Validators.pattern(/^\d+$/)
@@ -214,7 +203,7 @@ export class EmployeeFormComponent implements OnInit {
             city: 'Córdoba',
             province: Provinces.CORDOBA,
             country: Countries.ARGENTINA,
-            postal_code: 5000
+            postalCode: 5000
           }
         })
       }
@@ -228,7 +217,6 @@ export class EmployeeFormComponent implements OnInit {
     this.addContact();
 
     this.employeeForm.get('hiringDate')?.valueChanges.subscribe(value => {
-      console.log(value);
       this.employeeForm.patchValue({ hiringDate: value });
     })
 
@@ -257,7 +245,7 @@ export class EmployeeFormComponent implements OnInit {
       console.log('[EmployeeForm] Datos originales:', data);
       
       this.employeeForm.patchValue({
-        id: data.id,
+        //id: data.id,
         firstName: data.firstName,
         lastName: data.lastName,
         employeeType: data.employeeType,
@@ -266,6 +254,8 @@ export class EmployeeFormComponent implements OnInit {
         docNumber: data.docNumber,
         state: StatusType.ACTIVE,
         salary: data.salary,
+        address: data.address,
+        contactsForm: data.contact,
       });
 
       // Guardar el estado inicial del formulario después de cargarlo
@@ -296,7 +286,7 @@ export class EmployeeFormComponent implements OnInit {
     this.showEmployeeForm = true;
     this.employeeRegistered = false;
     this.employeeForm.reset({
-      id: 0,
+      //id: 0,
       firstName: '',
       lastName: '',
       employeeType: EmployeeType.MANTENIMIENTO,
@@ -306,14 +296,14 @@ export class EmployeeFormComponent implements OnInit {
       state: StatusType.ACTIVE,
       salary: 0,
       address: {
-        street_address: '',
+        streetAddress: '',
         number: 0,
         floor: 0,
         apartment: '',
         city: 'Córdoba',
         province: Provinces.CORDOBA,
         country: Countries.ARGENTINA,
-        postal_code: 5000  
+        postalCode: 5000  
       }
     });
     // this.contacts.clear();
@@ -340,14 +330,14 @@ export class EmployeeFormComponent implements OnInit {
     } as Employee;
   } */
     prepareEmployeeData(): any {
-      const formValue = this.employeeForm.value;
+      const formValue = this.employeeForm.getRawValue();
       const hiringDate = formValue.hiringDate 
       ? new Date(formValue.hiringDate).toISOString()
       : new Date().toISOString();
       //const hiringDate = formValue.hiringDate + (formValue.hiringDate?.includes('T') ? '' : 'T00:00:00');
       // Crear el objeto base del empleado
       const employeeData = {
-        id: formValue.id,
+        //id: formValue.id,
         first_name: formValue.firstName,
         last_name: formValue.lastName,
         employee_type: formValue.employeeType,
@@ -357,7 +347,8 @@ export class EmployeeFormComponent implements OnInit {
         salary: formValue.salary,
         state: formValue.state,
         // contact: this.contacts.length > 0 ? this.contacts.at(0).value : null,
-        address: formValue.address
+        address: formValue.address,
+        contact: formValue.contactsForm
       };
   
       return employeeData;

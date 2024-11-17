@@ -160,9 +160,10 @@ export class EmployeeListComponent implements OnInit {
     this.isLoading = true;
 
     const filters = this.currentFilters;
+    
     console.log('Filters:', filters);
 
-    debugger
+    //debugger
     this.employeeService.getAllEmployeesPaged(this.currentPage,this.pageSize,filters).subscribe({
 
       next: (response) => {
@@ -335,6 +336,8 @@ export class EmployeeListComponent implements OnInit {
 
   // CRUD operations
   editEmployee(employee: Employee): void {
+    console.log('Editando empleado:', employee);
+    console.log('id', employee.id);
     this.router.navigate(['employees/form', employee.id]);
   }
 
