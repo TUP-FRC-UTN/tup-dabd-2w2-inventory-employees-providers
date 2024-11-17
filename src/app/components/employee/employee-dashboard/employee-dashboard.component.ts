@@ -221,20 +221,32 @@ export class EmployeeDashboardComponent implements OnInit, AfterViewInit {
   // Nuevo método para obtener empleados con filtro de fecha
   getEmployeesWithFilters(filters: any): void {
     console.log('Filtros enviados al backend:', filters);
-
-    this.employeesService.getAllEmployeesDashboard( filters).subscribe({
-        next: (response) => {
-            console.log('Respuesta del backend:', response);
-            this.employeeList = response; // Actualizamos la lista de empleados
-            this.calculateMetrics(); // Calculamos métricas
-            this.updateCharts(); // Actualizamos gráficos
-        },
-        error: (error) => {
-            console.error('Error al cargar empleados:', error);
-            this.toastService.sendError('Error al cargar empleados.');
-        },
+  
+    this.employeesService.getAllEmployeesDashboard(filters).subscribe({
+      next: (response) => {
+        console.log('Respuesta del backend:', response);
+  
+        if (!response || response.length === 0) {
+          // Mostrar mensaje si no se encontraron empleados
+          this.toastService.sendError('No se encontraron empleados para los filtros seleccionados.');
+  
+          // Cargar todos los empleados nuevamente
+          this.loadEmployeeData();
+          return;
+        }
+  
+        // Si hay datos, actualizar la lista de empleados y métricas
+        this.employeeList = response;
+        this.calculateMetrics();
+        this.updateCharts();
+      },
+      error: (error) => {
+        console.error('Error al cargar empleados:', error);
+        this.toastService.sendError('Error al cargar empleados.');
+      },
     });
-}
+  }
+  
 
   
   
