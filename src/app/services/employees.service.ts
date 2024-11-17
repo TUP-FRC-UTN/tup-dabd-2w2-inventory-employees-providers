@@ -85,6 +85,7 @@ export class EmployeesService {
   
   //fin filtros dashboard
   createSchedule(schedule: EmployeeSchedule): Observable<EmployeeSchedule> {
+    console.log('Schedule to create:', schedule);
     return this.http.post<EmployeeSchedule>(this.apiUrlSHIFT, schedule);
   }
 
