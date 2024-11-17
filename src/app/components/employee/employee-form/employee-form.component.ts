@@ -42,7 +42,7 @@ export class EmployeeFormComponent implements OnInit {
     state: new FormControl(StatusType.ACTIVE),
     contactsForm: new FormGroup({
       contactType: new FormControl('EMAIL', []),
-      contactValue: new FormControl('', []),
+      contactValue: new FormControl('', [Validators.required, Validators.email]),
     }),
     address: new FormGroup({
       street_address: new FormControl('', [Validators.required]),

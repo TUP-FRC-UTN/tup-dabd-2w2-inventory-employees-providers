@@ -260,15 +260,18 @@
             <label for="contact-info" class="col-form-label me-2">Email</label>
           </div>
           <div class="col">
-            <input type="text" class="form-control" id="contact-info" formControlName="contactValue" />
+            <input type="text" class="form-control" id="contact-info" formControlName="contactValue"
+              [ngClass]="{'is-invalid': employeeForm.get('contactsForm.contactValue')?.invalid && employeeForm.get('contactsForm.contactValue')?.touched,
+                          'is-valid': employeeForm.get('contactsForm.contactValue')?.valid && employeeForm.get('contactsForm.contactValue')?.touched}">
           </div>
         </div>
         <div class="col">
           @if(employeeForm.get('contactsForm.contactValue')?.invalid &&
-          employeeForm.get('contactsForm.contactValue')?.touched ) {
-          @if(employeeForm.get('contactsForm.contactValue')?.errors?.['email']){
-          <small class="text-danger">Email inválido</small>
-          } }
+              employeeForm.get('contactsForm.contactValue')?.touched) {
+            @if(employeeForm.get('contactsForm.contactValue')?.errors?.['email']) {
+              <small class="text-danger">Email inválido</small>
+            }
+          }
         </div>
       </div>
       <!-- Botones para agregar y cancelar contactos -->
