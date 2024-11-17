@@ -189,6 +189,10 @@ export class EmployeeFormComponent implements OnInit {
         province: Provinces.CORDOBA,
         country: Countries.ARGENTINA,
         postal_code: 5000  
+      },
+      contactsForm: {
+        contactType: 'EMAIL',
+        contactValue: ''
       }
     });
   }
@@ -206,7 +210,8 @@ export class EmployeeFormComponent implements OnInit {
       hiring_date: hiringDate,
       salary: formValue.salary,
       state: formValue.state,
-      address: formValue.address
+      address: formValue.address,
+      contacts: formValue.contactsForm
       };
       return employeeData;
   }
