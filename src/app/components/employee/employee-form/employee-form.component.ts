@@ -65,7 +65,7 @@ export class EmployeeFormComponent implements OnInit {
     ]),
     state: new FormControl(StatusType.ACTIVE),
     contactsForm: new FormGroup({
-      contactType: new FormControl('', [Validators.required]),
+      contactType: new FormControl('EMAIL', []),
       contactValue: new FormControl('', [
         Validators.required,
         (control) => {
@@ -77,14 +77,6 @@ export class EmployeeFormComponent implements OnInit {
               return /^[a-zA-Z0-9._-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,6}$/.test(control.value) 
                 ? null 
                 : { invalidEmail: true };
-            case 'PHONE':
-              return /^[\d\s()-]{8,15}$/.test(control.value) 
-                ? null 
-                : { invalidPhone: true };
-            case 'SOCIAL_MEDIA_LINK':
-              return /^https?:\/\//.test(control.value) 
-                ? null 
-                : { invalidUrl: true };
             default:
               return null;
           }
@@ -357,7 +349,8 @@ export class EmployeeFormComponent implements OnInit {
         salary: formValue.salary,
         state: formValue.state,
         // contact: this.contacts.length > 0 ? this.contacts.at(0).value : null,
-        address: formValue.address
+        address: formValue.address,
+        contact: formValue.contactsForm
       };
   
       return employeeData;
